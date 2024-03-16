@@ -55,13 +55,17 @@
     <div id="signin-button"></div>
   </main>
   <footer>
-    <p>nko@tkp.edu.hk</p>
+    <p>Copyright © SKHTKPSS. All rights reserved. Powered by NKO</p>
   </footer>
 
   <script>
     function handleCredentialResponse(response) {
+      const profile = parseJwt(response.credential);
+      // 以安全的方式设置cookie，可能需要服务器端参与以设置HttpOnly属性
+      document.cookie = `email=${encodeURIComponent(profile.email)}; max-age=86400; path=/; Secure; SameSite=Strict`;
+      document.cookie = `username=${encodeURIComponent(profile.name)}; max-age=86400; path=/; Secure; SameSite=Strict`;
       // 把用户登录状态存储为cookie
-      document.cookie = "isLogin=true; max-age=86400; path=/"; // 设置cookie 24小时过期
+      document.cookie = "isLogin=true; max-age=86400; path=/; Secure; SameSite=Strict";
       window.location.href = 'index.html'; // 重定向到主页
     }
 
