@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登入 - 中文打字平台</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      padding-top: 50px;
+    }
+
+    h1 {
+      margin-bottom: 0.5em;
+    }
+
+    #signin-button {
+      margin-top: 20px;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+      background: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>中文打字平台</h1>
+  <p>歡迎來到中文打字平台，請先登入。</p>
+
+  <div id="signin-button"></div>
+
+  <!-- 這裡會放置Google登入函數 -->
+
+  <footer>
+    <p>nko@tkp.edu.hk</p>
+  </footer>
+
+  <script>
+    function handleCredentialResponse(response) {
+      // Google 登入成功後的回調函數，用來處理登入資訊
+      const data = parseJwt(response.credential);
+
+      // 更新cookie
+      document.cookie = "isLogin=true; max-age=86400; path=/"; // 24小時後過期
+
+      // 跳轉到主頁
+      window.location.href = 'index.html';
+    }
+
+    // 解析JWT
+    function parseJwt(token) {
+      // 實作JWT解析代碼 or 使用現成函示庫
+      return JSON.parse(atob(token.split('.')[1])); // 可能需要robust handling
+    }
+
+    function checkLoginStatus() {
+      // 檢查用戶登入狀態
+      const isLogin = document.cookie.split(';').some((item) => item.trim().startsWith('isLogin=true'));
+      
+      if (isLogin) {
+        window.location.href = 'index.html';
+      }
+    }
+
+    window.onload = function() {
+      checkLoginStatus();
+    };
+
+    // 初始化Google登入按鈕
+    window.onGoogleLibraryLoad = function() {
+      google.accounts.id.renderButton(
+        document.getElementById('signin-button'), // 繪製在此元素中
+        { theme: 'outline', size: 'large' }  // 按鈕樣式
+      );
+
+      google.accounts.id.initialize({
+        client_id: '207480084362-mc0she8jhrhd2bu01ifg8quo1ujksup6.apps.googleusercontent.com',
+        callback: handleCredentialResponse
+      });   
+    };
+  </script>
+</body>
+</html>
