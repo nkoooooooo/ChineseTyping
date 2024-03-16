@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登入 - 中文打字平台</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    body, html {
+    body,
+    html {
       height: 100%;
       margin: 0;
       display: flex;
@@ -48,6 +50,7 @@
   </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
+
 <body>
   <main>
     <h1>中文打字平台</h1>
@@ -59,6 +62,17 @@
   </footer>
 
   <script>
+    // 將JWT token的Payload部分進行Base64解碼的函數
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1]; // 獲得JWT的Payload部分
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // 替換字符，使其符合base64的要求
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2); // 將字符轉換為16進制
+      }).join(''));
+
+      return JSON.parse(jsonPayload); // 返回解碼後的JSON對象
+    }
+
     function handleCredentialResponse(response) {
       const profile = parseJwt(response.credential);
       // 以安全的方式设置cookie，可能需要服务器端参与以设置HttpOnly属性
@@ -72,12 +86,12 @@
     function checkLoginStatus() {
       // 检查是否已设置登录状态的cookie
       const isLoggedIn = document.cookie.split(';').some((item) => item.trim().startsWith('isLogin=true'));
-      if(isLoggedIn) {
+      if (isLoggedIn) {
         window.location.href = 'index.html'; // 如果已登录，直接重定向到主页
       }
     }
 
-    window.onload = function() {
+    window.onload = function () {
       checkLoginStatus();
 
       // 以下为Google登录按钮的初始化代码
@@ -85,14 +99,15 @@
         client_id: '207480084362-mc0she8jhrhd2bu01ifg8quo1ujksup6.apps.googleusercontent.com',
         callback: handleCredentialResponse
       });
-      
+
       google.accounts.id.renderButton(
         document.getElementById('signin-button'), // 将Google登录按钮渲染在这个元素内
         { theme: 'outline', size: 'large' } // 按钮的主题和尺寸
       );
-      
+
       google.accounts.id.prompt(); // 显示账号选择器
     };
   </script>
 </body>
+
 </html>
