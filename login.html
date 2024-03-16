@@ -2,9 +2,9 @@
 <html lang="zh-HK">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登入 - 中文打字平台</title>
-  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
   <style>
     body, html {
       height: 100%;
@@ -17,21 +17,17 @@
       background-color: #f9f9f9;
     }
 
-    header, main, footer {
+    main {
       width: 100%;
       max-width: 400px;
-      margin: 10px auto;
       text-align: center;
-    }
-
-    header {
-      margin-bottom: 30px;
     }
 
     h1 {
       font-size: 2em;
       color: #5c80d1;
       margin: 0;
+      padding-bottom: 0.5em;
     }
 
     p.description {
@@ -39,78 +35,60 @@
       color: #666;
     }
 
-    footer p {
+    footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
       font-size: 0.9em;
+      background: #f1f1f1;
       color: #888;
-    }
-
-    .g_id_signin {
-      margin-top: 20px;
-    }
-
-    @media (max-width: 400px) {
-      header, main, footer {
-        width: 90%;
-      }
     }
   </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-  <header>
+  <main>
     <h1>中文打字平台</h1>
     <p class="description">歡迎來到中文打字平台，請先登入。</p>
-  </header>
-  
-  <main>
-    <div id="g_id_onload"
-         data-client_id="207480084362-mc0she8jhrhd2bu01ifg8quo1ujksup6.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse"
-         data-auto_prompt="false">
-    </div>
-    
-    <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
+    <div id="signin-button"></div>
   </main>
-  
   <footer>
     <p>nko@tkp.edu.hk</p>
   </footer>
 
   <script>
     function handleCredentialResponse(response) {
-      // 这是用户登录成功后会被调用的处理函数
+      // 把用户登录状态存储为cookie
       document.cookie = "isLogin=true; max-age=86400; path=/"; // 设置cookie 24小时过期
       window.location.href = 'index.html'; // 重定向到主页
     }
 
     function checkLoginStatus() {
-      // 查看cookie中的登录状态，如果用户已登录，则重定向到主页
-      if(document.cookie.split(';').some((item) => item.trim().startsWith('isLogin=true'))) {
-        window.location.href = 'index.html';
+      // 检查是否已设置登录状态的cookie
+      const isLoggedIn = document.cookie.split(';').some((item) => item.trim().startsWith('isLogin=true'));
+      if(isLoggedIn) {
+        window.location.href = 'index.html'; // 如果已登录，直接重定向到主页
       }
     }
-    
-    // 当页面加载完毕时，检查用户的登录状态
+
     window.onload = function() {
       checkLoginStatus();
-      
-      // 设置Google登录按钮，并初始化登录过程
+
+      // 以下为Google登录按钮的初始化代码
       google.accounts.id.initialize({
         client_id: '207480084362-mc0she8jhrhd2bu01ifg8quo1ujksup6.apps.googleusercontent.com',
         callback: handleCredentialResponse
       });
+      
       google.accounts.id.renderButton(
-        document.getElementById('signin-button'), // 这会将登录按钮渲染在id为'signin-button'的div内
-        { theme: 'outline', size: 'large' }  // 用来自定义Google登录按钮的外观
+        document.getElementById('signin-button'), // 将Google登录按钮渲染在这个元素内
+        { theme: 'outline', size: 'large' } // 按钮的主题和尺寸
       );
-      google.accounts.id.prompt(); // 这是用于显示帐号选择器提示的函数
+      
+      google.accounts.id.prompt(); // 显示账号选择器
     };
-    
-    function parseJwt(token) {
-      const base64Payload = token.split('.')[1];
-      const payload = Buffer.from(base64Payload, 'base64');
-      return JSON.parse(payload.toString());
-    }
   </script>
 </body>
 </html>
