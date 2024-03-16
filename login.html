@@ -78,15 +78,33 @@
 
   <script>
     function handleCredentialResponse(response) {
-      // 登录成功后的处理代码
-      // 非常重要：在实际生产环境中，您需要验证此ID令牌（JWT）
-      const profile = parseJwt(response.credential);
-      // 存储登录状态到cookie
-      document.cookie = "isLogin=true; max-age=86400; path=/"; // 24小时后过期
-      // 跳转到主页或其它逻辑
-      // 此处仅作演示，实际使用时应更具更安全的方式验证和传递数据
-      window.location.href = 'index.html';
+      // 这是用户登录成功后会被调用的处理函数
+      document.cookie = "isLogin=true; max-age=86400; path=/"; // 设置cookie 24小时过期
+      window.location.href = 'index.html'; // 重定向到主页
     }
+
+    function checkLoginStatus() {
+      // 查看cookie中的登录状态，如果用户已登录，则重定向到主页
+      if(document.cookie.split(';').some((item) => item.trim().startsWith('isLogin=true'))) {
+        window.location.href = 'index.html';
+      }
+    }
+    
+    // 当页面加载完毕时，检查用户的登录状态
+    window.onload = function() {
+      checkLoginStatus();
+      
+      // 设置Google登录按钮，并初始化登录过程
+      google.accounts.id.initialize({
+        client_id: '207480084362-mc0she8jhrhd2bu01ifg8quo1ujksup6.apps.googleusercontent.com',
+        callback: handleCredentialResponse
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('signin-button'), // 这会将登录按钮渲染在id为'signin-button'的div内
+        { theme: 'outline', size: 'large' }  // 用来自定义Google登录按钮的外观
+      );
+      google.accounts.id.prompt(); // 这是用于显示帐号选择器提示的函数
+    };
     
     function parseJwt(token) {
       const base64Payload = token.split('.')[1];
