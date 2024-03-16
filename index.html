@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中文打字練習結果收集</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body,
+    html {
+      height: 100%;
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: #f7f7f7;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      height: 100vh;
+    }
+
+    .text-section,
+    .typing-area {
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      width: 80%;
+      max-width: 600px;
+      background-color: #fff;
+    }
+
+    .text-section {
+      height: 200px;
+      /* 調整適合你的高度 */
+      overflow-y: auto;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      /* 調整適合你的高度 */
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      resize: none;
+      line-height: 1.5;
+      font-size: medium;
+    }
+
+    input[type="text"],
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #4CAF50;
+      /* 按鈕背景色 */
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 這裡放置Google登入的div -->
+  <div id="g_id_onload"
+       data-client_id="207480084362-mc0she8jhrhd2bu01ifg8quo1ujksup6.apps.googleusercontent.com"
+       data-auto_prompt="false">
+  </div>
+
+  <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
+
+  <!-- 用來顯示登入用戶的資訊 -->
+  <div id="user-info"></div>
+
+  <div class="container">
+    <h1>中文打字練習</h1>
+
+    <!-- 課文部分 -->
+    <div id="text-section" class="text-section">
+      <p>這裡是課文內容，學生需要在下面的輸入框中模仿打字。</p>
+    </div>
+
+    <!-- https://docs.google.com/forms/d/e/1FAIpQLSfFKNgPlbRUz6ZAmgogAH9NDaVXTDWUvorFxaObt9-18yrrcg/viewform?usp=pp_url&entry.1235490204=nko@tkp.edu.hk&entry.317621266=nko&entry.53039711=123213213213
+    -->
+    <!-- 打字練習的地方，表單提交到Google表單 -->
+    <form id="google-form"
+      action="https://docs.google.com/forms/d/e/1FAIpQLSfFKNgPlbRUz6ZAmgogAH9NDaVXTDWUvorFxaObt9-18yrrcg/formResponse"
+      method="post" target="_blank">
+
+      <!-- 輸入學生電郵的輸入框 -->
+      <label for="entry.1235490204">電郵：</label>
+      <input type="text" name="entry.1235490204" disabled>
+      <br>
+      <!-- 輸入學生名字的輸入框 -->
+      <label for="entry.317621266">名字：</label>
+      <input type="text" name="entry.317621266" disabled>
+
+
+      <!-- 這裡的name屬性需要對應到Google表單中的input name -->
+      <br>
+      <label for="entry.53039711">請在下面的文字：</label>
+      <textarea id="inputField" name="entry.53039711" placeholder="請在此處輸入" required></textarea>
+
+      <!-- 提交按鈕 -->
+      <button type="submit">提交練習結果</button>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let lastActivityTime = Date.now();
+      let tabSwitches = 0;
+
+      const form = document.getElementById('google-form');
+      const inputField = document.getElementById('inputField');
+      const textSection = document.getElementById('text-section');
+
+      form.addEventListener('submit', handleSubmit);
+      inputField.addEventListener('paste', preventDefaultAction);
+      inputField.addEventListener('copy', preventDefaultAction);
+      inputField.addEventListener('cut', preventDefaultAction);
+      inputField.addEventListener('drop', preventDefaultAction);
+      inputField.addEventListener('dragstart', preventDefaultAction);
+      inputField.addEventListener('selectstart', preventDefaultAction);
+      textSection.addEventListener('selectstart', preventDefaultAction);
+      textSection.onmousedown = textSection.onmouseup = preventDefaultAction;
+
+      document.onkeydown = checkForProhibitedActions;
+      document.oncontextmenu = preventDefaultAction;
+      document.addEventListener('mousemove', () => lastActivityTime = Date.now());
+      document.addEventListener('keypress', () => lastActivityTime = Date.now());
+      window.addEventListener('blur', () => {
+        tabSwitches++;
+        if (tabSwitches % 5 == 0) {
+          alert('請專心打字練習，不要切換到其他視窗！');
+        }
+      });
+
+      setInterval(() => {
+        const currentTime = Date.now();
+        if (currentTime - lastActivityTime > (3 * 60 * 1000)) {
+          alert('您已經超過3分鐘未進行任何操作。');
+        }
+      }, 60 * 1000);
+    });
+
+    function handleSubmit(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+
+      fetch(event.target.action, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors'
+      })
+        .then(() => alert('表单提交成功！'))
+        .catch(error => {
+          console.error('Error submitting form:', error);
+          alert('表单提交出错');
+        });
+    }
+
+    function preventDefaultAction(event) {
+      event.preventDefault();
+    }
+
+    function checkForProhibitedActions(event) {
+      const forbiddenKeys = [67, 86, 88, 65, 83, 123];
+      const isCtrlPressed = event.ctrlKey;
+      const isKeyPressedForbidden = forbiddenKeys.includes(event.keyCode);
+      const isRightClick = event.button === 2;
+      const isAltPressed = event.altKey;
+      const isFKey = event.keyCode >= 112 && event.keyCode <= 123 && event.keyCode !== 116;
+
+      if (isCtrlPressed && isKeyPressedForbidden || isRightClick || isAltPressed || isFKey) {
+        event.preventDefault();
+      }
+    }
+  </script>
+  <script>
+    // 這個函數會在用戶登入後呼叫
+    function handleCredentialResponse(response) {
+      // 這裡解析ID token（JWT）
+      const data = parseJwt(response.credential);
+
+      // 將用戶資訊顯示在頁面上
+      const userInfo = document.getElementById('user-info');
+      userInfo.innerHTML = `<h2>歡迎，${data.name}</h2><p>你已成功登入！</p>`;
+    }
+
+    // 用來解析JWT的函數
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      return JSON.parse(jsonPayload);
+    }
+  </script>
+</body>
+
+</html>
