@@ -311,6 +311,7 @@
             // 可以在这里加入条件检查以匹配指定的 email 和题号
             if (email === document.getElementById('email').value && questionNumber === document.getElementById('qno').value) {
               document.getElementById("responseText").innerHTML = columns[5];
+              document.getElementById("inputField").value = columns[5];
             }
           });
         })
