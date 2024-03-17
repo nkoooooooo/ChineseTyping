@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <title>练习页面</title>
+  <style>
+    .text-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .character {
+      text-align: center;
+      margin: 10px;
+    }
+    .character span {
+      font-size: 24px;
+    }
+    .character sub {
+      display: block;
+      color: #888;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="text-container" id="exerciseText"></div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const exerciseId = urlParams.get('id'); // 获取ID
+
+    // 使用fetch API根据ID从远程JSON中获取练习数据
+    fetch('https://raw.githubusercontent.com/nkoooooooo/ChineseTyping/main/exercise.json')
+      .then(response => response.json())
+      .then(data => {
+        const exercise = data.find(ex => ex.id === exerciseId);
+        displayExercise(exercise.text, exercise.pinyin);
+      })
+      .catch(error => {
+        console.error('Error loading exercise:', error);
+      });
+
+    function displayExercise(text, pinyin) {
+      const textContainer = document.getElementById('exerciseText');
+      text.split('').forEach((char, index) => {
+        const charPinyin = pinyin.split(' ')[index] || '';
+        const characterElem = document.createElement('div');
+        characterElem.classList.add('character');
+        characterElem.innerHTML = `<span>${char}</span><sub>${charPinyin}</sub>`;
+        textContainer.appendChild(characterElem);
+      });
+    }
+  </script>
+</body>
+</html>

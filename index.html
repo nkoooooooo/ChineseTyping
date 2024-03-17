@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,11 +12,13 @@
     .sticky-top {
       z-index: 1020;
     }
+
     .table-wrap {
       overflow-x: auto;
     }
   </style>
 </head>
+
 <body>
 
   <!-- Sticky Navbar 上方的导航栏 -->
@@ -48,16 +51,7 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- 动态生成和更新这部分 -->
-                <tr>
-                  <th scope="row">001</th>
-                  <td>標題一</td>
-                  <td>未開始</td>
-                  <td>
-                    <a href="#" class="btn btn-primary">開始練習</a>
-                  </td>
-                </tr>
-                <!-- 可以根据数目继续添加更多练习 -->
+                <!-- 這裡將動態生成打字練習項目 -->
               </tbody>
             </table>
           </div>
@@ -67,7 +61,8 @@
   </section>
 
   <!-- Bootstrap 5 JS 和 Popper.js -->
-  <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+    integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -84,19 +79,55 @@
     }
 
     // 显示用户名
-    document.getElementById('username').textContent = getCookie('username');
+    if (getCookie('username')) {
+      document.getElementById('username').textContent = getCookie('username');
+    }
 
     // 辅助函数：从cookie中读取登录用户名
     function getCookie(name) {
       let cookieArray = document.cookie.split(';');
-      for(let i = 0; i < cookieArray.length; i++) {
+      for (let i = 0; i < cookieArray.length; i++) {
         let cookiePair = cookieArray[i].split('=');
-        if(name == cookiePair[0].trim()) {
+        if (name == cookiePair[0].trim()) {
           return decodeURIComponent(cookiePair[1]);
         }
       }
       return null;
     }
+
+    // 聲明一個函數用於更新表格內容
+    function updateExerciseTable(exercises) {
+      const tableBody = document.querySelector('.table tbody');
+      tableBody.innerHTML = ''; // 清空现有内容
+
+      exercises.forEach((exercise) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <th scope="row">${exercise.id}</th>
+          <td>${exercise.title}</td>
+          <td>未開始</td>
+          <td>
+            <a href="#" class="btn btn-primary">開始練習</a>
+          </td>
+        `;
+        tableBody.appendChild(row);
+        // 找到开始练习的按钮并添加点击事件
+        const startButton = row.querySelector('.btn-primary');
+        startButton.setAttribute('href', `exercise.html?id=${exercise.id}`);
+      });
+    }
+
+    // 使用fetch API從遠端URL加載數據
+    fetch('https://raw.githubusercontent.com/nkoooooooo/ChineseTyping/main/exercise.json')
+      .then(response => response.json()) // 解析返回的JSON數據
+      .then(data => {
+        updateExerciseTable(data); // 使用數據更新表格
+      })
+      .catch(error => {
+        // 處理錯誤
+        console.error('Fetch error:', error);
+      });
   </script>
 </body>
+
 </html>
