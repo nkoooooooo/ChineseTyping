@@ -68,6 +68,24 @@
       padding: 10px;
       height: 30vh;
     }
+    
+    .response-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 80%;
+      /* Or any other width you want */
+      margin: 20px auto;
+    }
+
+    #responseText {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: start;
+      border: 1px solid #ddd;
+      overflow-y: auto;
+      height: 250px;
+    }
   </style>
 </head>
 
@@ -85,19 +103,28 @@
     <div class="text-container" id="exerciseText"></div>
     <!-- 打字練習的地方，表單提交到Google表單 -->
     <form id="google-form"
-      action="https://docs.google.com/forms/d/e/1FAIpQLSfFKNgPlbRUz6ZAmgogAH9NDaVXTDWUvorFxaObt9-18yrrcg/formResponse"
+      action="https://docs.google.com/forms/d/e/1FAIpQLScamnBpVLSJ1TXQOX2IhNu8XNUwKj8O8MdAUowCjmWl3eDiQQ/formResponse"
       method="post" target="_blank">
 
       <!-- 輸入學生電郵的輸入框 -->
-      <input type="text" name="entry.1235490204" hidden>
-      <input type="text" name="entry.317621266" hidden>
+      <input type="text" name="entry.642787572" id = "email" hidden>
+      <!-- 輸入學生姓名的輸入框 -->
+      <input type="text" name="entry.101423020" id = "gname" hidden>
+      <!-- 輸入題號的輸入框 -->
+      <input type="text" name="entry.2023010530" id = "qno" hidden>
+      <!-- 輸入題目名稱的輸入框 -->
+      <input type="text" name="entry.505150958" id = "qname" hidden>
       <!-- 這裡的name屬性需要對應到Google表單中的input name -->
-      <label for="entry.53039711">請在下面的文字：</label>
-      <textarea id="inputField" name="entry.53039711" placeholder="請在此處輸入" required></textarea>
+      <label for="entry.1329760247">請在下面的文字：</label>
+      <textarea id="inputField" name="entry.1329760247" placeholder="請在此處輸入" required></textarea>
 
       <!-- 提交按鈕 -->
       <button type="submit">提交練習結果</button>
     </form>
+    <div class="response-container">
+      <label>你提交的文字：</label>
+      <div id="responseText"></div>
+    </div>
   </div>
 
 
@@ -142,6 +169,12 @@
       .then(data => {
         const exercise = data.find(ex => ex.id === exerciseId);
         displayExercise(exercise.text, exercise.pinyin);
+        // 題號
+        document.getElementById('qno').value = exercise.id;
+        console.log(document.getElementById('qno').value)
+        // 題目名稱
+        document.getElementById('qname').value = exercise.title;
+        console.log(document.getElementById('qname').value)
       })
       .catch(error => {
         console.error('Error loading exercise:', error);
@@ -174,9 +207,11 @@
     window.onload = function () {
       checkLoginStatus();
       // 获取表单input，设置初始值（以学校电邮为例）
-      document.querySelector('input[name="entry.1235490204"]').value = getCookie('email');
+      document.getElementById('email').value = getCookie('email');
+      console.log(document.getElementById('email').value)
       // 假设存在另一个字段，例如：用户NAME
-      document.querySelector('input[name="entry.317621266"]').value = getCookie('username');
+      document.getElementById('gname').value = getCookie('username');
+      console.log(document.getElementById('gname').value)
     }
   </script>
   <script>
