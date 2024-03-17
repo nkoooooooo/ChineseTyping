@@ -93,7 +93,7 @@
       }
       return null;
     }
-    
+
     const urlParams = new URLSearchParams(window.location.search);
     const exerciseId = urlParams.get('id'); // 获取ID
 
@@ -117,6 +117,18 @@
         characterElem.innerHTML = `<span>${char}</span><sub>${charPinyin}</sub>`;
         textContainer.appendChild(characterElem);
       });
+    }
+
+    function checkLoginStatus() {
+      // 检查是否已设置登录状态的cookie
+      const isLoggedIn = getCookie('isLogin');
+      if (isLoggedIn) {
+        window.location.href = 'index.html'; // 如果已登录，直接重定向到主页
+      }
+    }
+
+    window.onload = function () {
+      checkLoginStatus();
     }
   </script>
 </body>
