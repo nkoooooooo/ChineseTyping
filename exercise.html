@@ -35,7 +35,8 @@
 
     .page-container {
       position: relative;
-      min-height: calc(100vh - 80px - 40px); /* 根据导航栏和footer的实际高度调整 */
+      min-height: calc(100vh - 80px - 40px);
+      /* 根据导航栏和footer的实际高度调整 */
     }
 
     footer {
@@ -45,6 +46,20 @@
       font-size: 0.9em;
       background: #f1f1f1;
       color: #888;
+    }
+
+    #google-form {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 80%;
+      /* Or any other width you want */
+      margin: 20px auto;
+    }
+
+    #inputField {
+      margin: 10px 0;
+      padding: 10px;
     }
   </style>
 </head>
@@ -61,7 +76,23 @@
 
   <div class="page-container">
     <div class="text-container" id="exerciseText"></div>
+    <!-- 打字練習的地方，表單提交到Google表單 -->
+    <form id="google-form"
+      action="https://docs.google.com/forms/d/e/1FAIpQLSfFKNgPlbRUz6ZAmgogAH9NDaVXTDWUvorFxaObt9-18yrrcg/formResponse"
+      method="post" target="_blank">
+
+      <!-- 輸入學生電郵的輸入框 -->
+      <input type="text" name="entry.1235490204" hidden>
+      <input type="text" name="entry.317621266" hidden>
+      <!-- 這裡的name屬性需要對應到Google表單中的input name -->
+      <label for="entry.53039711">請在下面的文字：</label>
+      <textarea id="inputField" name="entry.53039711" placeholder="請在此處輸入" required></textarea>
+
+      <!-- 提交按鈕 -->
+      <button type="submit">提交練習結果</button>
+    </form>
   </div>
+
 
   <footer>
     <p>Copyright © SKHTKPSS. All rights reserved. Powered by NKO</p>
@@ -135,6 +166,81 @@
 
     window.onload = function () {
       checkLoginStatus();
+      // 获取表单input，设置初始值（以学校电邮为例）
+      document.querySelector('input[name="entry.1235490204"]').value = getCookie('email');
+      // 假设存在另一个字段，例如：用户NAME
+      document.querySelector('input[name="entry.317621266"]').value = getCookie('username');
+    }
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let lastActivityTime = Date.now();
+      let tabSwitches = 0;
+
+      const form = document.getElementById('google-form');
+      const inputField = document.getElementById('inputField');
+      const textSection = document.getElementById('exerciseText');
+
+      form.addEventListener('submit', handleSubmit);
+      inputField.addEventListener('paste', preventDefaultAction);
+      inputField.addEventListener('copy', preventDefaultAction);
+      inputField.addEventListener('cut', preventDefaultAction);
+      inputField.addEventListener('drop', preventDefaultAction);
+      inputField.addEventListener('dragstart', preventDefaultAction);
+      inputField.addEventListener('selectstart', preventDefaultAction);
+      textSection.addEventListener('selectstart', preventDefaultAction);
+      textSection.onmousedown = textSection.onmouseup = preventDefaultAction;
+
+      document.onkeydown = checkForProhibitedActions;
+      document.oncontextmenu = preventDefaultAction;
+      document.addEventListener('mousemove', () => lastActivityTime = Date.now());
+      document.addEventListener('keypress', () => lastActivityTime = Date.now());
+      window.addEventListener('blur', () => {
+        tabSwitches++;
+        if (tabSwitches % 5 == 0) {
+          alert('請專心打字練習，不要切換到其他視窗！');
+        }
+      });
+
+      setInterval(() => {
+        const currentTime = Date.now();
+        if (currentTime - lastActivityTime > (3 * 60 * 1000)) {
+          alert('您已經超過3分鐘未進行任何操作。');
+        }
+      }, 60 * 1000);
+    });
+
+    function preventDefaultAction(event) {
+      event.preventDefault();
+    }
+
+    function checkForProhibitedActions(event) {
+      const forbiddenKeys = [67, 86, 88, 65, 83, 123];
+      const isCtrlPressed = event.ctrlKey;
+      const isKeyPressedForbidden = forbiddenKeys.includes(event.keyCode);
+      const isRightClick = event.button === 2;
+      const isAltPressed = event.altKey;
+      const isFKey = event.keyCode >= 112 && event.keyCode <= 123 && event.keyCode !== 116;
+
+      if (isCtrlPressed && isKeyPressedForbidden || isRightClick || isAltPressed || isFKey) {
+        event.preventDefault();
+      }
+    }
+
+    function handleSubmit(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+
+      fetch(event.target.action, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors'
+      })
+        .then(() => alert('練習提交成功！'))
+        .catch(error => {
+          console.error('Error submitting form:', error);
+          alert('練習提交出現錯誤');
+        });
     }
   </script>
 </body>
