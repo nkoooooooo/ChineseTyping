@@ -85,6 +85,7 @@
       border: 1px solid #ddd;
       overflow-y: auto;
       height: 250px;
+      padding: 10px;
     }
   </style>
 </head>
@@ -123,7 +124,7 @@
     </form>
     <div class="response-container">
       <label>你提交的文字：</label>
-      <div id="responseText"></div>
+      <label id="responseText"></label>
     </div>
   </div>
 
@@ -222,6 +223,7 @@
       const form = document.getElementById('google-form');
       const inputField = document.getElementById('inputField');
       const textSection = document.getElementById('exerciseText');
+      const responseSection = document.getElementById('responseText');
 
       form.addEventListener('submit', handleSubmit);
       inputField.addEventListener('paste', preventDefaultAction);
@@ -232,6 +234,8 @@
       inputField.addEventListener('selectstart', preventDefaultAction);
       textSection.addEventListener('selectstart', preventDefaultAction);
       textSection.onmousedown = textSection.onmouseup = preventDefaultAction;
+      responseSection.addEventListener('selectstart', preventDefaultAction);
+      responseSection.onmousedown = responseSection.onmouseup = preventDefaultAction;
 
       document.onkeydown = checkForProhibitedActions;
       document.oncontextmenu = preventDefaultAction;
@@ -284,6 +288,28 @@
           alert('練習提交出現錯誤');
         });
     }
+  </script>
+  <script>
+    // 公开的试算表 URL（例如csv格式）
+    var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTayq2IE448ev4DhUfeIpzdcKfKERlJ2k28Wou-0faitR5vqIUiYk7bEZ5hBm9nB5MHbEP2i0YmIUi3/pub?gid=365141235&single=true&output=csv';
+
+    fetch(publicSpreadsheetUrl)
+      .then(response => response.text())
+      .then(data => {
+        // 将 CSV 数据转换成你可以使用的格式
+        var rows = data.split("\n");
+        rows.forEach(row => {
+          console.log(row);
+          var columns = row.split(",");
+          var email = columns[1]; // 电子邮箱
+          var questionNumber = columns[3]; // 题号
+          // 可以在这里加入条件检查以匹配指定的 email 和题号
+          if (email === document.getElementById('email').value && questionNumber === document.getElementById('qno').value) {
+            document.getElementById("responseText").innerHTML = columns[5];
+          }
+        });
+      })
+      .catch(error => console.error('Error loading spreadsheet data:', error));
   </script>
 </body>
 
