@@ -87,6 +87,14 @@
       height: 250px;
       padding: 10px;
     }
+
+    .correct {
+      color: green;
+    }
+
+    .incorrect {
+      color: red;
+    }
   </style>
 </head>
 
@@ -176,6 +184,10 @@
         // 題目名稱
         document.getElementById('qname').value = exercise.title;
         console.log(document.getElementById('qname').value)
+        // 给用户输入框添加事件监听器
+        document.getElementById('inputField').addEventListener('input', () => {
+          handleUserInput(exercise.text);
+        });
       })
       .catch(error => {
         console.error('Error loading exercise:', error);
@@ -187,6 +199,7 @@
         const charPinyin = pinyin.split(' ')[index] || '';
         const characterElem = document.createElement('div');
         characterElem.classList.add('character');
+        characterElem.dataset.index = index; // 添加一个索引数据属性以供比较使用
         characterElem.innerHTML = `<span>${char}</span><sub>${charPinyin}</sub>`;
         textContainer.appendChild(characterElem);
       });
@@ -215,6 +228,26 @@
       document.getElementById('gname').value = getCookie('username');
       console.log(document.getElementById('gname').value)
     }
+
+    // 用户输入处理函数
+    function handleUserInput(exerciseText) {
+      const userInput = document.getElementById('inputField').value;
+      const characters = document.querySelectorAll('#exerciseText .character');
+      // 转换为中文字符列表
+      const userChars = userInput.replace(/\s/g, '').split('');
+      console.log(userChars);
+      userChars.forEach((char, index) => {
+        // 比较，若中文字符一致则添加绿色显示
+        if (exerciseText[index] === char) {
+          characters[index].firstChild.classList.add('correct'); // firstChild 是 <span> 元素
+          characters[index].firstChild.classList.remove('incorrect');
+        } else if (characters[index].firstChild) {
+          characters[index].firstChild.classList.remove('correct');
+          characters[index].firstChild.classList.add('incorrect');
+        }
+      });
+    }
+
   </script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
