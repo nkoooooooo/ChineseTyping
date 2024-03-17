@@ -1,75 +1,72 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>主頁 - 中文打字平台</title>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <title>中文打字平台</title>
   <style>
-    /* CSS樣式依您的UI設計進行調整。 */
     body {
       font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f7f7f7;
+      text-align: center;
+      padding-top: 50px;
     }
-    
-    .userinfo {
+
+    h1 {
       margin-bottom: 20px;
     }
 
-    button {
-      cursor: pointer;
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-      margin: 4px 2px;
-      transition-duration: 0.4s;
-    }
-
-    button:hover {
-      background-color: #45a049;
+    /* 添加用于登出按钮与显示用户信息的样式 */
+    .user-info,
+    .logout-button {
+      margin: 20px;
     }
   </style>
 </head>
+
 <body>
-  <div class="userinfo">
-    <h2>歡迎回來, <span id="username"></span></h2>
-    <p>Email: <span id="email"></span></p>
+
+  <h1>中文打字練習</h1>
+  <div class="user-info">
+    <p>名稱：<span id="username"></span></p>
+    <p>電郵：<span id="email"></span></p>
   </div>
-  
-  <button id="logout-button">登出</button>
+  <button class="logout-button" onclick="logout()">登出</button>
 
   <script>
-    function displayUserInfo() {
-      // 從cookie或localStorage讀取用戶資訊
-      var name = /* 從存儲中提取用戶名 */ "示例用戶名";
-      var email = /* 從存儲中提取email */ "example@example.com";
-      
-      // 顯示到頁面上
-      document.getElementById('username').textContent = name;
-      document.getElementById('email').textContent = email;
+    // 檢查用戶是否已登入，未登入的話重定向到登入頁面
+    const isLogin = document.cookie.split(';').some((item) => item.trim().startsWith('isLogin=true'));
+    if (!isLogin) {
+      window.location.href = 'login.html';
+    } else {
+      // 已经登录, 获取并显示用户名和电邮
+      document.getElementById('username').textContent = getCookie('username');
+      document.getElementById('email').textContent = getCookie('email');
     }
 
-    function clearLoginInfo() {
-      // 清除用戶登入狀態
-      document.cookie = "isLogin=; max-age=0; path=/"; // 清除cookie
-      // 或者使用localStorage.clear(); 來清除所有localStorage資料
-
-      // 重定向到登入頁面
+    // 登出函数
+    function logout() {
+      // 清除所有cookie信息
+      document.cookie = "email=; Max-Age=-99999999; path=/";
+      document.cookie = "username=; Max-Age=-99999999; path=/";
+      document.cookie = "isLogin=; Max-Age=-99999999; path=/";
+      // 重定向回登录界面
       window.location.href = 'login.html';
     }
 
-    document.getElementById('logout-button').addEventListener('click', clearLoginInfo);
-
-    // 當頁面加載時顯示用戶資訊
-    displayUserInfo();
+    // 用来获取cookie值的辅助函数
+    function getCookie(name) {
+      let cookieArray = document.cookie.split(';');
+      for (let i = 0; i < cookieArray.length; i++) {
+        let cookiePair = cookieArray[i].split('=');
+        if (name == cookiePair[0].trim()) {
+          return decodeURIComponent(cookiePair[1]);
+        }
+      }
+      return null;
+    }
+  </script>
   </script>
 </body>
+
 </html>
