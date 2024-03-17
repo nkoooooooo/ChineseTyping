@@ -1,32 +1,99 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
+
 <head>
   <meta charset="UTF-8">
   <title>练习页面</title>
+  <!-- 引入Bootstrap 5 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <style>
+    .sticky-top {
+      z-index: 1020;
+    }
+
     .text-container {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
     }
+
     .character {
       text-align: center;
       margin: 10px;
     }
+
     .character span {
       font-size: 24px;
     }
+
     .character sub {
       display: block;
       color: #888;
       margin-top: 5px;
     }
+
+    footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 0.9em;
+      background: #f1f1f1;
+      color: #888;
+    }
   </style>
 </head>
+
 <body>
+  <!-- Sticky Navbar 上方的导航栏 -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">中文打字平台</a>
+      <span class="navbar-text ms-auto" id="username">用戶名稱</span>
+      <button class="btn btn-outline-warning ms-3" onclick="logout()">登出</button>
+    </div>
+  </nav>
+
   <div class="text-container" id="exerciseText"></div>
 
+  <footer>
+    <p>Copyright © SKHTKPSS. All rights reserved. Powered by NKO</p>
+  </footer>
+
+  <!-- Bootstrap 5 JS 和 Popper.js -->
+  <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+    integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
   <script>
+    function logout() {
+      // 清除所有cookie信息
+      document.cookie = "email=; Max-Age=-99999999; path=/";
+      document.cookie = "username=; Max-Age=-99999999; path=/";
+      document.cookie = "isLogin=; Max-Age=-99999999; path=/";
+      // 重定向回登录界面
+      window.location.href = 'login.html';
+    }
+
+    // 显示用户名
+    if (getCookie('username')) {
+      document.getElementById('username').textContent = getCookie('username');
+    }
+
+    // 辅助函数：从cookie中读取登录用户名
+    function getCookie(name) {
+      let cookieArray = document.cookie.split(';');
+      for (let i = 0; i < cookieArray.length; i++) {
+        let cookiePair = cookieArray[i].split('=');
+        if (name == cookiePair[0].trim()) {
+          return decodeURIComponent(cookiePair[1]);
+        }
+      }
+      return null;
+    }
+    
     const urlParams = new URLSearchParams(window.location.search);
     const exerciseId = urlParams.get('id'); // 获取ID
 
@@ -53,4 +120,5 @@
     }
   </script>
 </body>
+
 </html>
