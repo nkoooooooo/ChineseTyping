@@ -83,6 +83,23 @@
 
   <!-- 自定义JavaScript -->
   <script>
+    function checkLoginStatus() {
+      // 檢查用戶是否已登入，未登入的話重定向到登入頁面
+      const isLoggedIn = getCookie('isLogin');
+      if (isLoggedIn) {
+        // 显示用户名
+        if (getCookie('username')) {
+          document.getElementById('username').textContent = getCookie('username');
+        }
+      } else {
+        window.location.href = 'login.html';
+      }
+    }
+
+    window.onload = function () {
+      checkLoginStatus();
+    }
+
     // 登出操作
     function logout() {
       // 清除所有cookie信息
@@ -93,10 +110,6 @@
       window.location.href = 'login.html';
     }
 
-    // 显示用户名
-    if (getCookie('username')) {
-      document.getElementById('username').textContent = getCookie('username');
-    }
 
     // 辅助函数：从cookie中读取登录用户名
     function getCookie(name) {
@@ -143,17 +156,6 @@
         console.error('Fetch error:', error);
       });
 
-      function checkLoginStatus() {
-      // 检查是否已设置登录状态的cookie
-      const isLoggedIn = getCookie('isLogin');
-      if (isLoggedIn) {
-        window.location.href = 'index.html'; // 如果已登录，直接重定向到主页
-      }
-    }
-
-    window.onload = function () {
-      checkLoginStatus();
-    }
   </script>
 </body>
 
