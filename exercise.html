@@ -68,7 +68,7 @@
       padding: 10px;
       height: 30vh;
     }
-    
+
     .response-container {
       display: flex;
       flex-direction: column;
@@ -108,13 +108,13 @@
       method="post" target="_blank">
 
       <!-- 輸入學生電郵的輸入框 -->
-      <input type="text" name="entry.642787572" id = "email" hidden>
+      <input type="text" name="entry.642787572" id="email" hidden>
       <!-- 輸入學生姓名的輸入框 -->
-      <input type="text" name="entry.101423020" id = "gname" hidden>
+      <input type="text" name="entry.101423020" id="gname" hidden>
       <!-- 輸入題號的輸入框 -->
-      <input type="text" name="entry.2023010530" id = "qno" hidden>
+      <input type="text" name="entry.2023010530" id="qno" hidden>
       <!-- 輸入題目名稱的輸入框 -->
-      <input type="text" name="entry.505150958" id = "qname" hidden>
+      <input type="text" name="entry.505150958" id="qname" hidden>
       <!-- 這裡的name屬性需要對應到Google表單中的input name -->
       <label for="entry.1329760247">請在下面的文字：</label>
       <textarea id="inputField" name="entry.1329760247" placeholder="請在此處輸入" required></textarea>
@@ -207,6 +207,7 @@
 
     window.onload = function () {
       checkLoginStatus();
+      getResponseData();
       // 获取表单input，设置初始值（以学校电邮为例）
       document.getElementById('email').value = getCookie('email');
       console.log(document.getElementById('email').value)
@@ -282,7 +283,10 @@
         body: formData,
         mode: 'no-cors'
       })
-        .then(() => alert('練習提交成功！'))
+        .then(() => {
+          alert('練習提交成功！');
+          window.location.href = 'index.html';
+        })
         .catch(error => {
           console.error('Error submitting form:', error);
           alert('練習提交出現錯誤');
@@ -290,26 +294,29 @@
     }
   </script>
   <script>
-    // 公开的试算表 URL（例如csv格式）
-    var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTayq2IE448ev4DhUfeIpzdcKfKERlJ2k28Wou-0faitR5vqIUiYk7bEZ5hBm9nB5MHbEP2i0YmIUi3/pub?gid=365141235&single=true&output=csv';
+    function getResponseData() {
+      // 公开的试算表 URL（例如csv格式）
+      var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTayq2IE448ev4DhUfeIpzdcKfKERlJ2k28Wou-0faitR5vqIUiYk7bEZ5hBm9nB5MHbEP2i0YmIUi3/pub?gid=365141235&single=true&output=csv';
 
-    fetch(publicSpreadsheetUrl)
-      .then(response => response.text())
-      .then(data => {
-        // 将 CSV 数据转换成你可以使用的格式
-        var rows = data.split("\n");
-        rows.forEach(row => {
-          console.log(row);
-          var columns = row.split(",");
-          var email = columns[1]; // 电子邮箱
-          var questionNumber = columns[3]; // 题号
-          // 可以在这里加入条件检查以匹配指定的 email 和题号
-          if (email === document.getElementById('email').value && questionNumber === document.getElementById('qno').value) {
-            document.getElementById("responseText").innerHTML = columns[5];
-          }
-        });
-      })
-      .catch(error => console.error('Error loading spreadsheet data:', error));
+      fetch(publicSpreadsheetUrl)
+        .then(response => response.text())
+        .then(data => {
+          // 将 CSV 数据转换成你可以使用的格式
+          var rows = data.split("\n");
+          rows.forEach(row => {
+            console.log(row);
+            var columns = row.split(",");
+            var email = columns[1]; // 电子邮箱
+            var questionNumber = columns[3]; // 题号
+            // 可以在这里加入条件检查以匹配指定的 email 和题号
+            if (email === document.getElementById('email').value && questionNumber === document.getElementById('qno').value) {
+              document.getElementById("responseText").innerHTML = columns[5];
+            }
+          });
+        })
+        .catch(error => console.error('Error loading spreadsheet data:', error));
+    }
+
   </script>
 </body>
 
