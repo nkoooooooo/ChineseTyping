@@ -90,10 +90,47 @@
 
     .correct {
       color: green;
+      font-weight: bold;
     }
 
     .incorrect {
       color: red;
+    }
+
+    #inputButtons {
+      margin-top: 10px;
+      /* 在输入区和按钮区之间添加一些空间 */
+    }
+
+    .input-symbol {
+      background-color: #f5f5f5;
+      /* 按钮背景颜色 */
+      border: 1px solid #ddd;
+      /* 边框颜色和宽度 */
+      border-radius: 5px;
+      /* 圆角按钮 */
+      margin-right: 8px;
+      /* 按钮之间的右边距 */
+      padding: 5px 10px;
+      /* 上下和左右的内填充 */
+      font-size: 16px;
+      /* 文本大小 */
+      cursor: pointer;
+      /* 鼠标悬停时的指针形状 */
+      transition: background-color 0.3s, transform 0.1s;
+      /* 背景颜色和按下效果的过渡 */
+    }
+
+    /* 鼠标悬停时按钮的样式 */
+    .input-symbol:hover {
+      background-color: #eaeaea;
+      /* 悬停时的背景颜色 */
+    }
+
+    /* 按钮被按下时的样式 */
+    .input-symbol:active {
+      transform: translateY(2px);
+      /* 按钮按下后下移2px */
     }
   </style>
 </head>
@@ -125,6 +162,17 @@
       <input type="text" name="entry.505150958" id="qname" hidden>
       <!-- 這裡的name屬性需要對應到Google表單中的input name -->
       <label for="entry.1329760247">請在下面的文字：</label>
+      <div id="inputButtons">
+        <button type="button" class="input-symbol" data-symbol="。">。</button>
+        <button type="button" class="input-symbol" data-symbol="，">，</button>
+        <button type="button" class="input-symbol" data-symbol="、">、</button>
+        <button type="button" class="input-symbol" data-symbol="！">！</button>
+        <button type="button" class="input-symbol" data-symbol="：">：</button>
+        <button type="button" class="input-symbol" data-symbol="「">「</button>
+        <button type="button" class="input-symbol" data-symbol="」">」</button>
+        <button type="button" class="input-symbol" data-symbol="；">；</button>
+        <!-- 添加更多按钮 -->
+      </div>
       <textarea id="inputField" name="entry.1329760247" placeholder="請在此處輸入" required></textarea>
 
       <!-- 提交按鈕 -->
@@ -148,6 +196,22 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    // 将符号插入到文本输入框的光标位置
+    function insertSymbolAtCursor(symbol) {
+      const inputField = document.getElementById('inputField');
+      // 保存当前的光标位置
+      const cursorPosition = inputField.selectionStart;
+      // 目前输入框的内容
+      const currentValue = inputField.value;
+      // 将符号插入到当前光标位置
+      const newValue = currentValue.slice(0, cursorPosition) + symbol + currentValue.slice(cursorPosition);
+      inputField.value = newValue;
+      // 更新光标位置，使其位于插入的符号后
+      inputField.selectionStart = cursorPosition + symbol.length;
+      inputField.selectionEnd = cursorPosition + symbol.length;
+      // 重新聚焦输入框
+      inputField.focus();
+    }
     function logout() {
       // 清除所有cookie信息
       document.cookie = "email=; Max-Age=-99999999; path=/";
@@ -180,10 +244,10 @@
         displayExercise(exercise.text, exercise.pinyin);
         // 題號
         document.getElementById('qno').value = exercise.id;
-        console.log(document.getElementById('qno').value)
+        //console.log(document.getElementById('qno').value)
         // 題目名稱
         document.getElementById('qname').value = exercise.title;
-        console.log(document.getElementById('qname').value)
+        //console.log(document.getElementById('qname').value)
         // 给用户输入框添加事件监听器
         document.getElementById('inputField').addEventListener('input', () => {
           handleUserInput(exercise.text);
@@ -199,7 +263,6 @@
         const charPinyin = pinyin.split(' ')[index] || '';
         const characterElem = document.createElement('div');
         characterElem.classList.add('character');
-        characterElem.dataset.index = index; // 添加一个索引数据属性以供比较使用
         characterElem.innerHTML = `<span>${char}</span><sub>${charPinyin}</sub>`;
         textContainer.appendChild(characterElem);
       });
@@ -223,29 +286,43 @@
       getResponseData();
       // 获取表单input，设置初始值（以学校电邮为例）
       document.getElementById('email').value = getCookie('email');
-      console.log(document.getElementById('email').value)
+      //console.log(document.getElementById('email').value)
       // 假设存在另一个字段，例如：用户NAME
       document.getElementById('gname').value = getCookie('username');
-      console.log(document.getElementById('gname').value)
+      //console.log(document.getElementById('gname').value)
     }
 
     // 用户输入处理函数
     function handleUserInput(exerciseText) {
       const userInput = document.getElementById('inputField').value;
       const characters = document.querySelectorAll('#exerciseText .character');
-      // 转换为中文字符列表
+      // /\s/g 是一个正则表达式，它匹配字符串中所有的空白字符。
+      // 在这个表达式中： 
+      // \s 匹配单个空格字符，包括空格、制表符、换页符、换行符等。 
+      // g 标志是 "global"（全局）的缩写，意味着匹配字符串中的所有空白字符，而不是只匹配第一个。
       const userChars = userInput.replace(/\s/g, '').split('');
-      console.log(userChars);
+
+      // 遍历用户输入的字符，检查是否与练习文本中的字符匹配
       userChars.forEach((char, index) => {
-        // 比较，若中文字符一致则添加绿色显示
-        if (exerciseText[index] === char) {
-          characters[index].firstChild.classList.add('correct'); // firstChild 是 <span> 元素
-          characters[index].firstChild.classList.remove('incorrect');
-        } else if (characters[index].firstChild) {
-          characters[index].firstChild.classList.remove('correct');
-          characters[index].firstChild.classList.add('incorrect');
+        if (index < characters.length) {
+          if (exerciseText[index] === char) {
+            characters[index].firstChild.classList.add('correct'); // firstChild 是 <span> 元素
+            characters[index].firstChild.classList.remove('incorrect');
+          } else if (characters[index].firstChild) {
+            characters[index].firstChild.classList.remove('correct');
+            characters[index].firstChild.classList.add('incorrect');
+          }
         }
       });
+      // 处理用户输入超出的情况
+      for (let i = userChars.length; i < characters.length; i++) {
+        characters[i].firstChild.classList.remove('correct');
+        characters[i].firstChild.classList.add('incorrect');
+      }
+      // 如果用户输入少于或等于练习文本长度，则清除最后一个字符的错误样式
+      if (userChars.length <= characters.length) {
+        characters[userChars.length - 1].firstChild.classList.remove('incorrect');
+      }
     }
 
   </script>
@@ -288,6 +365,14 @@
           alert('您已經超過3分鐘未進行任何操作。');
         }
       }, 60 * 1000);
+
+      // 监听所有符号按钮的点击事件
+      document.querySelectorAll('.input-symbol').forEach(button => {
+        button.addEventListener('click', function () {
+          insertSymbolAtCursor(this.dataset.symbol);
+        });
+      });
+
     });
 
     function preventDefaultAction(event) {
@@ -331,13 +416,13 @@
       // 公开的试算表 URL（例如csv格式）
       var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTayq2IE448ev4DhUfeIpzdcKfKERlJ2k28Wou-0faitR5vqIUiYk7bEZ5hBm9nB5MHbEP2i0YmIUi3/pub?gid=365141235&single=true&output=csv';
 
-      fetch(publicSpreadsheetUrl)
+      fetch(publicSpreadsheetUrl, { cache: "no-cache" })
         .then(response => response.text())
         .then(data => {
           // 将 CSV 数据转换成你可以使用的格式
           var rows = data.split("\n");
           rows.forEach(row => {
-            console.log(row);
+            //console.log(row);
             var columns = row.split(",");
             var email = columns[1]; // 电子邮箱
             var questionNumber = columns[3]; // 题号
