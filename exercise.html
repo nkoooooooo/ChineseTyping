@@ -132,6 +132,11 @@
       transform: translateY(2px);
       /* 按钮按下后下移2px */
     }
+
+    .word-count-container {
+      margin-left: auto;
+      margin-right: 0;
+    }
   </style>
 </head>
 
@@ -163,8 +168,8 @@
       <!-- 這裡的name屬性需要對應到Google表單中的input name -->
       <label for="entry.1329760247">請在下面的文字：</label>
       <div id="inputButtons">
-        <button type="button" class="input-symbol" data-symbol="。">。</button>
         <button type="button" class="input-symbol" data-symbol="，">，</button>
+        <button type="button" class="input-symbol" data-symbol="。">。</button>
         <button type="button" class="input-symbol" data-symbol="、">、</button>
         <button type="button" class="input-symbol" data-symbol="！">！</button>
         <button type="button" class="input-symbol" data-symbol="：">：</button>
@@ -174,7 +179,9 @@
         <!-- 添加更多按钮 -->
       </div>
       <textarea id="inputField" name="entry.1329760247" placeholder="請在此處輸入" required></textarea>
-
+      <div class="word-count-container">
+        <span id="currentWordCount">0</span>/<span id="totalWordCount">0</span> 字數
+      </div>
       <!-- 提交按鈕 -->
       <button type="submit">提交練習結果</button>
     </form>
@@ -233,29 +240,39 @@
       return null;
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const exerciseId = urlParams.get('id'); // 获取ID
+    function getExercise() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const exerciseId = urlParams.get('id'); // 获取ID
 
-    // 使用fetch API根据ID从远程JSON中获取练习数据
-    fetch('https://raw.githubusercontent.com/nkoooooooo/ChineseTyping/main/exercise.json')
-      .then(response => response.json())
-      .then(data => {
-        const exercise = data.find(ex => ex.id === exerciseId);
-        displayExercise(exercise.text, exercise.pinyin);
-        // 題號
-        document.getElementById('qno').value = exercise.id;
-        //console.log(document.getElementById('qno').value)
-        // 題目名稱
-        document.getElementById('qname').value = exercise.title;
-        //console.log(document.getElementById('qname').value)
-        // 给用户输入框添加事件监听器
-        document.getElementById('inputField').addEventListener('input', () => {
-          handleUserInput(exercise.text);
+      // 使用fetch API根据ID从远程JSON中获取练习数据
+      fetch('https://raw.githubusercontent.com/nkoooooooo/ChineseTyping/main/exercise.json')
+        .then(response => response.json())
+        .then(data => {
+          const exercise = data.find(ex => ex.id === exerciseId);
+          displayExercise(exercise.text, exercise.pinyin);
+          // 題號
+          document.getElementById('qno').value = exercise.id;
+          //console.log(document.getElementById('qno').value)
+          // 題目名稱
+          document.getElementById('qname').value = exercise.title;
+          //console.log(document.getElementById('qname').value)
+          // 给用户输入按钮添加事件监听器
+          document.getElementById('inputButtons').addEventListener('click', () => {
+            handleUserInput(exercise.text);
+          });
+          // 给用户输入框添加事件监听器
+          document.getElementById('inputField').addEventListener('input', () => {
+            handleUserInput(exercise.text);
+          });
+          // 總字數
+          const totalWordCountElem = document.getElementById('totalWordCount');
+          totalWordCountElem.textContent = exercise.text.length;
+        })
+        .catch(error => {
+          console.error('Error loading exercise:', error);
         });
-      })
-      .catch(error => {
-        console.error('Error loading exercise:', error);
-      });
+    }
+
 
     function displayExercise(text, pinyin) {
       const textContainer = document.getElementById('exerciseText');
@@ -283,6 +300,7 @@
 
     window.onload = function () {
       checkLoginStatus();
+      getExercise()
       getResponseData();
       // 获取表单input，设置初始值（以学校电邮为例）
       document.getElementById('email').value = getCookie('email');
@@ -295,6 +313,7 @@
     // 用户输入处理函数
     function handleUserInput(exerciseText) {
       const userInput = document.getElementById('inputField').value;
+      // characters 是一个包含所有字符的数组(All characters)
       const characters = document.querySelectorAll('#exerciseText .character');
       // /\s/g 是一个正则表达式，它匹配字符串中所有的空白字符。
       // 在这个表达式中： 
@@ -302,27 +321,35 @@
       // g 标志是 "global"（全局）的缩写，意味着匹配字符串中的所有空白字符，而不是只匹配第一个。
       const userChars = userInput.replace(/\s/g, '').split('');
 
-      // 遍历用户输入的字符，检查是否与练习文本中的字符匹配
+      // 遍历用户输入的字符，检查是否与练习文本中的字符匹配 characters index start from 0
       userChars.forEach((char, index) => {
         if (index < characters.length) {
+          // 如果文本中的字符匹配用户输入的字符，则添加正确样式
           if (exerciseText[index] === char) {
             characters[index].firstChild.classList.add('correct'); // firstChild 是 <span> 元素
             characters[index].firstChild.classList.remove('incorrect');
-          } else if (characters[index].firstChild) {
+          } else {
             characters[index].firstChild.classList.remove('correct');
             characters[index].firstChild.classList.add('incorrect');
           }
         }
       });
+
       // 处理用户输入超出的情况
       for (let i = userChars.length; i < characters.length; i++) {
+        // 移除正确和错误的样式
         characters[i].firstChild.classList.remove('correct');
-        characters[i].firstChild.classList.add('incorrect');
+        characters[i].firstChild.classList.remove('incorrect');
       }
+
       // 如果用户输入少于或等于练习文本长度，则清除最后一个字符的错误样式
-      if (userChars.length <= characters.length) {
-        characters[userChars.length - 1].firstChild.classList.remove('incorrect');
+      if (userChars.length <= characters.length && userChars.length > 0) {
+        characters[userChars.length].firstChild.classList.remove('incorrect');
       }
+
+      // 更新当前字数
+      const currentWordCountElem = document.getElementById('currentWordCount');
+      currentWordCountElem.textContent = userChars.length;
     }
 
   </script>
