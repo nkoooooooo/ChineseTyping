@@ -95,6 +95,7 @@
 
     .incorrect {
       color: red;
+      font-weight: bold;
     }
 
     #inputButtons {
@@ -165,6 +166,12 @@
       <input type="text" name="entry.2023010530" id="qno" hidden>
       <!-- 輸入題目名稱的輸入框 -->
       <input type="text" name="entry.505150958" id="qname" hidden>
+      <!-- 輸入正確字數的輸入框 -->
+      <input type="text" name="entry.1482062752" id="qcorrectnum" hidden>
+      <!-- 輸入錯誤字數的輸入框 -->
+      <input type="text" name="entry.1603506777" id="qincorrectnum" hidden>
+      <!-- 輸入進度的輸入框 -->
+      <input type="text" name="entry.215344342" id="qprogress" hidden>
       <!-- 這裡的name屬性需要對應到Google表單中的input name -->
       <label for="entry.1329760247">請在下方輸入您的文字：</label>
       <div id="inputButtons">
@@ -348,6 +355,21 @@
       if (userChars.length < characters.length && userChars.length > 0) {
         characters[userChars.length].firstChild.classList.remove('incorrect');
       }
+
+      // 计算正确的字数
+      const correctCharacters = document.querySelectorAll('#exerciseText .character .correct').length;
+      document.getElementById('qcorrectnum').value = correctCharacters;
+      // 计算错误的字数
+      const incorrectCharacters = document.querySelectorAll('#exerciseText .character .incorrect').length;
+      document.getElementById('qincorrectnum').value = incorrectCharacters;
+
+      // 進度記錄
+      if (correctCharacters === characters.length) {
+        document.getElementById('qprogress').value = 1;
+      }else{
+        document.getElementById('qprogress').value = 0;
+      }
+        
 
       // 更新当前字数
       const currentWordCountElem = document.getElementById('currentWordCount');
