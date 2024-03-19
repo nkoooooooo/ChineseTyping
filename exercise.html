@@ -166,7 +166,7 @@
       <!-- 輸入題目名稱的輸入框 -->
       <input type="text" name="entry.505150958" id="qname" hidden>
       <!-- 這裡的name屬性需要對應到Google表單中的input name -->
-      <label for="entry.1329760247">請在下面的文字：</label>
+      <label for="entry.1329760247">請在下方輸入您的文字：</label>
       <div id="inputButtons">
         <button type="button" class="input-symbol" data-symbol="，">，</button>
         <button type="button" class="input-symbol" data-symbol="。">。</button>
@@ -185,10 +185,12 @@
       <!-- 提交按鈕 -->
       <button type="submit">提交練習結果</button>
     </form>
+    <!-- 
     <div class="response-container">
       <label>你提交的文字：</label>
       <label id="responseText"></label>
     </div>
+    -->
   </div>
 
 
@@ -343,7 +345,7 @@
       }
 
       // 如果用户输入少于或等于练习文本长度，则清除最后一个字符的错误样式
-      if (userChars.length <= characters.length && userChars.length > 0) {
+      if (userChars.length < characters.length && userChars.length > 0) {
         characters[userChars.length].firstChild.classList.remove('incorrect');
       }
 
