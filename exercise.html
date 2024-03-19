@@ -309,7 +309,7 @@
 
     window.onload = function () {
       checkLoginStatus();
-      getExercise()
+      getExercise();
       getResponseData();
       // 获取表单input，设置初始值（以学校电邮为例）
       document.getElementById('email').value = getCookie('email');
@@ -366,10 +366,9 @@
       // 進度記錄
       if (correctCharacters === characters.length) {
         document.getElementById('qprogress').value = 1;
-      }else{
+      } else {
         document.getElementById('qprogress').value = 0;
       }
-        
 
       // 更新当前字数
       const currentWordCountElem = document.getElementById('currentWordCount');
@@ -480,9 +479,13 @@
             // 可以在这里加入条件检查以匹配指定的 email 和题号
             if (email === document.getElementById('email').value && questionNumber === document.getElementById('qno').value) {
               //document.getElementById("responseText").innerHTML = columns[5];
-              document.getElementById("inputField").value = columns[5];
+              document.getElementById("inputField").value = columns[5].replace(/\s/g, '');
+              
             }
           });
+          // 更新当前字数
+          const currentWordCountElem = document.getElementById('currentWordCount');
+          currentWordCountElem.textContent = document.getElementById("inputField").value.length;
         })
         .catch(error => console.error('Error loading spreadsheet data:', error));
     }
