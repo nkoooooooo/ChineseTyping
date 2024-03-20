@@ -212,6 +212,62 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    // 公开全局的logout方法
+    window.logout = logout;
+
+    // 辅助函数：设置Cookie
+    function setCookie(name, value, days) {
+      const d = new Date();
+      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + d.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    // 辅助函数：删除Cookie
+    function deleteCookie(name) {
+      setCookie(name, '', -1);
+    }
+
+    // 登出操作
+    function logout() {
+      // 清除所有cookie信息
+      deleteCookie('email');
+      deleteCookie('username');
+      deleteCookie('isLogin');
+      // 重定向回登录界面
+      window.location.href = 'login.html';
+    }
+
+    // 辅助函数：从cookie中读取登录用户名
+    function getCookie(name) {
+      let cookieArray = document.cookie.split(';');
+      for (let i = 0; i < cookieArray.length; i++) {
+        let cookiePair = cookieArray[i].split('=');
+        if (name == cookiePair[0].trim()) {
+          return decodeURIComponent(cookiePair[1]);
+        }
+      }
+      return null;
+    }
+
+    function checkLoginStatus() {
+      // 从Cookie中获取isLogin
+      const isLoggedIn = getCookie('isLogin');
+      const userName = getCookie('username');
+
+      if (isLoggedIn) {
+        // 显示用户名
+        if (userName) {
+          document.getElementById('username').textContent = userName;
+        }
+      } else {
+        // 重定向到登录页面
+        window.location.href = 'login.html';
+      }
+    }
+  </script>
+
+  <script>
     // 将符号插入到文本输入框的光标位置
     function insertSymbolAtCursor(symbol) {
       const inputField = document.getElementById('inputField');
@@ -227,26 +283,6 @@
       inputField.selectionEnd = cursorPosition + symbol.length;
       // 重新聚焦输入框
       inputField.focus();
-    }
-    function logout() {
-      // 清除所有cookie信息
-      document.cookie = "email=; Max-Age=-99999999; path=/";
-      document.cookie = "username=; Max-Age=-99999999; path=/";
-      document.cookie = "isLogin=; Max-Age=-99999999; path=/";
-      // 重定向回登录界面
-      window.location.href = 'login.html';
-    }
-
-    // 辅助函数：从cookie中读取登录用户名
-    function getCookie(name) {
-      let cookieArray = document.cookie.split(';');
-      for (let i = 0; i < cookieArray.length; i++) {
-        let cookiePair = cookieArray[i].split('=');
-        if (name == cookiePair[0].trim()) {
-          return decodeURIComponent(cookiePair[1]);
-        }
-      }
-      return null;
     }
 
     function getExercise() {
@@ -294,30 +330,6 @@
       });
     }
 
-    function checkLoginStatus() {
-      // 檢查用戶是否已登入，未登入的話重定向到登入頁面
-      const isLoggedIn = getCookie('isLogin');
-      if (isLoggedIn) {
-        // 显示用户名
-        if (getCookie('username')) {
-          document.getElementById('username').textContent = getCookie('username');
-        }
-      } else {
-        window.location.href = 'login.html';
-      }
-    }
-
-    window.onload = function () {
-      checkLoginStatus();
-      getExercise();
-      getResponseData();
-      // 获取表单input，设置初始值（以学校电邮为例）
-      document.getElementById('email').value = getCookie('email');
-      //console.log(document.getElementById('email').value)
-      // 假设存在另一个字段，例如：用户NAME
-      document.getElementById('gname').value = getCookie('username');
-      //console.log(document.getElementById('gname').value)
-    }
 
     // 用户输入处理函数
     function handleUserInput(exerciseText) {
@@ -423,6 +435,12 @@
         });
       });
 
+      checkLoginStatus();
+      getExercise();
+      getResponseData();
+      document.getElementById('email').value = getCookie('email');
+      document.getElementById('gname').value = getCookie('username');
+
     });
 
     function preventDefaultAction(event) {
@@ -453,7 +471,9 @@
       })
         .then(() => {
           alert('練習提交成功！');
-          window.location.href = 'index.html';
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1000); // 延时1秒后跳转
         })
         .catch(error => {
           console.error('Error submitting form:', error);
@@ -461,25 +481,24 @@
         });
     }
   </script>
+
   <script>
     function getResponseData() {
       // 公开的试算表 URL（例如csv格式）
       var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTayq2IE448ev4DhUfeIpzdcKfKERlJ2k28Wou-0faitR5vqIUiYk7bEZ5hBm9nB5MHbEP2i0YmIUi3/pub?gid=365141235&single=true&output=csv';
+      var noCacheUrl = publicSpreadsheetUrl + '&_ts=' + new Date().getTime();
 
-      fetch(publicSpreadsheetUrl, { cache: "no-cache" })
+      fetch(noCacheUrl, { cache: "no-cache" })
         .then(response => response.text())
         .then(data => {
-          // 将 CSV 数据转换成你可以使用的格式
           var rows = data.split("\n");
           rows.forEach(row => {
-            //console.log(row);
             var columns = row.split(",");
             var email = columns[1]; // 电子邮箱
             var questionNumber = columns[3]; // 题号
-            // 可以在这里加入条件检查以匹配指定的 email 和题号
             if (email === document.getElementById('email').value && questionNumber === document.getElementById('qno').value) {
-              //document.getElementById("responseText").innerHTML = columns[5];
               document.getElementById("inputField").value = columns[5].replace(/\s/g, '');
+
             }
           });
           // 更新当前字数

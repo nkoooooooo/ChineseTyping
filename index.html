@@ -141,35 +141,64 @@
 
   <!-- 自定义JavaScript -->
   <script>
+    // 检查登录状态
     function checkLoginStatus() {
-      // 檢查用戶是否已登入，未登入的話重定向到登入頁面
+      // 从Cookie中获取isLogin
       const isLoggedIn = getCookie('isLogin');
+      const userName = getCookie('username');
+
       if (isLoggedIn) {
         // 显示用户名
-        if (getCookie('username')) {
-          document.getElementById('username').textContent = getCookie('username');
+        if (userName) {
+          document.getElementById('username').textContent = userName;
         }
       } else {
+        // 重定向到登录页面
         window.location.href = 'login.html';
       }
     }
 
-    window.onload = function () {
+    // 程序的入口
+    document.addEventListener('DOMContentLoaded', () => {
+      // 检查登录状态
       checkLoginStatus();
       getExercises();
       getResponseData();
+    });
+
+    // 辅助函数：设置Cookie
+    function setCookie(name, value, days) {
+      const d = new Date();
+      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + d.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    // 辅助函数：删除Cookie
+    function deleteCookie(name) {
+      setCookie(name, '', -1);
+    }
+
+    // 登录操作
+    function login(username, email) {
+      // 添加登录Cookie信息
+      setCookie('username', username, 1);
+      setCookie('email', email, 1);
+      setCookie('isLogin', true, 1);
     }
 
     // 登出操作
     function logout() {
       // 清除所有cookie信息
-      document.cookie = "email=; Max-Age=-99999999; path=/";
-      document.cookie = "username=; Max-Age=-99999999; path=/";
-      document.cookie = "isLogin=; Max-Age=-99999999; path=/";
+      deleteCookie('email');
+      deleteCookie('username');
+      deleteCookie('isLogin');
       // 重定向回登录界面
       window.location.href = 'login.html';
     }
 
+    // 公开全局的logout方法
+    window.logout = logout;
 
     // 辅助函数：从cookie中读取登录用户名
     function getCookie(name) {
@@ -206,7 +235,6 @@
     }
 
     function getExercises() {
-
       // 使用fetch API從遠端URL加載數據
       fetch('https://raw.githubusercontent.com/nkoooooooo/ChineseTyping/main/exercise.json')
         .then(response => response.json()) // 解析返回的JSON數據
@@ -221,50 +249,48 @@
 
     function getResponseData() {
       var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTayq2IE448ev4DhUfeIpzdcKfKERlJ2k28Wou-0faitR5vqIUiYk7bEZ5hBm9nB5MHbEP2i0YmIUi3/pub?gid=365141235&single=true&output=csv';
+      var noCacheUrl = publicSpreadsheetUrl + '&_ts=' + new Date().getTime();
 
-      fetch(publicSpreadsheetUrl, { cache: "no-cache" })
+      fetch(noCacheUrl, { cache: "no-cache" })
         .then(response => response.text())
         .then(data => {
-          var rows = data.split("\n");
-          // 获取所有状态列的 DOM 元素
-          var statusElements = document.querySelectorAll('.table tbody .status');
+          const rows = data.split("\n").slice(1); // 移除标题行
+          const emailToMatch = getCookie('email');
+          // 存储需要更新状态的 exerciseId, 作为已经找到最新状态的标识
+          const updateRequired = new Set();
 
-          // 遍历每个状态元素
-          statusElements.forEach((statusElement) => {
-            //console.log("正在处理:", statusElement);
-            var statusId = statusElement.dataset.id;
-            //console.log("ELEMENT ID:", statusId);
+          // 获得页面中所有状态显示元素
+          const statusElements = document.querySelectorAll('.table tbody .status');
+          statusElements.forEach(element => updateRequired.add(element.dataset.id));
 
-            // 查找与此状态ID相匹配的CSV记录
-            for (var i = rows.length - 1; i > 0; i--) { // 跳过标题行
-              var columns = rows[i].split(",");
-              var email = columns[1].replace(/\s/g, ''); // 电子邮箱
-              var exerciseId = columns[3].replace(/\s/g, ''); // 练习ID
-              var csvStatus = columns[8].replace(/\s/g, ''); // 进度状态
-              if (email === getCookie('email') && exerciseId === statusId) {
-                //console.log("找到匹配记录:", i, email, exerciseId, columns[5], csvStatus);
-                //console.log("进度状态:", csvStatus);
-                // 根据 CSV 中的状态，更新状态列的显示
-                var span = statusElement.querySelector('span');
-                span.className = ''; // 先清除所有的类名
-                switch (csvStatus) {
-                  case '1':
-                    span.classList.add('completed');
-                    span.textContent = '已完成';
-                    break;
-                  case '0':
-                    span.classList.add('ongoing');
-                    span.textContent = '進行中';
-                    break;
-                  default:
-                    span.classList.add('waiting');
-                    span.textContent = '未開始';
-                }
-                break;  // 找到后即停止搜索此 exerciseId 的记录
+          // 从底部开始遍历，寻找需要更新的 exerciseId 的状态
+          for (let i = rows.length - 1; i >= 0 && updateRequired.size > 0; i--) {
+            const columns = rows[i].split(",").map(column => column.trim());
+            const exerciseId = columns[3];
+            const csvStatus = columns[8];
+
+            // 如果该行数据与当前用户邮箱匹配并且包含待更新的 exerciseId
+            if (emailToMatch === columns[1] && updateRequired.has(exerciseId)) {
+              const statusElement = [...statusElements].find(element => element.dataset.id === exerciseId);
+              const span = statusElement.querySelector('span');
+              span.className = '';  // 清除所有类名
+              switch (csvStatus) {
+                case '1':
+                  span.classList.add('completed');
+                  span.textContent = '已完成';
+                  break;
+                case '0':
+                  span.classList.add('ongoing');
+                  span.textContent = '進行中';
+                  break;
+                default:
+                  span.classList.add('waiting');
+                  span.textContent = '未開始';
               }
+              // 找到后，从更新集合中移除该 exerciseId
+              updateRequired.delete(exerciseId);
             }
-          });
-
+          }
         })
         .catch(error => console.error('Error loading spreadsheet data:', error));
     }
