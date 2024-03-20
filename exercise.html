@@ -24,6 +24,16 @@
       margin: 20px auto;
     }
 
+    .record-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: start;
+      overflow-y: auto;
+      width: 100%;
+      max-width: 80%;
+      margin: 20px auto;
+    }
+
     .character {
       text-align: center;
       margin: 10px;
@@ -152,6 +162,28 @@
   </nav>
 
   <div class="page-container">
+    <div class="row record-container">
+      <div class="col-4">
+        <div class="card-body">
+          <p class="card-title text-muted">正確字數</p>
+          <p class="card-text font-weight-bolder" id="correctCount">0</p>
+        </div>
+      </div>
+
+      <div class="col-4">
+        <div class="card-body">
+          <p class="card-title text-muted">錯誤字數</p>
+          <p class="card-text font-weight-bolder" id="incorrectCount">0</p>
+        </div>
+      </div>
+
+      <div class="col-4">
+        <div class="card-body">
+          <p class="card-title text-muted">正確率</p>
+          <p class="card-text font-weight-bolder" id="accuracy">0%</p>
+        </div>
+      </div>
+    </div>
     <div class="text-container" id="exerciseText"></div>
     <!-- 打字練習的地方，表單提交到Google表單 -->
     <form id="google-form"
@@ -371,9 +403,14 @@
       // 计算正确的字数
       const correctCharacters = document.querySelectorAll('#exerciseText .character .correct').length;
       document.getElementById('qcorrectnum').value = correctCharacters;
+      document.getElementById('correctCount').innerText = correctCharacters;
       // 计算错误的字数
       const incorrectCharacters = document.querySelectorAll('#exerciseText .character .incorrect').length;
       document.getElementById('qincorrectnum').value = incorrectCharacters;
+      document.getElementById('incorrectCount').innerText = incorrectCharacters;
+      // 计算正确率
+      const accuracy = calculateAccuracy(correctCharacters, correctCharacters + incorrectCharacters); // 正确率
+      document.getElementById('accuracy').innerText = `${accuracy}%`;
 
       // 進度記錄
       if (correctCharacters === characters.length) {
@@ -387,6 +424,10 @@
       currentWordCountElem.textContent = userChars.length;
     }
 
+    // 计算正确率 (正确字数 / 总字数)
+    function calculateAccuracy(correctChars, totalChars) {
+      return Math.round((correctChars / totalChars) * 100);
+    }
   </script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
