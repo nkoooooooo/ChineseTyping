@@ -190,7 +190,7 @@
         <span id="currentWordCount">0</span>/<span id="totalWordCount">0</span> 字數
       </div>
       <!-- 提交按鈕 -->
-      <button type="submit">提交練習結果</button>
+      <button id ="submitBtn" type="submit">提交練習結果</button>
     </form>
     <!-- 
     <div class="response-container">
@@ -490,18 +490,23 @@
       fetch(noCacheUrl, { cache: "no-cache" })
         .then(response => response.text())
         .then(data => {
-          var rows = data.split("\n");
+          const rows = data.split("\n");
           // 由于最新记录在底部，所以从数组的末尾向前遍历
-          for (var i = rows.length - 1; i >= 0; i--) {
-            var columns = rows[i].split(",");
-            var email = columns[1]; // 电子邮箱
-            var questionNumber = columns[3]; // 题号
+          for (let i = rows.length - 1; i >= 0; i--) {
+            const columns = rows[i].split(",").map(column => column.trim());
+            const email = columns[1]; // 电子邮箱
+            const questionNumber = columns[3]; // 题号
+            const status = columns[8]; // 状态
             // 检查当前行是否与用户电子邮箱和题号匹配
             if (email === document.getElementById('email').value && questionNumber === document.getElementById('qno').value) {
-              document.getElementById("inputField").value = columns[5].replace(/\s/g, '');
+              document.getElementById("inputField").value = columns[5];
               // 更新当前字数
               const currentWordCountElem = document.getElementById('currentWordCount');
               currentWordCountElem.textContent = document.getElementById("inputField").value.length;
+              if (status === "1") {
+                document.getElementById("inputField").readOnly = true;
+                document.getElementById("submitBtn").disabled = true;
+              }
               // 找到匹配记录后，无需继续检查其他行
               break;
             }
