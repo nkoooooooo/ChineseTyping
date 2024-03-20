@@ -21,7 +21,7 @@
     .ftco-section {
       min-height: calc(100vh - 80px - 40px);
     }
-    
+
     footer {
       width: 100%;
       text-align: center;
@@ -31,7 +31,7 @@
       color: #888;
     }
 
-    .table-dark th{
+    .table-dark th {
       min-width: 48px;
     }
 
@@ -39,6 +39,7 @@
       min-width: 90px;
 
     }
+
     .table tbody td.status .completed {
       background: #cff6dd;
       color: #1fa750;
@@ -155,6 +156,8 @@
 
     window.onload = function () {
       checkLoginStatus();
+      getExercises();
+      getResponseData();
     }
 
     // 登出操作
@@ -190,7 +193,7 @@
         row.innerHTML = `
           <th scope="row">${exercise.id}</th>
           <td>${exercise.title}</td>
-          <td class="status"><span class="waiting">未開始</span></td>
+          <td class="status" data-id="${exercise.id}"><span></span></td>
           <td>
             <a href="#" class="btn btn-primary btn-sm">開始</a>
           </td>
@@ -202,17 +205,69 @@
       });
     }
 
-    // 使用fetch API從遠端URL加載數據
-    fetch('https://raw.githubusercontent.com/nkoooooooo/ChineseTyping/main/exercise.json')
-      .then(response => response.json()) // 解析返回的JSON數據
-      .then(data => {
-        updateExerciseTable(data); // 使用數據更新表格
-      })
-      .catch(error => {
-        // 處理錯誤
-        console.error('Fetch error:', error);
-      });
+    function getExercises() {
 
+      // 使用fetch API從遠端URL加載數據
+      fetch('https://raw.githubusercontent.com/nkoooooooo/ChineseTyping/main/exercise.json')
+        .then(response => response.json()) // 解析返回的JSON數據
+        .then(data => {
+          updateExerciseTable(data); // 使用數據更新表格
+        })
+        .catch(error => {
+          // 處理錯誤
+          console.error('Fetch error:', error);
+        });
+    }
+
+    function getResponseData() {
+      var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTayq2IE448ev4DhUfeIpzdcKfKERlJ2k28Wou-0faitR5vqIUiYk7bEZ5hBm9nB5MHbEP2i0YmIUi3/pub?gid=365141235&single=true&output=csv';
+
+      fetch(publicSpreadsheetUrl, { cache: "no-cache" })
+        .then(response => response.text())
+        .then(data => {
+          var rows = data.split("\n");
+          // 获取所有状态列的 DOM 元素
+          var statusElements = document.querySelectorAll('.table tbody .status');
+
+          // 遍历每个状态元素
+          statusElements.forEach((statusElement) => {
+            //console.log("正在处理:", statusElement);
+            var statusId = statusElement.dataset.id;
+            //console.log("ELEMENT ID:", statusId);
+
+            // 查找与此状态ID相匹配的CSV记录
+            for (var i = rows.length - 1; i > 0; i--) { // 跳过标题行
+              var columns = rows[i].split(",");
+              var email = columns[1].replace(/\s/g, ''); // 电子邮箱
+              var exerciseId = columns[3].replace(/\s/g, ''); // 练习ID
+              var csvStatus = columns[8].replace(/\s/g, ''); // 进度状态
+              if (email === getCookie('email') && exerciseId === statusId) {
+                //console.log("找到匹配记录:", i, email, exerciseId, columns[5], csvStatus);
+                //console.log("进度状态:", csvStatus);
+                // 根据 CSV 中的状态，更新状态列的显示
+                var span = statusElement.querySelector('span');
+                span.className = ''; // 先清除所有的类名
+                switch (csvStatus) {
+                  case '1':
+                    span.classList.add('completed');
+                    span.textContent = '已完成';
+                    break;
+                  case '0':
+                    span.classList.add('ongoing');
+                    span.textContent = '進行中';
+                    break;
+                  default:
+                    span.classList.add('waiting');
+                    span.textContent = '未開始';
+                }
+                break;  // 找到后即停止搜索此 exerciseId 的记录
+              }
+            }
+          });
+
+        })
+        .catch(error => console.error('Error loading spreadsheet data:', error));
+    }
   </script>
 </body>
 
