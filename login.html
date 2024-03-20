@@ -48,7 +48,7 @@
       color: #888;
     }
   </style>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
 </head>
 
 <body>
@@ -60,9 +60,11 @@
   <footer>
     <p>Copyright © SKHTKPSS. All rights reserved. Powered by NKO</p>
   </footer>
-
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
-    // 將JWT token的Payload部分進行Base64解碼的函數
+    const COOKIE_SETTINGS = 'max-age=86400; path=/; Secure; SameSite=Strict';
+
+    // 将JWT token的Payload部分进行Base64解码的函数
     function parseJwt(token) {
       const base64Url = token.split('.')[1]; // 獲得JWT的Payload部分
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // 替換字符，使其符合base64的要求
@@ -73,21 +75,30 @@
       return JSON.parse(jsonPayload); // 返回解碼後的JSON對象
     }
 
+    // Cookie操作工具函数
+    function setCookie(name, value, settings) {
+      document.cookie = `${name}=${encodeURIComponent(value)}; ${settings}`;
+    }
+
+    function getCookie(name) {
+      return document.cookie.split(';').find(item => item.trim().startsWith(`${name}=`));
+    }
+
+    function deleteCookie(name) {
+      document.cookie = `${name}=; max-age=-1; path=/;`;
+    }
+
     function handleCredentialResponse(response) {
       const profile = parseJwt(response.credential);
-      // 以安全的方式设置cookie，可能需要服务器端参与以设置HttpOnly属性
-      document.cookie = `email=${encodeURIComponent(profile.email)}; max-age=86400; path=/; Secure; SameSite=Strict`;
-      document.cookie = `username=${encodeURIComponent(profile.name)}; max-age=86400; path=/; Secure; SameSite=Strict`;
-      // 把用户登录状态存储为cookie
-      document.cookie = "isLogin=true; max-age=3600; path=/; Secure; SameSite=Strict";
-      window.location.href = 'index.html'; // 重定向到主页
+      setCookie('email', profile.email, COOKIE_SETTINGS);
+      setCookie('username', profile.name, COOKIE_SETTINGS);
+      setCookie('isLogin', 'true', 'max-age=3600; path=/; Secure; SameSite=Strict');
+      window.location.href = 'index.html';
     }
 
     function checkLoginStatus() {
-      // 检查是否已设置登录状态的cookie
-      const isLoggedIn = document.cookie.split(';').some((item) => item.trim().startsWith('isLogin=true'));
-      if (isLoggedIn) {
-        window.location.href = 'index.html'; // 如果已登录，直接重定向到主页
+      if (getCookie('isLogin')) {
+        window.location.href = 'index.html';
       }
     }
 
@@ -101,13 +112,14 @@
       });
 
       google.accounts.id.renderButton(
-        document.getElementById('signin-button'), // 将Google登录按钮渲染在这个元素内
-        { theme: 'outline', size: 'large' } // 按钮的主题和尺寸
+        document.getElementById('signin-button'),
+        { theme: 'outline', size: 'large' }
       );
 
-      google.accounts.id.prompt(); // 显示账号选择器
-    };
+      google.accounts.id.prompt();
+    }
   </script>
+
 </body>
 
 </html>
