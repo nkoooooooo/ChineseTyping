@@ -248,28 +248,32 @@
     }
 
     function getResponseData() {
-      var webAppUrl = 'https://script.google.com/macros/s/AKfycbzkih-dIq4xXWd5uNYTcQ8LUvdTRg0EWUfEyRzwxffZPWyu1PMhh8UlFXvXdyQK79E/exec'; // 替换成你的Apps Script Web应用URL
-      var noCacheUrl = webAppUrl + '?_ts=' + new Date().getTime(); // 防止缓存，每次请求都添加时间戳
+      var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTayq2IE448ev4DhUfeIpzdcKfKERlJ2k28Wou-0faitR5vqIUiYk7bEZ5hBm9nB5MHbEP2i0YmIUi3/pub?gid=365141235&single=true&output=csv';
+      var noCacheUrl = publicSpreadsheetUrl + '&_ts=' + new Date().getTime();
 
       fetch(noCacheUrl, { cache: "no-cache" })
-        .then(response => response.json()) // 改为解析JSON
-        .then(jsonData => {
+        .then(response => response.text())
+        .then(data => {
+          const rows = data.split("\n").slice(1); // 移除标题行
           const emailToMatch = getCookie('email');
-
+          // 存储需要更新状态的 exerciseId, 作为已经找到最新状态的标识
           const updateRequired = new Set();
+
+          // 获得页面中所有状态显示元素
           const statusElements = document.querySelectorAll('.table tbody .status');
           statusElements.forEach(element => updateRequired.add(element.dataset.id));
 
-          // 使用 JSON 数据代替解析 CSV 数据
-          jsonData.data.forEach(row => {
-            const exerciseId = row[3];
-            const csvStatus = row[8];
+          // 从底部开始遍历，寻找需要更新的 exerciseId 的状态
+          for (let i = rows.length - 1; i >= 0 && updateRequired.size > 0; i--) {
+            const columns = rows[i].split(",").map(column => column.trim());
+            const exerciseId = columns[3];
+            const csvStatus = columns[8];
 
-            if (emailToMatch === row[1] && updateRequired.has(exerciseId)) {
+            // 如果该行数据与当前用户邮箱匹配并且包含待更新的 exerciseId
+            if (emailToMatch === columns[1] && updateRequired.has(exerciseId)) {
               const statusElement = [...statusElements].find(element => element.dataset.id === exerciseId);
               const span = statusElement.querySelector('span');
-              span.className = '';
-
+              span.className = '';  // 清除所有类名
               switch (csvStatus) {
                 case '1':
                   span.classList.add('completed');
@@ -283,10 +287,10 @@
                   span.classList.add('waiting');
                   span.textContent = '未開始';
               }
-
+              // 找到后，从更新集合中移除该 exerciseId
               updateRequired.delete(exerciseId);
             }
-          });
+          }
         })
         .catch(error => console.error('Error loading spreadsheet data:', error));
     }
