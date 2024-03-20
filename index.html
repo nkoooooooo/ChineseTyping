@@ -248,7 +248,7 @@
     }
 
     function getResponseData() {
-      var webAppUrl = 'https://script.google.com/a/macros/imnko.me/s/AKfycbzkih-dIq4xXWd5uNYTcQ8LUvdTRg0EWUfEyRzwxffZPWyu1PMhh8UlFXvXdyQK79E/exec'; // 替换成你的Apps Script Web应用URL
+      var webAppUrl = 'https://script.google.com/macros/s/AKfycbzkih-dIq4xXWd5uNYTcQ8LUvdTRg0EWUfEyRzwxffZPWyu1PMhh8UlFXvXdyQK79E/exec'; // 替换成你的Apps Script Web应用URL
       var noCacheUrl = webAppUrl + '?_ts=' + new Date().getTime(); // 防止缓存，每次请求都添加时间戳
 
       fetch(noCacheUrl, { cache: "no-cache" })
