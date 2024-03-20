@@ -190,7 +190,7 @@
         <span id="currentWordCount">0</span>/<span id="totalWordCount">0</span> 字數
       </div>
       <!-- 提交按鈕 -->
-      <button id ="submitBtn" type="submit">提交練習結果</button>
+      <button id="submitBtn" type="submit">提交練習結果</button>
     </form>
     <!-- 
     <div class="response-container">
@@ -506,6 +506,9 @@
               if (status === "1") {
                 document.getElementById("inputField").readOnly = true;
                 document.getElementById("submitBtn").disabled = true;
+                document.querySelectorAll('.input-symbol').forEach(button => {
+                  button.disabled = true;
+                });
               }
               // 找到匹配记录后，无需继续检查其他行
               break;
