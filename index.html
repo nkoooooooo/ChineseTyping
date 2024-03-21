@@ -70,6 +70,17 @@
       background: #1c55cf;
     }
 
+    .table tbody td.status .loading {
+      background: #d6d6d6;
+      color: #666666;
+      /* word color */
+      font-size: small;
+    }
+
+    .table tbody td.status .loading:after {
+      background: #666666;
+    }
+
     .table tbody td.status span {
       position: relative;
       border-radius: 30px;
@@ -222,7 +233,7 @@
         row.innerHTML = `
           <th scope="row">${exercise.id}</th>
           <td>${exercise.title}</td>
-          <td class="status" data-id="${exercise.id}"><span class="waiting">未開始</span></td>
+          <td class="status" data-id="${exercise.id}"><span class="loading">載入中</span></td>
           <td>
             <a href="#" class="btn btn-primary btn-sm">開始</a>
           </td>
@@ -248,49 +259,40 @@
     }
 
     function getResponseData() {
-      var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTayq2IE448ev4DhUfeIpzdcKfKERlJ2k28Wou-0faitR5vqIUiYk7bEZ5hBm9nB5MHbEP2i0YmIUi3/pub?gid=365141235&single=true&output=csv';
-      var noCacheUrl = publicSpreadsheetUrl + '&_ts=' + new Date().getTime();
+      var webappUrl = 'https://script.google.com/macros/s/AKfycbw-J7yVimq3IVc2xPXz3QgOIsm6p2FipAfFJObx3WXxajBhR4-iev1BRbKOLlR1MW5n/exec';
 
-      fetch(noCacheUrl, { cache: "no-cache" })
-        .then(response => response.text())
-        .then(data => {
-          const rows = data.split("\n").slice(1); // 移除标题行
+      fetch(webappUrl)
+        .then(response => response.json()) // 改为解析JSON
+        .then(jsonData => {
           const emailToMatch = getCookie('email');
-          // 存储需要更新状态的 exerciseId, 作为已经找到最新状态的标识
           const updateRequired = new Set();
-
-          // 获得页面中所有状态显示元素
           const statusElements = document.querySelectorAll('.table tbody .status');
           statusElements.forEach(element => updateRequired.add(element.dataset.id));
-
-          // 从底部开始遍历，寻找需要更新的 exerciseId 的状态
-          for (let i = rows.length - 1; i >= 0 && updateRequired.size > 0; i--) {
-            const columns = rows[i].split(",").map(column => column.trim());
-            const exerciseId = columns[3];
-            const csvStatus = columns[8];
-
-            // 如果该行数据与当前用户邮箱匹配并且包含待更新的 exerciseId
-            if (emailToMatch === columns[1] && updateRequired.has(exerciseId)) {
+          // 使用 JSON 数据代替解析 CSV 数据
+          jsonData.data.forEach(row => {
+            const exerciseId = row[3];
+            const csvStatus = row[8];
+            if (emailToMatch === row[1] && updateRequired.has(exerciseId)) {
               const statusElement = [...statusElements].find(element => element.dataset.id === exerciseId);
               const span = statusElement.querySelector('span');
-              span.className = '';  // 清除所有类名
-              switch (csvStatus) {
-                case '1':
-                  span.classList.add('completed');
-                  span.textContent = '已完成';
-                  break;
-                case '0':
-                  span.classList.add('ongoing');
-                  span.textContent = '進行中';
-                  break;
-                default:
-                  span.classList.add('waiting');
-                  span.textContent = '未開始';
+              span.className = '';
+              if (csvStatus === 1) {
+                span.classList.add('completed');
+                span.textContent = '已完成';
+              } else if (csvStatus === 0) {
+                span.classList.add('ongoing');
+                span.textContent = '進行中';
               }
-              // 找到后，从更新集合中移除该 exerciseId
               updateRequired.delete(exerciseId);
             }
-          }
+          });
+          // 对于仍然是 'loading' 状态的元素，表示没有找到对应数据，更新其状态
+          [...statusElements].filter(element => element.querySelector('span').className === 'loading')
+            .forEach(element => {
+              const span = element.querySelector('span');
+              span.className = 'waiting';
+              span.textContent = '未開始';
+            });
         })
         .catch(error => console.error('Error loading spreadsheet data:', error));
     }
