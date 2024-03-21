@@ -274,10 +274,11 @@
           const statusElements = document.querySelectorAll('.table tbody .status');
           statusElements.forEach(element => updateRequired.add(element.dataset.id));
           // 使用 JSON 数据代替解析 CSV 数据
-          jsonData.data.forEach(row => {
+          jsonData.data.reverse().forEach(row => {
             const exerciseId = row[3];
             const csvStatus = row[8];
             if (emailToMatch === row[1] && updateRequired.has(exerciseId)) {
+              console.log('Found matching email:', row);
               const statusElement = [...statusElements].find(element => element.dataset.id === exerciseId);
               const span = statusElement.querySelector('span');
               span.className = '';
