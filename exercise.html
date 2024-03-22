@@ -446,6 +446,7 @@
       inputField.addEventListener('drop', preventDefaultAction);
       inputField.addEventListener('dragstart', preventDefaultAction);
       inputField.addEventListener('selectstart', preventDefaultAction);
+      inputField.addEventListener('keydown', disableNonKeyboardInput);
       textSection.addEventListener('selectstart', preventDefaultAction);
       textSection.onmousedown = textSection.onmouseup = preventDefaultAction;
       //responseSection.addEventListener('selectstart', preventDefaultAction);
@@ -484,6 +485,16 @@
 
     });
 
+    function disableNonKeyboardInput(event) {
+      // 获取按键的字符
+      let key = event.key;
+      // 允许输入法中选择的按键 A-Z 和 0-9（假设输入法在选择时会触发 keydown 事件）
+      if (!((key >= 'A' && key <= 'Z') && !(key >= 'a' && key <= 'z') && !(key >= '0' && key <= '9'))) {
+        // 禁止不符合的按键
+        event.preventDefault();
+      }
+    }
+
     function preventDefaultAction(event) {
       event.preventDefault();
     }
@@ -494,9 +505,11 @@
       const isKeyPressedForbidden = forbiddenKeys.includes(event.keyCode);
       const isRightClick = event.button === 2;
       const isAltPressed = event.altKey;
+      const isSpacePressed = event.keyCode === 32;
+      const isTabPressed = event.keyCode === 9;
       const isFKey = event.keyCode >= 112 && event.keyCode <= 123 && event.keyCode !== 116;
 
-      if (isCtrlPressed && isKeyPressedForbidden || isRightClick || isAltPressed || isFKey) {
+      if (isCtrlPressed && isKeyPressedForbidden || isRightClick || isAltPressed || isFKey || isSpacePressed || isTabPressed) {
         event.preventDefault();
       }
     }
