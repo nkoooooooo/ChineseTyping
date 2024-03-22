@@ -486,10 +486,7 @@
     });
 
     function disableNonKeyboardInput(event) {
-      // 获取按键的字符
-      let key = event.key;
-      // 允许输入法中选择的按键 A-Z 和 0-9（假设输入法在选择时会触发 keydown 事件）
-      if (!((key >= 'A' && key <= 'Z') && !(key >= 'a' && key <= 'z') && !(key >= '0' && key <= '9'))) {
+      if (event.keyCode >= 48 && event.keyCode <= 123) {
         // 禁止不符合的按键
         event.preventDefault();
       }
