@@ -367,8 +367,8 @@
 
     // 用户输入处理函数
     function handleUserInput(exerciseText) {
-      if (hasKeyPressed === false) {
-        alert('請使用鍵盤輸入練習文字。');
+      if (!hasKeyPressed && event.isTrusted=== false) {
+        alert('請使用鍵盤輸入！');
       }
       hasKeyPressed = false;
       const userInput = document.getElementById('inputField').value;
@@ -492,7 +492,7 @@
     });
 
     function disableNonKeyboardInput(event) {
-      if (event.keyCode >= 65 && event.keyCode <= 90 || event.keyCode == 229) {
+      if (event) {
         hasKeyPressed = true;
       }
       if (event.keyCode >= 48 && event.keyCode <= 123) {
