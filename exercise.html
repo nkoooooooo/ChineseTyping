@@ -492,7 +492,7 @@
     });
 
     function disableNonKeyboardInput(event) {
-      if (event) {
+      if (event.keyCode >= 65 && event.keyCode <= 90 || event.keyCode == 229) {
         hasKeyPressed = true;
       }
       if (event.keyCode >= 48 && event.keyCode <= 123) {
