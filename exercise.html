@@ -363,14 +363,14 @@
     }
 
     // 全局变量
-    let hasKeyPressed = false;
+    let hasKeyPressed = true;
 
     // 用户输入处理函数
     function handleUserInput(exerciseText) {
       if (hasKeyPressed === false) {
         alert('請使用鍵盤輸入練習文字。');
-        hasKeyPressed = false;
       }
+      hasKeyPressed = false;
       const userInput = document.getElementById('inputField').value;
       // characters 是一个包含所有字符的数组(All characters)
       const characters = document.querySelectorAll('#exerciseText .character');
@@ -453,7 +453,6 @@
       inputField.addEventListener('dragstart', preventDefaultAction);
       inputField.addEventListener('selectstart', preventDefaultAction);
       inputField.addEventListener('keydown', disableNonKeyboardInput);
-      inputField.addEventListener('keyup', detectEnterKey);
       textSection.addEventListener('selectstart', preventDefaultAction);
       textSection.onmousedown = textSection.onmouseup = preventDefaultAction;
       //responseSection.addEventListener('selectstart', preventDefaultAction);
@@ -492,13 +491,10 @@
 
     });
 
-    function detectEnterKey(event) {
+    function disableNonKeyboardInput(event) {
       if (event.keyCode >= 65 && event.keyCode <= 90 || event.keyCode == 229) {
         hasKeyPressed = true;
       }
-    }
-
-    function disableNonKeyboardInput(event) {
       if (event.keyCode >= 48 && event.keyCode <= 123) {
         // 禁止不符合的按键
         event.preventDefault();
