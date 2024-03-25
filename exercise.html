@@ -148,6 +148,43 @@
       margin-left: auto;
       margin-right: 0;
     }
+
+    /* 模态对话框的样式 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      padding-top: 100px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0, 0, 0);
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+    }
+
+    .close {
+      color: #aaaaaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -160,7 +197,14 @@
       <button class="btn btn-outline-warning ms-3" onclick="logout()">登出</button>
     </div>
   </nav>
-
+  <!-- 模态对话框的 HTML 结构 -->
+  <div id="myModal" class="modal">
+    <!-- 对话框的内容 -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <p>請專心打字練習！</p>
+    </div>
+  </div>
   <div class="page-container">
     <div class="row record-container">
       <div class="col-4">
@@ -430,6 +474,13 @@
     }
   </script>
   <script>
+    // 在用户点击模态对话框以外的地方时，关闭它
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       let lastActivityTime = Date.now();
       let tabSwitches = 0;
@@ -459,14 +510,14 @@
       window.addEventListener('blur', () => {
         tabSwitches++;
         if (tabSwitches % 5 == 0) {
-          alert('請專心打字練習，不要切換到其他視窗！');
+          showModal()
         }
       });
 
       setInterval(() => {
         const currentTime = Date.now();
         if (currentTime - lastActivityTime > (3 * 60 * 1000)) {
-          alert('您已經超過3分鐘未進行任何操作。');
+          showModal()
         }
       }, 60 * 1000);
 
@@ -484,6 +535,23 @@
       document.getElementById('gname').value = getCookie('username');
 
     });
+
+    // 获取模态对话框元素
+    var modal = document.getElementById("myModal");
+
+    // 获取 <span> 元素，它用于关闭模态对话框
+    var span = document.getElementsByClassName("close")[0];
+
+    // 点击 <span> (x), 关闭模态对话框
+    span.onclick = function () {
+      modal.style.display = "none";
+    }
+
+    // 显示模态对话框的函数
+    function showModal() {
+      modal.style.display = "block";
+    }
+
 
     function disableNonKeyboardInput(event) {
       if (event.keyCode >= 48 && event.keyCode <= 123) {
