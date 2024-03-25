@@ -386,6 +386,7 @@
           document.getElementById('inputField').addEventListener('input', () => {
             handleUserInput(exercise.text);
           });
+          window.onload = handleUserInput(exercise.text);
           // 總字數
           const totalWordCountElem = document.getElementById('totalWordCount');
           totalWordCountElem.textContent = exercise.text.length;
