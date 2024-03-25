@@ -310,6 +310,7 @@
       deleteCookie('email');
       deleteCookie('username');
       deleteCookie('isLogin');
+      deleteCookie('forceUpdate');
       localStorage.clear();
       // 重定向回登录界面
       window.location.href = 'login.html';
@@ -590,6 +591,7 @@
       submitBtn.disabled = true;
       event.preventDefault();
       const formData = new FormData(event.target);
+      setCookie('forceUpdate', '1', 1);
 
       fetch(event.target.action, {
         method: 'POST',
