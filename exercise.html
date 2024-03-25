@@ -585,6 +585,8 @@
     }
 
     function handleSubmit(event) {
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = true;
       event.preventDefault();
       const formData = new FormData(event.target);
 
@@ -594,8 +596,6 @@
         mode: 'no-cors'
       })
         .then(() => {
-          const submitBtn = document.getElementById("submitBtn");
-          submitBtn.disabled = true;
           showModal("練習提交成功！");
           setTimeout(() => {
             window.location.href = 'index.html';
