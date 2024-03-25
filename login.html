@@ -90,6 +90,10 @@
 
     function handleCredentialResponse(response) {
       const profile = parseJwt(response.credential);
+      if (!profile.email.endsWith('@tkp.edu.hk')) {
+        alert('請先驗證您的電子郵件地址。\n使用學生電郵：s123456@tkp.edu.hk');
+        return;
+      }
       setCookie('email', profile.email, COOKIE_SETTINGS);
       setCookie('username', profile.name, COOKIE_SETTINGS);
       setCookie('isLogin', 'true', 'max-age=3600; path=/; Secure; SameSite=Strict');
