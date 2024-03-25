@@ -310,6 +310,7 @@
       deleteCookie('email');
       deleteCookie('username');
       deleteCookie('isLogin');
+      localStorage.clear();
       // 重定向回登录界面
       window.location.href = 'login.html';
     }
@@ -593,10 +594,12 @@
         mode: 'no-cors'
       })
         .then(() => {
+          const submitBtn = document.getElementById("submitBtn");
+          submitBtn.disabled = true;
           showModal("練習提交成功！");
           setTimeout(() => {
             window.location.href = 'index.html';
-          }, 1000); // 延时1秒后跳转
+          }, 2000); // 延时2秒后跳转
         })
         .catch(error => {
           console.error('Error submitting form:', error);
