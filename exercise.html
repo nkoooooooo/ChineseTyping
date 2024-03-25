@@ -607,35 +607,34 @@
 
   <script>
     function getResponseData() {
-      const webappUrl = 'https://script.google.com/macros/s/AKfycbw-J7yVimq3IVc2xPXz3QgOIsm6p2FipAfFJObx3WXxajBhR4-iev1BRbKOLlR1MW5n/exec';
       const urlParams = new URLSearchParams(window.location.search);
-      const userEmail = getCookie('email');
       const questionNumber = urlParams.get('id'); // 获取ID
       const inputField = document.getElementById("inputField");
       const currentWordCountElem = document.getElementById('currentWordCount');
       const submitBtn = document.getElementById("submitBtn");
       const inputSymbols = document.querySelectorAll('.input-symbol');
 
-      fetch(webappUrl)
-        .then(response => response.json())
-        .then(jsonData => {
-          for (let i = jsonData.data.length - 1; i >= 0; i--) {
-            const row = jsonData.data[i];
-            if (row[1] === userEmail && row[3] === questionNumber) {
-              inputField.value = row[5];
-              currentWordCountElem.textContent = inputField.value.length;
-              if (row[8] === 1) {
-                inputField.readOnly = true;
-                submitBtn.disabled = true;
-                inputSymbols.forEach(button => {
-                  button.disabled = true;
-                });
-              }
-              break;
-            }
+      // 从 Local Storage 获取字符串
+      const jsonString = localStorage.getItem('myRecordData');
+      // 将字符串转换回 JavaScript 对象
+      const jsonData = JSON.parse(jsonString);
+
+      for (let i = jsonData.length - 1; i >= 0; i--) {
+        const row = jsonData[i];
+        if (row[3] === questionNumber) {
+          inputField.value = row[5];
+          currentWordCountElem.textContent = inputField.value.length;
+          if (row[8] === 1) {
+            inputField.readOnly = true;
+            submitBtn.disabled = true;
+            inputSymbols.forEach(button => {
+              button.disabled = true;
+            });
           }
-        })
-        .catch(error => console.error('Error fetching data:', error));
+          break;
+        }
+      }
+
     }
 
   </script>

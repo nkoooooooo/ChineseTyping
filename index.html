@@ -41,7 +41,7 @@
       white-space: nowrap;
     }
 
-    .table tbody td a.start {
+    .table tbody td a.btn-start {
       white-space: nowrap;
     }
 
@@ -240,12 +240,12 @@
           <td>${exercise.title}</td>
           <td class="status" data-id="${exercise.id}"><span class="loading">載入中</span></td>
           <td>
-            <a href="#" class="btn btn-primary btn-sm start">開始</a>
+            <a href="#" class="btn btn-primary btn-secondary btn-start disabled">開始</a>
           </td>
         `;
         tableBody.appendChild(row);
         // 找到开始练习的按钮并添加点击事件
-        const startButton = row.querySelector('.btn-primary');
+        const startButton = row.querySelector('.btn-start');
         startButton.setAttribute('href', `exercise.html?id=${exercise.id}`);
       });
     }
@@ -273,7 +273,7 @@
           const updateRequired = new Set();
           const statusElements = document.querySelectorAll('.table tbody .status');
           statusElements.forEach(element => updateRequired.add(element.dataset.id));
-          console.log(updateRequired);
+          let myRecord = [];
           // 使用 JSON 数据代替解析 CSV 数据
           jsonData.data.reverse().forEach(row => {
             const exerciseId = row[3];
@@ -290,6 +290,9 @@
                 span.textContent = '進行中';
               }
               updateRequired.delete(exerciseId);
+              myRecord.push(row);
+              const jsonString = JSON.stringify(myRecord);
+              localStorage.setItem('myRecordData', jsonString);
             }
           });
           // 对于未找到的 `exerciseId`，即仍为 'loading' 状态，更新状态为 'waiting'
@@ -302,6 +305,12 @@
               }
             }
           }
+          const startButtons = document.querySelectorAll('.btn-start');
+          startButtons.forEach(button => {
+            button.classList.remove('btn-secondary', 'disabled');
+            button.classList.add('btn-primary');
+          });
+
         })
         .catch(error => console.error('Error loading spreadsheet data:', error));
     }
