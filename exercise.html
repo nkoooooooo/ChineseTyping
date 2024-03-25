@@ -510,14 +510,14 @@
       window.addEventListener('blur', () => {
         tabSwitches++;
         if (tabSwitches % 5 == 0) {
-          showModal()
+          showModal();
         }
       });
 
       setInterval(() => {
         const currentTime = Date.now();
         if (currentTime - lastActivityTime > (3 * 60 * 1000)) {
-          showModal()
+          showModal();
         }
       }, 60 * 1000);
 
