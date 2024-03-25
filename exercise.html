@@ -510,14 +510,14 @@
       window.addEventListener('blur', () => {
         tabSwitches++;
         if (tabSwitches % 5 == 0) {
-          showModal();
+          showModal("請專心打字練習，不要切換到其他視窗！");
         }
       });
 
       setInterval(() => {
         const currentTime = Date.now();
-        if (currentTime - lastActivityTime > (3 * 60 * 1000)) {
-          showModal();
+        if (currentTime - lastActivityTime > (5 * 60 * 1000)) {
+          showModal("您已經超過5分鐘未進行任何操作。");
         }
       }, 60 * 1000);
 
@@ -548,7 +548,11 @@
     }
 
     // 显示模态对话框的函数
-    function showModal() {
+    function showModal(message) {
+      // 获取模态对话框中的 <p> 元素用于显示消息
+      var messageParagraph = document.querySelector(".modal-content p");
+      // 设置 <p> 元素的文本内容为传入的消息
+      messageParagraph.textContent = message;
       modal.style.display = "block";
     }
 
@@ -589,14 +593,14 @@
         mode: 'no-cors'
       })
         .then(() => {
-          alert('練習提交成功！');
+          showModal("練習提交成功！");
           setTimeout(() => {
             window.location.href = 'index.html';
           }, 1000); // 延时1秒后跳转
         })
         .catch(error => {
           console.error('Error submitting form:', error);
-          alert('練習提交出現錯誤');
+          showModal("練習提交出現錯誤");
         });
     }
   </script>
