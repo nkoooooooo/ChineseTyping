@@ -484,7 +484,7 @@
 
     window.onload = function () {
       document.getElementById('email').value = getCookie('email');
-      document.getElementById('gname').value = getCookie('username');
+      document.getElementById('gname').value = document.getElementById('username').textContent;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -537,9 +537,6 @@
       checkLoginStatus();
       getExercise();
       getResponseData();
-      document.getElementById('email').value = getCookie('email');
-      document.getElementById('gname').value = getCookie('username');
-
     });
 
     // 获取模态对话框元素
