@@ -373,6 +373,8 @@
         .then(data => {
           const exercise = data.find(ex => ex.id === exerciseId);
           displayExercise(exercise.text, exercise.pinyin);
+          document.getElementById('email').value = getCookie('email');
+          document.getElementById('gname').value = getCookie('username');
           // 題號
           document.getElementById('qno').value = exercise.id;
           //console.log(document.getElementById('qno').value)
