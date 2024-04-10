@@ -482,6 +482,11 @@
       }
     }
 
+    window.onload = function () {
+      document.getElementById('email').value = getCookie('email');
+      document.getElementById('gname').value = getCookie('username');
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       let lastActivityTime = Date.now();
       let tabSwitches = 0;
