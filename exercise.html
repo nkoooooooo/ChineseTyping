@@ -622,7 +622,7 @@
       // 将字符串转换回 JavaScript 对象
       const jsonData = JSON.parse(jsonString);
 
-      if (jsonData.length > 0) {
+      if (jsonData && jsonData.length > 0) {
         for (let i = jsonData.length - 1; i >= 0; i--) {
           const row = jsonData[i];
           if (row[3] === questionNumber) {
