@@ -484,7 +484,7 @@
 
     window.onload = function () {
       document.getElementById('email').value = getCookie('email');
-      document.getElementById('gname').value = document.getElementById('username').textContent;
+      document.getElementById('gname').value = getCookie('username');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -625,19 +625,21 @@
       // 将字符串转换回 JavaScript 对象
       const jsonData = JSON.parse(jsonString);
 
-      for (let i = jsonData.length - 1; i >= 0; i--) {
-        const row = jsonData[i];
-        if (row[3] === questionNumber) {
-          inputField.value = row[5];
-          currentWordCountElem.textContent = inputField.value.length;
-          if (row[8] === 1) {
-            inputField.readOnly = true;
-            submitBtn.disabled = true;
-            inputSymbols.forEach(button => {
-              button.disabled = true;
-            });
+      if (jsonData.length > 0) {
+        for (let i = jsonData.length - 1; i >= 0; i--) {
+          const row = jsonData[i];
+          if (row[3] === questionNumber) {
+            inputField.value = row[5];
+            currentWordCountElem.textContent = inputField.value.length;
+            if (row[8] === 1) {
+              inputField.readOnly = true;
+              submitBtn.disabled = true;
+              inputSymbols.forEach(button => {
+                button.disabled = true;
+              });
+            }
+            break;
           }
-          break;
         }
       }
 
