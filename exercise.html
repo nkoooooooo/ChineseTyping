@@ -586,6 +586,9 @@
     function handleSubmit(event) {
       const submitBtn = document.getElementById("submitBtn");
       submitBtn.disabled = true;
+      // 移除空格和换行
+      const inputField = document.getElementById('inputField');
+      inputField.value = inputField.value.replace(/\s+/g, '');
       event.preventDefault();
       const formData = new FormData(event.target);
       setCookie('forceUpdate', '1', 0.1);
