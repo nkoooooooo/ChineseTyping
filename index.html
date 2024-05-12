@@ -236,19 +236,21 @@
       tableBody.innerHTML = ''; // 清空现有内容
 
       exercises.forEach((exercise) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <th scope="row">${exercise.id}</th>
-          <td>${exercise.title}</td>
-          <td class="status" data-id="${exercise.id}"><span class="loading">載入中</span></td>
-          <td>
-            <a href="#" class="btn btn-primary btn-secondary btn-start disabled">開始</a>
-          </td>
-        `;
-        tableBody.appendChild(row);
-        // 找到开始练习的按钮并添加点击事件
-        const startButton = row.querySelector('.btn-start');
-        startButton.setAttribute('href', `exercise.html?id=${exercise.id}`);
+        if (exercise.display !== 0) {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <th scope="row">${exercise.id}</th>
+            <td>${exercise.title}</td>
+            <td class="status" data-id="${exercise.id}"><span class="loading">載入中</span></td>
+            <td>
+              <a href="#" class="btn btn-primary btn-secondary btn-start disabled">開始</a>
+            </td>
+          `;
+          tableBody.appendChild(row);
+          // 找到开始练习的按钮并添加点击事件
+          const startButton = row.querySelector('.btn-start');
+          startButton.setAttribute('href', `exercise.html?id=${exercise.id}`);
+        }
       });
     }
 
