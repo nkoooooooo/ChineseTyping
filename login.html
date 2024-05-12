@@ -104,6 +104,12 @@
       if (getCookie('isLogin')) {
         window.location.href = 'index.html';
       }
+      // 清除所有cookie信息
+      deleteCookie('email');
+      deleteCookie('username');
+      deleteCookie('isLogin');
+      deleteCookie('forceUpdate');
+      localStorage.clear();
     }
 
     window.onload = function () {
