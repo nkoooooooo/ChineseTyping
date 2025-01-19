@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登入 - 中文打字平台</title>
   <link rel="stylesheet" href="css/login-style.css">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
 </head>
 
@@ -33,9 +32,18 @@
   <footer>
     <p>Copyright © SKHTKPSS.<br>All rights reserved. Powered by NKO</p>
   </footer>
+  <script src="js/util.js"></script>
+    <!-- 將 login-script.js 的執行延遲到 Google API 載入完成後 -->
+    <script>
+        // Google API 載入完成後執行的函數
+        function onGoogleLibraryLoad() {
+            // 載入 login-script.js
+            var script = document.createElement('script');
+            script.src = 'js/login-script.js';
+            document.body.appendChild(script);
+        }
+    </script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="onGoogleLibraryLoad()"></script>
 </body>
-
-<script src="js/util.js"></script>
-<script src="js/login-script.js"></script>
 
 </html>

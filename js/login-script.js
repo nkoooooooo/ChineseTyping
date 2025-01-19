@@ -1,3 +1,4 @@
+// 檢查是否已登入，如果已登入則跳轉到 index.html
 document.addEventListener('DOMContentLoaded', function() {
     const user = SessionStorageUtil.getItem('user');
     if (user) {
@@ -5,21 +6,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-window.onload = function () {
-    google.accounts.id.initialize({
-        client_id: "207480084362-mc0she8jhrhd2bu01ifg8quo1ujksup6.apps.googleusercontent.com",
-        callback: handleLogin
-    });
+// 在 Google API 載入完成後執行
+google.accounts.id.initialize({
+    client_id: "207480084362-mc0she8jhrhd2bu01ifg8quo1ujksup6.apps.googleusercontent.com",
+    callback: handleLogin
+});
 
-    const buttonDiv = document.getElementById('google-login');
-    google.accounts.id.renderButton(buttonDiv, {
-        type: 'standard',
-        theme: 'filled_blue',
-        size: 'large',
-        text: 'signin_with',
-        logo_alignment: 'left'
-    });
-};
+const buttonDiv = document.getElementById('google-login');
+google.accounts.id.renderButton(buttonDiv, {
+    type: 'standard',
+    theme: 'filled_blue',
+    size: 'large',
+    text: 'signin_with',
+    logo_alignment: 'left'
+});
 
 function handleLogin(response) {
     const googleLoginButton = document.getElementById('google-login');
