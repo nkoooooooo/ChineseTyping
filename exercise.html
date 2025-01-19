@@ -6,206 +6,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>練習頁面</title>
   <!-- 引入Bootstrap 5 CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script> 
-  <style>
-    .sticky-top {
-      z-index: 1020;
-    }
-
-    .text-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: start;
-      border: 1px solid #ddd;
-      overflow-y: auto;
-      height: 250px;
-      width: 100%;
-      max-width: 80%;
-      margin: 20px auto;
-    }
-
-    .record-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: start;
-      overflow-y: auto;
-      width: 100%;
-      max-width: 80%;
-      margin: 20px auto;
-    }
-
-    .character {
-      text-align: center;
-      margin: 10px;
-    }
-
-    .character span {
-      font-size: 24px;
-    }
-
-    .character sub {
-      display: block;
-      color: #888;
-      margin-top: 5px;
-    }
-
-    .page-container {
-      position: relative;
-      min-height: calc(100vh - 80px - 40px);
-      /* 根据导航栏和footer的实际高度调整 */
-    }
-
-    footer {
-      width: 100%;
-      text-align: center;
-      padding: 10px 0;
-      font-size: 0.9em;
-      background: #f1f1f1;
-      color: #888;
-    }
-
-    #google-form {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      max-width: 80%;
-      /* Or any other width you want */
-      margin: 20px auto;
-    }
-
-    #inputField {
-      margin: 10px 0;
-      padding: 10px;
-      height: 30vh;
-    }
-
-    .response-container {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      max-width: 80%;
-      /* Or any other width you want */
-      margin: 20px auto;
-    }
-
-    #responseText {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: start;
-      border: 1px solid #ddd;
-      overflow-y: auto;
-      height: 250px;
-      padding: 10px;
-    }
-
-    .correct {
-      color: green;
-      font-weight: bold;
-    }
-
-    .incorrect {
-      color: red;
-      font-weight: bold;
-    }
-
-    #inputButtons {
-      margin-top: 10px;
-      /* 在输入区和按钮区之间添加一些空间 */
-    }
-
-    .input-symbol {
-      background-color: #f5f5f5;
-      /* 按钮背景颜色 */
-      border: 1px solid #ddd;
-      /* 边框颜色和宽度 */
-      border-radius: 5px;
-      /* 圆角按钮 */
-      margin-right: 8px;
-      /* 按钮之间的右边距 */
-      padding: 5px 10px;
-      /* 上下和左右的内填充 */
-      font-size: 16px;
-      /* 文本大小 */
-      cursor: pointer;
-      /* 鼠标悬停时的指针形状 */
-      transition: background-color 0.3s, transform 0.1s;
-      /* 背景颜色和按下效果的过渡 */
-    }
-
-    /* 鼠标悬停时按钮的样式 */
-    .input-symbol:hover {
-      background-color: #eaeaea;
-      /* 悬停时的背景颜色 */
-    }
-
-    /* 按钮被按下时的样式 */
-    .input-symbol:active {
-      transform: translateY(2px);
-      /* 按钮按下后下移2px */
-    }
-
-    .word-count-container {
-      margin-left: auto;
-      margin-right: 0;
-    }
-
-    /* 模态对话框的样式 */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1;
-      padding-top: 100px;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgb(0, 0, 0);
-      background-color: rgba(0, 0, 0, 0.4);
-    }
-
-    .modal-content {
-      background-color: #fefefe;
-      margin: auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 80%;
-    }
-
-    .close {
-      color: #aaaaaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-    }
-
-    .close:hover,
-    .close:focus {
-      color: #000;
-      text-decoration: none;
-      cursor: pointer;
-    }
-  </style>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap">
+  <link rel="stylesheet" href="css/exercise-style.css">
 </head>
 
 <body>
   <!-- Sticky Navbar 上方的导航栏 -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
     <div class="container-fluid">
-      <a class="navbar-brand" href="index.html">中文打字平台</a>
-      <span class="navbar-text ms-auto" id="username">用戶名稱</span>
-      <button class="btn btn-outline-warning ms-3" onclick="logout()">登出</button>
+      <a class="navbar-brand ms-3" href="index.html">中文打字平台</a>
+      <div class="dropdown" id="userDropdown"> <a href="#"
+          class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          <div class="navbar-text text-center p-0">
+            <span id="username">用户名</span>
+            <br>
+            <span id="userrole">學生</span>
+          </div>
+        </a>
+        <!-- 下拉菜单 -->
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+          <li><a class="dropdown-item" href="login.html" id="logout-button" onclick="logout()">登出</a></li>
+        </ul>
+      </div>
     </div>
   </nav>
-  <!-- 模态对话框的 HTML 结构 -->
-  <div id="myModal" class="modal">
-    <!-- 对话框的内容 -->
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <p>請專心打字練習！</p>
-    </div>
-  </div>
+
+  <!-- 練習頁面 -->
   <div class="page-container">
     <div class="row record-container">
       <div class="col-4">
@@ -230,27 +59,10 @@
       </div>
     </div>
     <div class="text-container" id="exerciseText"></div>
-    <!-- 打字練習的地方，表單提交到Google表單 -->
-    <form id="google-form"
-      action="https://docs.google.com/forms/d/e/1FAIpQLScamnBpVLSJ1TXQOX2IhNu8XNUwKj8O8MdAUowCjmWl3eDiQQ/formResponse"
-      method="post" target="_blank">
 
-      <!-- 輸入學生電郵的輸入框 -->
-      <input type="text" name="entry.642787572" id="email" hidden>
-      <!-- 輸入學生姓名的輸入框 -->
-      <input type="text" name="entry.101423020" id="gname" hidden>
-      <!-- 輸入題號的輸入框 -->
-      <input type="text" name="entry.2023010530" id="qno" hidden>
-      <!-- 輸入題目名稱的輸入框 -->
-      <input type="text" name="entry.505150958" id="qname" hidden>
-      <!-- 輸入正確字數的輸入框 -->
-      <input type="text" name="entry.1482062752" id="qcorrectnum" hidden>
-      <!-- 輸入錯誤字數的輸入框 -->
-      <input type="text" name="entry.1603506777" id="qincorrectnum" hidden>
-      <!-- 輸入進度的輸入框 -->
-      <input type="text" name="entry.215344342" id="qprogress" hidden>
-      <!-- 這裡的name屬性需要對應到Google表單中的input name -->
-      <label for="entry.1329760247">請在下方輸入您的文字：</label>
+    <!-- 打字練習的地方，表單提交到Google表單 -->
+    <div id="google-form">
+      <label>標點符號：</label>
       <div id="inputButtons">
         <button type="button" class="input-symbol" data-symbol="，">，</button>
         <button type="button" class="input-symbol" data-symbol="。">。</button>
@@ -262,373 +74,34 @@
         <button type="button" class="input-symbol" data-symbol="；">；</button>
         <!-- 添加更多按钮 -->
       </div>
-      <textarea id="inputField" name="entry.1329760247" placeholder="請在此處輸入" required></textarea>
+      <textarea id="inputField" placeholder="請在此處輸入" required></textarea>
       <div class="word-count-container">
         <span id="currentWordCount">0</span>/<span id="totalWordCount">0</span> 字數
       </div>
+      <div id="loading-icon" class="loading-icon" style="display: none; align-self: center;">
+        <div class="spinner-border text-primary" role="status">
+        </div>
+      </div>
       <!-- 提交按鈕 -->
-      <button id="submitBtn" type="submit">提交練習結果</button>
-    </form>
-    <!-- 
-    <div class="response-container">
-      <label>你提交的文字：</label>
-      <label id="responseText"></label>
+      <button class= "btn btn-primary" id="submitBtn" type="submit" onclick="submitExercise()">儲存進度</button>
     </div>
-    -->
   </div>
 
 
-  <footer>
-    <p>Copyright © SKHTKPSS. All rights reserved. Powered by NKO</p>
-  </footer>
-
-  <!-- Bootstrap 5 JS 和 Popper.js -->
-  <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
-    integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    // 公开全局的logout方法
-    window.logout = logout;
-
-    // 辅助函数：设置Cookie
-    function setCookie(name, value, days) {
-      const d = new Date();
-      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-      const expires = "expires=" + d.toUTCString();
-      document.cookie = name + "=" + value + ";" + expires + ";path=/";
-    }
-
-    // 辅助函数：删除Cookie
-    function deleteCookie(name) {
-      setCookie(name, '', -1);
-    }
-
-    // 登出操作
-    function logout() {
-      // 清除所有cookie信息
-      deleteCookie('email');
-      deleteCookie('username');
-      deleteCookie('isLogin');
-      deleteCookie('forceUpdate');
-      localStorage.clear();
-      // 重定向回登录界面
-      window.location.href = 'login.html';
-    }
-
-    // 辅助函数：从cookie中读取登录用户名
-    function getCookie(name) {
-      let cookieArray = document.cookie.split(';');
-      for (let i = 0; i < cookieArray.length; i++) {
-        let cookiePair = cookieArray[i].split('=');
-        if (name == cookiePair[0].trim()) {
-          return decodeURIComponent(cookiePair[1]);
-        }
-      }
-      return null;
-    }
-
-    function checkLoginStatus() {
-      // 从Cookie中获取isLogin
-      const isLoggedIn = getCookie('isLogin');
-      const userName = getCookie('username');
-
-      if (isLoggedIn) {
-        // 显示用户名
-        if (userName) {
-          document.getElementById('username').textContent = userName;
-        }
-      } else {
-        // 重定向到登录页面
-        window.location.href = 'login.html';
-      }
-    }
-  </script>
-
-  <script>
-    // 将符号插入到文本输入框的光标位置
-    function insertSymbolAtCursor(symbol) {
-      const inputField = document.getElementById('inputField');
-      // 保存当前的光标位置
-      const cursorPosition = inputField.selectionStart;
-      // 目前输入框的内容
-      const currentValue = inputField.value;
-      // 将符号插入到当前光标位置
-      const newValue = currentValue.slice(0, cursorPosition) + symbol + currentValue.slice(cursorPosition);
-      inputField.value = newValue;
-      // 更新光标位置，使其位于插入的符号后
-      inputField.selectionStart = cursorPosition + symbol.length;
-      inputField.selectionEnd = cursorPosition + symbol.length;
-      // 重新聚焦输入框
-      inputField.focus();
-    }
-
-    function getExercise() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const exerciseId = urlParams.get('id'); // 获取ID
-
-      // 使用fetch API根据ID从远程JSON中获取练习数据
-      fetch('https://raw.githubusercontent.com/nkoooooooo/ChineseTyping/main/exercise.json')
-        .then(response => response.json())
-        .then(data => {
-          const exercise = data.find(ex => ex.id === exerciseId);
-          displayExercise(exercise.text, exercise.pinyin);
-          document.getElementById('email').value = getCookie('email');
-          document.getElementById('gname').value = getCookie('username');
-          // 題號
-          document.getElementById('qno').value = exercise.id;
-          //console.log(document.getElementById('qno').value)
-          // 題目名稱
-          document.getElementById('qname').value = exercise.title;
-          //console.log(document.getElementById('qname').value)
-          // 给用户输入按钮添加事件监听器
-          document.getElementById('inputButtons').addEventListener('click', () => {
-            handleUserInput(exercise.text);
-          });
-          // 给用户输入框添加事件监听器
-          document.getElementById('inputField').addEventListener('input', () => {
-            handleUserInput(exercise.text);
-          });
-          window.onload = handleUserInput(exercise.text);
-          // 總字數
-          const totalWordCountElem = document.getElementById('totalWordCount');
-          totalWordCountElem.textContent = exercise.text.length;
-        })
-        .catch(error => {
-          console.error('Error loading exercise:', error);
-        });
-    }
-
-    function displayExercise(text, pinyin) {
-      const textContainer = document.getElementById('exerciseText');
-      text.split('').forEach((char, index) => {
-        const charPinyin = pinyin.split(' ')[index] || '';
-        const characterElem = document.createElement('div');
-        characterElem.classList.add('character');
-        characterElem.innerHTML = `<span>${char}</span><sub>${charPinyin}</sub>`;
-        textContainer.appendChild(characterElem);
-      });
-    }
-    
-    // 用户输入处理函数
-    function handleUserInput(exerciseText) {
-      const userInput = document.getElementById('inputField').value;
-      // characters 是一个包含所有字符的数组(All characters)
-      const characters = document.querySelectorAll('#exerciseText .character');
-      // /\s/g 是一个正则表达式，它匹配字符串中所有的空白字符。
-      // 在这个表达式中： 
-      // \s 匹配单个空格字符，包括空格、制表符、换页符、换行符等。 
-      // g 标志是 "global"（全局）的缩写，意味着匹配字符串中的所有空白字符，而不是只匹配第一个。
-      const userChars = userInput.replace(/\s/g, '').split('');
-      var converter = OpenCC.Converter({from: 'cn', to: 'tw'});
-      // 遍历用户输入的字符，检查是否与练习文本中的字符匹配 characters index start from 0
-      userChars.forEach((char, index) => {
-        if (index < characters.length) {
-          // 如果文本中的字符匹配用户输入的字符，则添加正确样式
-          if (exerciseText[index] === char || exerciseText[index] === converter(char) || converter(exerciseText[index]) === converter(char)) {
-            characters[index].firstChild.classList.add('correct'); // firstChild 是 <span> 元素
-            characters[index].firstChild.classList.remove('incorrect');
-          } else {
-            characters[index].firstChild.classList.remove('correct');
-            characters[index].firstChild.classList.add('incorrect');
-          }
-        }
-      });
-
-      // 处理用户输入超出的情况
-      for (let i = userChars.length; i < characters.length; i++) {
-        // 移除正确和错误的样式
-        characters[i].firstChild.classList.remove('correct');
-        characters[i].firstChild.classList.remove('incorrect');
-      }
-
-      // 如果用户输入少于或等于练习文本长度，则清除最后一个字符的错误样式
-      if (userChars.length < characters.length && userChars.length > 0) {
-        characters[userChars.length].firstChild.classList.remove('incorrect');
-      }
-
-      // 计算正确的字数
-      const correctCharacters = document.querySelectorAll('#exerciseText .character .correct').length;
-      document.getElementById('qcorrectnum').value = correctCharacters;
-      document.getElementById('correctCount').innerText = correctCharacters;
-      // 计算错误的字数
-      const incorrectCharacters = document.querySelectorAll('#exerciseText .character .incorrect').length;
-      document.getElementById('qincorrectnum').value = incorrectCharacters;
-      document.getElementById('incorrectCount').innerText = incorrectCharacters;
-      // 计算正确率
-      const accuracy = calculateAccuracy(correctCharacters, correctCharacters + incorrectCharacters); // 正确率
-      document.getElementById('accuracy').innerText = `${accuracy}%`;
-
-      // 進度記錄
-      if (correctCharacters === characters.length) {
-        document.getElementById('qprogress').value = 1;
-      } else {
-        document.getElementById('qprogress').value = 0;
-      }
-
-      // 更新当前字数
-      const currentWordCountElem = document.getElementById('currentWordCount');
-      currentWordCountElem.textContent = userChars.length;
-    }
-
-    // 计算正确率 (正确字数 / 总字数)
-    function calculateAccuracy(correctChars, totalChars) {
-      return Math.round((correctChars / totalChars) * 100);
-    }
-  </script>
-  <script>
-    // 在用户点击模态对话框以外的地方时，关闭它
-    window.onclick = function (event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('google-form');
-      const inputField = document.getElementById('inputField');
-      const textSection = document.getElementById('exerciseText');
-      //const responseSection = document.getElementById('responseText');
-
-      form.addEventListener('submit', handleSubmit);
-      inputField.addEventListener('paste', preventDefaultAction);
-      inputField.addEventListener('copy', preventDefaultAction);
-      inputField.addEventListener('cut', preventDefaultAction);
-      inputField.addEventListener('drop', preventDefaultAction);
-      inputField.addEventListener('dragstart', preventDefaultAction);
-      inputField.addEventListener('selectstart', preventDefaultAction);
-      inputField.addEventListener('keydown', disableNonKeyboardInput);
-      textSection.addEventListener('selectstart', preventDefaultAction);
-      textSection.onmousedown = textSection.onmouseup = preventDefaultAction;
-      //responseSection.addEventListener('selectstart', preventDefaultAction);
-      //responseSection.onmousedown = responseSection.onmouseup = preventDefaultAction;
-
-      document.onkeydown = checkForProhibitedActions;
-      document.oncontextmenu = preventDefaultAction;
-      
-      // 监听所有符号按钮的点击事件
-      document.querySelectorAll('.input-symbol').forEach(button => {
-        button.addEventListener('click', function () {
-          insertSymbolAtCursor(this.dataset.symbol);
-        });
-      });
-
-      checkLoginStatus();
-      getExercise();
-      getResponseData();
-    });
-
-    // 获取模态对话框元素
-    var modal = document.getElementById("myModal");
-
-    // 获取 <span> 元素，它用于关闭模态对话框
-    var span = document.getElementsByClassName("close")[0];
-
-    // 点击 <span> (x), 关闭模态对话框
-    span.onclick = function () {
-      modal.style.display = "none";
-    }
-
-    // 显示模态对话框的函数
-    function showModal(message) {
-      // 获取模态对话框中的 <p> 元素用于显示消息
-      var messageParagraph = document.querySelector(".modal-content p");
-      // 设置 <p> 元素的文本内容为传入的消息
-      messageParagraph.textContent = message;
-      modal.style.display = "block";
-    }
-
-
-    function disableNonKeyboardInput(event) {
-      if (event.keyCode >= 48 && event.keyCode <= 123) {
-        // 禁止不符合的按键
-        event.preventDefault();
-      }
-    }
-
-    function preventDefaultAction(event) {
-      event.preventDefault();
-    }
-
-    function checkForProhibitedActions(event) {
-      const forbiddenKeys = [67, 86, 88, 65, 83, 123];
-      const isCtrlPressed = event.ctrlKey;
-      const isKeyPressedForbidden = forbiddenKeys.includes(event.keyCode);
-      const isRightClick = event.button === 2;
-      const isAltPressed = event.altKey;
-      const isSpacePressed = event.keyCode === 32;
-      const isTabPressed = event.keyCode === 9;
-      const isFKey = event.keyCode >= 112 && event.keyCode <= 123 && event.keyCode !== 116;
-
-      if (isCtrlPressed && isKeyPressedForbidden || isRightClick || isAltPressed || isFKey || isSpacePressed || isTabPressed) {
-        event.preventDefault();
-      }
-    }
-
-    function handleSubmit(event) {
-      const submitBtn = document.getElementById("submitBtn");
-      submitBtn.disabled = true;
-      // 移除空格和换行
-      const inputField = document.getElementById('inputField');
-      inputField.value = inputField.value.replace(/\s+/g, '');
-      event.preventDefault();
-      const formData = new FormData(event.target);
-      setCookie('forceUpdate', '1', 0.1);
-
-      fetch(event.target.action, {
-        method: 'POST',
-        body: formData,
-        mode: 'no-cors'
-      })
-        .then(() => {
-          showModal("練習提交成功！");
-          setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 2000); // 延时2秒后跳转
-        })
-        .catch(error => {
-          console.error('Error submitting form:', error);
-          showModal("練習提交出現錯誤");
-        });
-    }
-  </script>
-
-  <script>
-    function getResponseData() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const questionNumber = urlParams.get('id'); // 获取ID
-      const inputField = document.getElementById("inputField");
-      const currentWordCountElem = document.getElementById('currentWordCount');
-      const submitBtn = document.getElementById("submitBtn");
-      const inputSymbols = document.querySelectorAll('.input-symbol');
-
-      // 从 Local Storage 获取字符串
-      const jsonString = localStorage.getItem('myRecordData');
-      // 将字符串转换回 JavaScript 对象
-      const jsonData = JSON.parse(jsonString);
-
-      if (jsonData && jsonData.length > 0) {
-        for (let i = jsonData.length - 1; i >= 0; i--) {
-          const row = jsonData[i];
-          if (row[3] === questionNumber) {
-            inputField.value = row[5];
-            currentWordCountElem.textContent = inputField.value.length;
-            if (row[8] === 1) {
-              inputField.readOnly = true;
-              submitBtn.disabled = true;
-              inputSymbols.forEach(button => {
-                button.disabled = true;
-              });
-            }
-            break;
-          }
-        }
-      }
-
-    }
-
-  </script>
+  <div class="footer-container">
+    <footer>
+      <p>Copyright © SKHTKPSS.<br>All rights reserved. Powered by NKO</p>
+    </footer>
+  </div>
 </body>
+
+<!-- Bootstrap 5 JS 和 Popper.js -->
+<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+  integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
+<script src="js/util.js"></script>
+<script src="js/exercise-script.js"></script>
 
 </html>

@@ -5,131 +5,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登入 - 中文打字平台</title>
+  <link rel="stylesheet" href="css/login-style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    body,
-    html {
-      height: 100%;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Noto Sans TC', sans-serif;
-      background-color: #f9f9f9;
-    }
-
-    main {
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 2em;
-      color: #5c80d1;
-      margin: 0;
-      padding-bottom: 0.5em;
-    }
-
-    p.description {
-      margin: 10px 0 20px 0;
-      color: #666;
-    }
-
-    footer {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      text-align: center;
-      padding: 10px 0;
-      font-size: 0.9em;
-      background: #f1f1f1;
-      color: #888;
-    }
-  </style>
-
 </head>
 
 <body>
-  <main>
-    <h1>中文打字平台</h1>
-    <p class="description">歡迎來到中文打字平台，請先登入。</p>
-    <div id="signin-button"></div>
-  </main>
+  <div class="container">
+    <div class="login-form">
+      <div class="logo">
+        <img src="img/tkp-logo.png"
+          alt="平台 logo">
+        <h1>中文打字平台</h1>
+      </div>
+      <p class="welcome">歡迎來到中文打字平台，請先登入。</p>
+      <div id="signin-button"></div>
+      <button id="google-login" class="google-login">
+        <span>使用 Google 帳戶登入</span>
+      </button>
+      <div id="loading-icon" class="loading-icon" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+        </div>
+      </div>
+      <div id="login-message" class="login-message"></div>
+    </div>
+  </div>
   <footer>
-    <p>Copyright © SKHTKPSS. All rights reserved. Powered by NKO</p>
+    <p>Copyright © SKHTKPSS.<br>All rights reserved. Powered by NKO</p>
   </footer>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script>
-    const COOKIE_SETTINGS = 'max-age=86400; path=/; Secure; SameSite=Strict';
-
-    // 将JWT token的Payload部分进行Base64解码的函数
-    function parseJwt(token) {
-      const base64Url = token.split('.')[1]; // 獲得JWT的Payload部分
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // 替換字符，使其符合base64的要求
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2); // 將字符轉換為16進制
-      }).join(''));
-
-      return JSON.parse(jsonPayload); // 返回解碼後的JSON對象
-    }
-
-    // Cookie操作工具函数
-    function setCookie(name, value, settings) {
-      document.cookie = `${name}=${encodeURIComponent(value)}; ${settings}`;
-    }
-
-    function getCookie(name) {
-      return document.cookie.split(';').find(item => item.trim().startsWith(`${name}=`));
-    }
-
-    function deleteCookie(name) {
-      document.cookie = `${name}=; max-age=-1; path=/;`;
-    }
-
-    function handleCredentialResponse(response) {
-      const profile = parseJwt(response.credential);
-      if (!profile.email.endsWith('@tkp.edu.hk')) {
-        alert('請先驗證您的電子郵件地址。\n使用學生電郵：s123456@tkp.edu.hk');
-        return;
-      }
-      setCookie('email', profile.email, COOKIE_SETTINGS);
-      setCookie('username', profile.name, COOKIE_SETTINGS);
-      setCookie('isLogin', 'true', 'max-age=3600; path=/; Secure; SameSite=Strict');
-      window.location.href = 'index.html';
-    }
-
-    function checkLoginStatus() {
-      if (getCookie('isLogin')) {
-        window.location.href = 'index.html';
-      }
-      // 清除所有cookie信息
-      deleteCookie('email');
-      deleteCookie('username');
-      deleteCookie('isLogin');
-      deleteCookie('forceUpdate');
-      localStorage.clear();
-    }
-
-    window.onload = function () {
-      checkLoginStatus();
-
-      // 以下为Google登录按钮的初始化代码
-      google.accounts.id.initialize({
-        client_id: '207480084362-mc0she8jhrhd2bu01ifg8quo1ujksup6.apps.googleusercontent.com',
-        callback: handleCredentialResponse
-      });
-
-      google.accounts.id.renderButton(
-        document.getElementById('signin-button'),
-        { theme: 'outline', size: 'large' }
-      );
-
-      google.accounts.id.prompt();
-    }
-  </script>
-
 </body>
+
+<script src="js/util.js"></script>
+<script src="js/login-script.js"></script>
 
 </html>
