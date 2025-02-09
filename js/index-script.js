@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // 更新用戶名稱及角色
   document.getElementById('username').textContent = user.name;
-  document.getElementById('userrole').textContent = user.type;
+  document.getElementById('userrole').textContent = user.permission;
 
   // 載入數據
   if (getDataFromSessionStorage('exercises') && getDataFromSessionStorage('records')) {
@@ -33,7 +33,8 @@ async function fetchExercisesDataAndUserRecord() {
 
 async function fetchExercisesData() {
   console.log("Fetching exercises data");
-  return fetchData('https://script.google.com/macros/s/AKfycbyV8R5HIWe7PoKQN9BOaBW5240Sebj3Ld9qUOtkM8p3H8WxBAyHeBpbM3kQNPg5OdAa/exec', 'exercises');
+  const classid = SessionStorageUtil.getItem('user').class;
+  return fetchData('https://script.google.com/macros/s/AKfycbyV8R5HIWe7PoKQN9BOaBW5240Sebj3Ld9qUOtkM8p3H8WxBAyHeBpbM3kQNPg5OdAa/exec', 'exercises', {classid});
 }
 
 async function fetchUserRecord() {
