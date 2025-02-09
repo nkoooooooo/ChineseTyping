@@ -47,7 +47,7 @@ function handleLogin(response) {
             "Content-Type": "text/plain;charset=utf-8",
         },
         // 发送电子邮件
-        body: JSON.stringify({ email: profile.email, name: profile.name })
+        body: JSON.stringify({ email: profile.email})
     })
         .then(response => response.json())
         .then(data => {
