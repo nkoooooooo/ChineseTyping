@@ -72,8 +72,11 @@ function handleInputField() {
   const exerciseId = new URLSearchParams(window.location.search).get("id");
   const exercise = getDataFromSessionStorage("exercises").data.find(ex => ex.id === exerciseId);
 
+  // 將使用者輸入的文字去除空格，並轉換為陣列
   const inputCharacters = inputField.value.replace(/\s/g, "").split("");
+  // 將練習的原文轉換為陣列
   const exerciseCharacters = exercise.text1.split("");
+  // 獲取所有表示原文的 span 元素
   const characterElements = document.querySelectorAll("#exerciseText .character");
 
   let correctCount = 0;
@@ -82,7 +85,11 @@ function handleInputField() {
   characterElements.forEach((element, index) => {
     const inputChar = inputCharacters[index];
     if (inputChar) {
-      if (inputChar === exerciseCharacters[index]) {
+      // 將使用者輸入的字元和原文的字元都轉換為簡體中文
+      const simplifiedInputChar = toSimp(inputChar);
+      const simplifiedExerciseChar = toSimp(exerciseCharacters[index]);
+
+      if (simplifiedInputChar === simplifiedExerciseChar) {
         element.style.color = "green";
         correctCount++;
       } else {
