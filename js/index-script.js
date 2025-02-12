@@ -8,6 +8,14 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('username').textContent = user.name;
   document.getElementById('userrole').textContent = user.permission;
 
+  // 顯示/隱藏管理員專區
+  const adminSection = document.getElementById('admin-section');
+  if (user.permission === '管理員') {
+      adminSection.style.display = 'block'; // 顯示管理員專區
+  } else {
+      adminSection.style.display = 'none'; // 隱藏管理員專區
+  }
+  
   // 載入數據
   if (getDataFromSessionStorage('exercises') && getDataFromSessionStorage('records')) {
     renderExercisesList();
