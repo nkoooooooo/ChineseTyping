@@ -42,6 +42,31 @@
           <div class="card-header justify-content-center">
             <h2>打字練習列表</h2>
           </div>
+
+          <!-- 管理員專區 -->
+          <div id="admin-section" style="display: none; margin-left: 25px; margin-right: 25px;">
+            <div class="row">
+              <div class="col-6 d-flex align-items-center">
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="classDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    切換當前班：<span id="currentClass">1D</span>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="classDropdown" id="classList">
+                    <li><a class="dropdown-item" href="#">1A</a></li>
+                    <li><a class="dropdown-item" href="#">1B</a></li>
+                    <li><a class="dropdown-item" href="#">1C</a></li>
+                    <li><a class="dropdown-item" href="#">1D</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-6 d-flex justify-content-end">
+                <button class="btn btn-success" id="addExerciseBtn">新增題目</button>
+              </div>
+            </div>
+          </div>
+          <!-- 管理員專區結束 -->
+          
           <div class="card-body">
             <div class="table-responsive" style="overflow: hidden; outline: none;">
               <!-- 表格行增加條紋樣式 可滑入行 -->
