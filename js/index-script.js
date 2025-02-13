@@ -215,6 +215,10 @@ function createRow(exercise, progress) {
   const row = document.createElement('tr');
   const progressColor = getProgressColor(progress);
   const progressClass = progress >= 100 ? 'progress-bar-striped progress-bar-animated' : '';
+
+  const user = SessionStorageUtil.getItem('user'); // 獲取當前用戶信息
+  const isAdminOrTeacher = user && (user.permission === '教師' || user.permission === '管理員');
+
   row.innerHTML = `
           <td class="align-middle">
             <p>${exercise.id}</p>
@@ -233,6 +237,11 @@ function createRow(exercise, progress) {
             <a href="exercise.html?id=${exercise.id}" data-toggle="tooltip" title="" data-original-title="view" style="color:#ffffff;">
             <button type="button" class="btn btn-primary btn-sm">
             <i class="fas fa-solid fa-magnifying-glass"></i></button></a>
+            ${isAdminOrTeacher ? `
+              <button type="button" class="btn btn-secondary btn-sm" data-toggle="tooltip" title="修改設定" onclick="openEditExerciseModal('${exercise.id}')">
+                <i class="fa fa-cog" aria-hidden="true"></i>
+              </button>
+            ` : ''}
           </td>
         `;
   return row;
