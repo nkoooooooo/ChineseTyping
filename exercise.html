@@ -2,107 +2,157 @@
 <html lang="zh-HK">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>練習頁面</title>
-  <!-- 引入Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap">
-  <link rel="stylesheet" href="css/exercise-style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>練習頁面</title>
+    <!-- 引入Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- 引入Noto Sans TC 字體 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap">
+    <!-- 引入自定義CSS樣式 -->
+    <link rel="stylesheet" href="css/exercise-style.css">
 </head>
 
 <body>
-  <!-- Sticky Navbar 上方的导航栏 -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-    <div class="container-fluid">
-      <a class="navbar-brand ms-3" href="index.html">中文打字平台</a>
-      <div class="dropdown" id="userDropdown"> <a href="#"
-          class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown"
-          aria-expanded="false">
-          <div class="navbar-text text-center p-0">
-            <span id="username">用户名</span>
-            <br>
-            <span id="userrole">學生</span>
-          </div>
-        </a>
-        <!-- 下拉菜单 -->
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-          <li><a class="dropdown-item" href="login.html" id="logout-button" onclick="logout()">登出</a></li>
-        </ul>
-      </div>
+    <!-- 導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <!-- 導航欄標題，點擊返回首頁 -->
+            <a class="navbar-brand ms-3" href="index.html">中文打字平台</a>
+            <!-- 用戶下拉選單 -->
+            <div class="dropdown" id="userDropdown">
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <!-- 用戶名稱和角色顯示 -->
+                    <div class="navbar-text text-center p-0">
+                        <span id="username">用户名</span>
+                        <br>
+                        <span id="userrole">學生</span>
+                    </div>
+                </a>
+                <!-- 下拉選單內容 -->
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <!-- 登出選項 -->
+                    <li><a class="dropdown-item" href="login.html" id="logout-button" onclick="logout()">登出</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 字根表側邊欄 -->
+    <aside class="key-table-sidebar" id="keyTableSidebar">
+        <img src="img/key_table.png" alt="字根表，包含各個中文字的字根資訊">
+    </aside>
+
+    <!-- 字根表開關按鈕 -->
+    <button class="key-table-toggle-button" id="keyTableToggleButton">顯示字根表</button>
+
+    <!-- 練習頁面主容器 -->
+    <main class="page-container">
+        <!-- 成績顯示區域 -->
+        <div class="row record-container">
+            <!-- 正確字數顯示 -->
+            <div class="col-4">
+                <div class="card-body">
+                    <p class="card-title text-muted">正確字數</p>
+                    <p class="card-text font-weight-bolder" id="correctCount">0</p>
+                </div>
+            </div>
+
+            <!-- 錯誤字數顯示 -->
+            <div class="col-4">
+                <div class="card-body">
+                    <p class="card-title text-muted">錯誤字數</p>
+                    <p class="card-text font-weight-bolder" id="incorrectCount">0</p>
+                </div>
+            </div>
+
+            <!-- 正確率顯示 -->
+            <div class="col-4">
+                <div class="card-body">
+                    <p class="card-title text-muted">正確率</p>
+                    <p class="card-text font-weight-bolder" id="accuracy">0%</p>
+                </div>
+            </div>
+        </div>
+        <!-- 練習文字顯示區域 -->
+        <div class="text-container" id="exerciseText"></div>
+
+        <!-- 打字練習區域 -->
+        <div id="google-form">
+            <!-- 標點符號按鈕 -->
+            <label>標點符號：</label>
+            <div id="inputButtons">
+                <button type="button" class="input-symbol" data-symbol="，">，</button>
+                <button type="button" class="input-symbol" data-symbol="。">。</button>
+                <button type="button" class="input-symbol" data-symbol="、">、</button>
+                <button type="button" class="input-symbol" data-symbol="！">！</button>
+                <button type="button" class="input-symbol" data-symbol="：">：</button>
+                <button type="button" class="input-symbol" data-symbol="「">「</button>
+                <button type="button" class="input-symbol" data-symbol="」">」</button>
+                <button type="button" class="input-symbol" data-symbol="；">；</button>
+                <!-- 添加更多按鈕 -->
+            </div>
+            <!-- 文字輸入框 -->
+            <textarea id="inputField" placeholder="請在此處輸入" required></textarea>
+            <!-- 字數統計顯示 -->
+            <div class="word-count-container">
+                <span id="currentWordCount">0</span>/<span id="totalWordCount">0</span> 字數
+            </div>
+            <!-- 載入圖示 -->
+            <div id="loading-icon" class="loading-icon" style="display: none; align-self: center;">
+                <div class="spinner-border text-primary" role="status">
+                </div>
+            </div>
+            <!-- 提交按鈕 -->
+            <button class="btn btn-primary" id="submitBtn" type="submit" onclick="submitExercise()">儲存進度</button>
+        </div>
+    </main>
+
+    <!-- 頁腳 -->
+    <footer class="footer-container">
+        <footer>
+            <p>Copyright © SKHTKPSS.<br>All rights reserved. Powered by NKO</p>
+        </footer>
     </div>
-  </nav>
 
-  <!-- 練習頁面 -->
-  <div class="page-container">
-    <div class="row record-container">
-      <div class="col-4">
-        <div class="card-body">
-          <p class="card-title text-muted">正確字數</p>
-          <p class="card-text font-weight-bolder" id="correctCount">0</p>
-        </div>
-      </div>
+    <!-- JavaScript 引用 -->
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+        integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <!-- 引入Bootstrap 5 JS 和 Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <!-- 引入OpenCC 繁簡轉換工具 -->
+    <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
+    <!-- 引入自定義工具函數 -->
+    <script src="js/util.js"></script>
+    <!-- 引入繁簡轉換相關的函數 -->
+    <script src="js/tongwen-ts.js"></script>
+    <!-- 引入練習頁面的主要腳本 -->
+    <script src="js/exercise-script.js"></script>
 
-      <div class="col-4">
-        <div class="card-body">
-          <p class="card-title text-muted">錯誤字數</p>
-          <p class="card-text font-weight-bolder" id="incorrectCount">0</p>
-        </div>
-      </div>
+    <script>
+        // JavaScript 程式碼控制字根表側邊欄的顯示與隱藏
+        $(document).ready(function () {
+            // 獲取字根表側邊欄和開關按鈕的引用
+            const keyTableSidebar = $('#keyTableSidebar');
+            const keyTableToggleButton = $('#keyTableToggleButton');
 
-      <div class="col-4">
-        <div class="card-body">
-          <p class="card-title text-muted">正確率</p>
-          <p class="card-text font-weight-bolder" id="accuracy">0%</p>
-        </div>
-      </div>
-    </div>
-    <div class="text-container" id="exerciseText"></div>
-
-    <!-- 打字練習的地方，表單提交到Google表單 -->
-    <div id="google-form">
-      <label>標點符號：</label>
-      <div id="inputButtons">
-        <button type="button" class="input-symbol" data-symbol="，">，</button>
-        <button type="button" class="input-symbol" data-symbol="。">。</button>
-        <button type="button" class="input-symbol" data-symbol="、">、</button>
-        <button type="button" class="input-symbol" data-symbol="！">！</button>
-        <button type="button" class="input-symbol" data-symbol="：">：</button>
-        <button type="button" class="input-symbol" data-symbol="「">「</button>
-        <button type="button" class="input-symbol" data-symbol="」">」</button>
-        <button type="button" class="input-symbol" data-symbol="；">；</button>
-        <!-- 添加更多按钮 -->
-      </div>
-      <textarea id="inputField" placeholder="請在此處輸入" required></textarea>
-      <div class="word-count-container">
-        <span id="currentWordCount">0</span>/<span id="totalWordCount">0</span> 字數
-      </div>
-      <div id="loading-icon" class="loading-icon" style="display: none; align-self: center;">
-        <div class="spinner-border text-primary" role="status">
-        </div>
-      </div>
-      <!-- 提交按鈕 -->
-      <button class= "btn btn-primary" id="submitBtn" type="submit" onclick="submitExercise()">儲存進度</button>
-    </div>
-  </div>
-
-
-  <div class="footer-container">
-    <footer>
-      <p>Copyright © SKHTKPSS.<br>All rights reserved. Powered by NKO</p>
-    </footer>
-  </div>
+            // 按鈕點擊事件處理函數
+            keyTableToggleButton.on('click', function () {
+                // 切換側邊欄的 "open" 類，控制側邊欄的顯示與隱藏
+                keyTableSidebar.toggleClass('open');
+                // 切換按鈕文字
+                if (keyTableSidebar.hasClass('open')) {
+                    $(this).text('隱藏字根表');
+                } else {
+                    $(this).text('顯示字根表');
+                }
+            });
+        });
+    </script>
 </body>
-
-<!-- Bootstrap 5 JS 和 Popper.js -->
-<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
-  integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
-<script src="js/util.js"></script>
-<script src="js/tongwen-ts.js"></script>
-<script src="js/exercise-script.js"></script>
 
 </html>
