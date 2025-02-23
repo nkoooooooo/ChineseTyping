@@ -221,14 +221,15 @@ function insertSymbolAtCursor(symbol) {
 }
 
 // 函數：顯示練習內容
-function displayExercise(text1) {
+function displayExercise(text1, text2) {
   const exerciseText = document.getElementById("exerciseText");
   exerciseText.innerHTML = "";
 
   text1.split("").forEach((char, index) => {
+      const keyStroke = text2.split(" ")[index] || "";
       const charElement = document.createElement("div");
       charElement.classList.add("character");
-      charElement.innerHTML = `<span>${char}</span>`;
+      charElement.innerHTML = `<span>${char}</span><sub>${keyStroke}</sub>`;
       exerciseText.appendChild(charElement);
   });
 }
@@ -303,7 +304,7 @@ function initPage() {
   const exercise = exercises.find(ex => ex.id === exerciseId);
 
   if (exercise) {
-      displayExercise(exercise.text1);
+      displayExercise(exercise.text1, exercise.text2);
       document.getElementById("totalWordCount").textContent = exercise.text1.length;
   }
 }
