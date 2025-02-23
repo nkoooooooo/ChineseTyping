@@ -3,13 +3,14 @@
     --secondary-color: #6c757d;
     --font-size-base: 16px;
     --navbar-height: 56px;
+    --font-family-base: "Noto Sans TC";
 }
 
 html,
 body {
     height: 100%;
     margin: 0;
-    font-family: "Noto Sans TC", sans-serif;
+    font-family: var(--font-family-base);
     display: flex;
     flex-direction: column;
     font-size: var(--font-size-base);
