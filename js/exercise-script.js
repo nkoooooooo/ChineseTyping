@@ -1,28 +1,35 @@
+// 異步函數：提交練習結果到 Google 表單
 async function submitExercise() {
   const exerciseId = new URLSearchParams(window.location.search).get("id");
-  const exercises = getDataFromSessionStorage("exercises").data;
+  const exercisesData = getDataFromSessionStorage("exercises");
+
+  if (!exercisesData || !exercisesData.data) {
+      console.error("練習資料未找到");
+      return;
+  }
+  const exercises = exercisesData.data;
   const exercise = exercises.find(ex => ex.id === exerciseId);
   const user = SessionStorageUtil.getItem("user");
 
   const inputField = document.getElementById("inputField");
-  const correctCount = document.getElementById("correctCount");
-  const incorrectCount = document.getElementById("incorrectCount");
-  const accuracy = document.getElementById("accuracy");
-  const totalWordCount = document.getElementById("totalWordCount");
+  const correctCountElement = document.getElementById("correctCount");
+  const incorrectCountElement = document.getElementById("incorrectCount");
+  const accuracyElement = document.getElementById("accuracy");
+  const totalWordCountElement = document.getElementById("totalWordCount");
   const submitBtn = document.getElementById("submitBtn");
   const loadingIcon = document.getElementById("loading-icon");
 
   const submissionData = {
-    email: user.email,
-    name: user.name,
-    id: exerciseId,
-    title: exercise.title,
-    content: inputField.value,
-    correctCount: correctCount.innerHTML,
-    incorrectCount: incorrectCount.innerHTML,
-    accuracy: accuracy.innerHTML.replace("%", ""),
-    total: totalWordCount.innerHTML,
-    time: new Date().toLocaleString()
+      email: user.email,
+      name: user.name,
+      id: exerciseId,
+      title: exercise.title,
+      content: inputField.value,
+      correctCount: correctCountElement.innerHTML,
+      incorrectCount: incorrectCountElement.innerHTML,
+      accuracy: accuracyElement.innerHTML.replace("%", ""),
+      total: totalWordCountElement.innerHTML,
+      time: new Date().toLocaleString()
   };
 
   loadingIcon.style.display = "block";
@@ -31,91 +38,127 @@ async function submitExercise() {
   submitBtn.textContent = "儲存中...";
 
   try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbweAN6d6s9HmZLfWsigcb6eteHRxHcTPb-fy7nsgP7-TY2cP1JnLI4_x10M7inaYWeU5w/exec", {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(submissionData)
-    });
+      const response = await fetch("https://script.google.com/macros/s/AKfycbweAN6d6s9HmZLfWsigcb6eteHRxHcTPb-fy7nsgP7-TY2cP1JnLI4_x10M7inaYWeU5w/exec", {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(submissionData)
+      });
 
-    if (!response.ok) throw new Error("Network response was not ok");
+      if (!response.ok) {
+          throw new Error(`Network response was not ok, status: ${response.status}`);
+      }
 
-    await updateUserRecord(user.email);
+      await updateUserRecord(user.email);
 
-    loadingIcon.style.display = "none";
-    submitBtn.disabled = false;
-    submitBtn.classList.replace("btn-secondary", "btn-primary");
-    submitBtn.textContent = "儲存進度";
+      loadingIcon.style.display = "none";
+      submitBtn.disabled = false;
+      submitBtn.classList.replace("btn-secondary", "btn-primary");
+      submitBtn.textContent = "儲存進度";
   } catch (error) {
-    console.error("Error fetching data:", error);
+      console.error("儲存練習進度時發生錯誤:", error);
+      alert("儲存練習進度時發生錯誤，請檢查網路連線或稍後再試。");
+
+      loadingIcon.style.display = "none";
+      submitBtn.disabled = false;
+      submitBtn.classList.replace("btn-secondary", "btn-primary");
+      submitBtn.textContent = "儲存進度";
   }
 }
 
+// 異步函數：更新使用者記錄
 async function updateUserRecord(email) {
   try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbwNZeJW5Kv8qPdJq2BD24-NSTFJbDWVYhB4ZYlD4ORgrAmcGuqCkAODXmO_BvGJiSS4Hw/exec", {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ email })
-    });
+      const response = await fetch("https://script.google.com/macros/s/AKfycbwNZeJW5Kv8qPdJq2BD24-NSTFJbDWVYhB4ZYlD4ORgrAmcGuqCkAODXmO_BvGJiSS4Hw/exec", {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ email })
+      });
 
-    if (!response.ok) throw new Error("Network response was not ok");
+      if (!response.ok) {
+          throw new Error(`Network response was not ok, status: ${response.status}`);
+      }
 
-    const data = await response.json();
-    SessionStorageUtil.setItem("records", JSON.stringify(data));
+      const data = await response.json();
+      SessionStorageUtil.setItem("records", JSON.stringify(data));
   } catch (error) {
-    console.error("Error fetching data:", error);
+      console.error("更新使用者記錄時發生錯誤:", error);
+      alert("更新使用者記錄時發生錯誤，請檢查網路連線或稍後再試。");
   }
 }
 
+// 函數：更新 UI 元素
+function updateUI(correctCount, incorrectCount, accuracy, currentWordCount) {
+  document.getElementById("correctCount").textContent = correctCount;
+  document.getElementById("incorrectCount").textContent = incorrectCount;
+  document.getElementById("accuracy").textContent = accuracy;
+  document.getElementById("currentWordCount").textContent = currentWordCount;
+}
+
+// 函數：處理文字輸入框的輸入
 function handleInputField() {
   const inputField = document.getElementById("inputField");
   const exerciseId = new URLSearchParams(window.location.search).get("id");
-  const exercise = getDataFromSessionStorage("exercises").data.find(ex => ex.id === exerciseId);
+  const exercisesData = getDataFromSessionStorage("exercises");
 
-  // 將使用者輸入的文字去除空格，並轉換為陣列
+  if (!exercisesData || !exercisesData.data) {
+      console.error("練習資料未找到");
+      return;
+  }
+  const exercises = exercisesData.data;
+  const exercise = exercises.find(ex => ex.id === exerciseId);
+
+  if (!exercise) {
+      console.error("找不到指定的練習");
+      return;
+  }
+
   const inputCharacters = inputField.value.replace(/\s/g, "").split("");
-  // 將練習的原文轉換為陣列
   const exerciseCharacters = exercise.text1.split("");
-  // 獲取所有表示原文的 span 元素
   const characterElements = document.querySelectorAll("#exerciseText .character");
 
   let correctCount = 0;
   let incorrectCount = 0;
+  const updates = [];
 
   characterElements.forEach((element, index) => {
-    const inputChar = inputCharacters[index];
-    if (inputChar) {
-      // 將使用者輸入的字元和原文的字元都轉換為簡體中文
-      const simplifiedInputChar = toSimp(inputChar);
-      const simplifiedExerciseChar = toSimp(exerciseCharacters[index]);
+      const inputChar = inputCharacters[index];
+      let color = "";
 
-      if (simplifiedInputChar === simplifiedExerciseChar) {
-        element.style.color = "green";
-        correctCount++;
-      } else {
-        element.style.color = "red";
-        incorrectCount++;
+      if (inputChar) {
+          const simplifiedInputChar = toSimp(inputChar);
+          const simplifiedExerciseChar = toSimp(exerciseCharacters[index]);
+
+          if (simplifiedInputChar === simplifiedExerciseChar) {
+              color = "green";
+              correctCount++;
+          } else {
+              color = "red";
+              incorrectCount++;
+          }
       }
-    } else {
-      element.style.color = "";
-    }
+
+      updates.push({ element, color });
+  });
+
+  updates.forEach(({ element, color }) => {
+      element.style.color = color;
   });
 
   for (let i = inputCharacters.length; i < characterElements.length; i++) {
-    characterElements[i].style.color = "";
+      characterElements[i].style.color = "";
   }
 
   const totalCount = inputCharacters.length;
-  const accuracy = ((correctCount / exerciseCharacters.length) * 100).toFixed(2) + "%";
+  const accuracy = exerciseCharacters.length > 0 ? ((correctCount / exerciseCharacters.length) * 100).toFixed(2) + "%" : "0.00%";
 
-  document.getElementById("currentWordCount").textContent = totalCount;
-  document.getElementById("correctCount").textContent = correctCount;
-  document.getElementById("incorrectCount").textContent = incorrectCount;
-  document.getElementById("accuracy").textContent = accuracy;
+  updateUI(correctCount, incorrectCount, accuracy, totalCount);
 
-  smoothScrollTo(characterElements[Math.max(0, inputCharacters.length - 1)].offsetTop - 115);
+  if (inputCharacters.length > 0) {
+      smoothScrollTo(characterElements[Math.max(0, inputCharacters.length - 1)].offsetTop - 190);
+  }
 }
 
+// 函數：平滑滾動到指定位置
 function smoothScrollTo(target) {
   const exerciseText = document.getElementById("exerciseText");
   const start = exerciseText.scrollTop;
@@ -124,17 +167,22 @@ function smoothScrollTo(target) {
   let currentTime = 0;
 
   function animateScroll() {
-    currentTime += 20;
-    const val = Math.easeInOutQuad(currentTime, start, change, duration);
-    exerciseText.scrollTop = val;
-    if (currentTime < duration) {
-      requestAnimationFrame(animateScroll);
-    }
+      currentTime += 20;
+      const val = Math.easeInOutQuad(currentTime, start, change, duration);
+
+      requestAnimationFrame(() => {
+          exerciseText.scrollTop = val;
+      });
+
+      if (currentTime < duration) {
+          requestAnimationFrame(animateScroll);
+      }
   }
 
   requestAnimationFrame(animateScroll);
 }
 
+// 函數：計算平滑滾動的數值
 Math.easeInOutQuad = function (t, b, c, d) {
   t /= d / 2;
   if (t < 1) return c / 2 * t * t + b;
@@ -142,10 +190,12 @@ Math.easeInOutQuad = function (t, b, c, d) {
   return -c / 2 * (t * (t - 2) - 1) + b;
 };
 
+// 函數：阻止預設行為
 function preventDefaultAction(e) {
   e.preventDefault();
 }
 
+// 函數：檢查是否觸發禁止的行為
 function checkForProhibitedActions(e) {
   const isCtrlKey = e.ctrlKey;
   const isProhibitedKey = [67, 86, 88, 65, 83, 123].includes(e.keyCode);
@@ -154,10 +204,11 @@ function checkForProhibitedActions(e) {
   const isFKey = e.keyCode >= 112 && e.keyCode <= 123 && e.keyCode !== 116;
 
   if ((isCtrlKey && isProhibitedKey) || isAltKey || isFKey || isSpecialKey) {
-    e.preventDefault();
+      e.preventDefault();
   }
 }
 
+// 函數：在游標位置插入符號
 function insertSymbolAtCursor(symbol) {
   const inputField = document.getElementById("inputField");
   const { selectionStart } = inputField;
@@ -166,59 +217,38 @@ function insertSymbolAtCursor(symbol) {
   inputField.value = value.slice(0, selectionStart) + symbol + value.slice(selectionStart);
   inputField.setSelectionRange(selectionStart + symbol.length, selectionStart + symbol.length);
   inputField.focus();
+  handleInputField();
 }
 
-function displayExercise(text1, text2) {
+// 函數：顯示練習內容
+function displayExercise(text1) {
   const exerciseText = document.getElementById("exerciseText");
   exerciseText.innerHTML = "";
 
   text1.split("").forEach((char, index) => {
-    const subText = text2.split(" ")[index] || "";
-    const charElement = document.createElement("div");
-    charElement.classList.add("character");
-    charElement.innerHTML = `<span>${char}</span><sub>${subText}</sub>`;
-    exerciseText.appendChild(charElement);
+      const charElement = document.createElement("div");
+      charElement.classList.add("character");
+      charElement.innerHTML = `<span>${char}</span>`;
+      exerciseText.appendChild(charElement);
   });
 }
 
+// 函數：從 SessionStorage 中獲取資料
 function getDataFromSessionStorage(key) {
   const item = SessionStorageUtil.getItem(key);
   return item ? JSON.parse(item) : null;
 }
 
+// 函數：登出
 function logout() {
   SessionStorageUtil.clear();
   window.location.href = "login.html";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const user = SessionStorageUtil.getItem("user");
-  if (!user) return window.location.href = "login.html";
-
-  document.getElementById("username").textContent = user.name;
-  document.getElementById("userrole").textContent = user.type;
-
-  const exerciseId = new URLSearchParams(window.location.search).get("id");
-  const records = getDataFromSessionStorage("records").data;
-  const record = records.find(rec => rec.id === exerciseId);
-
-  if (record) {
-    document.getElementById("correctCount").textContent = record.correct;
-    document.getElementById("incorrectCount").textContent = record.incorrect;
-    document.getElementById("accuracy").textContent = ((record.correct / record.word) * 100).toFixed(2) + "%";
-    document.getElementById("inputField").value = record.text;
-    document.getElementById("currentWordCount").textContent = record.text.length;
-  }
-
-  const exercises = getDataFromSessionStorage("exercises").data;
-  const exercise = exercises.find(ex => ex.id === exerciseId);
-
-  if (exercise) {
-    displayExercise(exercise.text1, exercise.text2);
-    document.getElementById("totalWordCount").textContent = exercise.text1.length;
-  }
-
+// 函數：初始化事件監聽器
+function initEventListeners() {
   const inputField = document.getElementById("inputField");
+
   inputField.addEventListener("input", handleInputField);
   inputField.addEventListener("paste", preventDefaultAction);
   inputField.addEventListener("copy", preventDefaultAction);
@@ -231,12 +261,56 @@ document.addEventListener("DOMContentLoaded", () => {
   inputField.addEventListener("mousemove", preventDefaultAction);
   inputField.addEventListener("keydown", checkForProhibitedActions);
 
-  document.querySelectorAll(".input-symbol").forEach(symbolBtn => {
-    symbolBtn.addEventListener("click", function () {
-      insertSymbolAtCursor(this.dataset.symbol);
-      handleInputField();
-    });
+  const symbolButtons = document.querySelectorAll(".input-symbol");
+  symbolButtons.forEach(symbolBtn => {
+      symbolBtn.addEventListener("click", function () {
+          insertSymbolAtCursor(this.dataset.symbol);
+      });
   });
+}
 
+// 函數：初始化頁面
+function initPage() {
+  const user = SessionStorageUtil.getItem("user");
+  if (!user) {
+      window.location.href = "login.html";
+      return;
+  }
+
+  document.getElementById("username").textContent = user.name;
+  document.getElementById("userrole").textContent = user.permission;
+
+  const exerciseId = new URLSearchParams(window.location.search).get("id");
+  const recordsData = getDataFromSessionStorage("records");
+
+  if (!recordsData || !recordsData.data) {
+      console.warn("使用者記錄未找到");
+  }
+  const records = recordsData ? recordsData.data : [];
+  const record = records.find(rec => rec.id === exerciseId);
+
+  if (record) {
+      updateUI(record.correct, record.incorrect, ((record.correct / record.word) * 100).toFixed(2) + "%", record.text.length);
+      document.getElementById("inputField").value = record.text;
+  }
+
+  const exercisesData = getDataFromSessionStorage("exercises");
+  if (!exercisesData || !exercisesData.data) {
+      console.error("練習資料未找到");
+      return;
+  }
+  const exercises = exercisesData.data;
+  const exercise = exercises.find(ex => ex.id === exerciseId);
+
+  if (exercise) {
+      displayExercise(exercise.text1);
+      document.getElementById("totalWordCount").textContent = exercise.text1.length;
+  }
+}
+
+// DOMContentLoaded 事件監聽器：在 DOM 載入完成後執行
+document.addEventListener("DOMContentLoaded", () => {
+  initPage();
+  initEventListeners();
   handleInputField();
 });
