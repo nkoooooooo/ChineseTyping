@@ -1,34 +1,67 @@
+// 監聽 DOMContentLoaded 事件，確保所有 HTML 元素都已載入
 document.addEventListener('DOMContentLoaded', function () {
+  // 從 SessionStorage 獲取使用者資訊
   const user = SessionStorageUtil.getItem('user');
+
+  // 檢查使用者是否已登入，如果沒有，則重定向到登入頁面
   if (!user) {
-    return window.location.href = 'login.html';
+      return window.location.href = 'login.html';
   }
 
-  // 更新用戶名稱及角色
+  // 更新頁面上的使用者名稱和角色
   document.getElementById('username').textContent = user.name;
   document.getElementById('userrole').textContent = user.permission;
 
-  // 顯示/隱藏管理員專區
+  // 獲取管理員專區的 DOM 元素
   const adminSection = document.getElementById('admin-section');
+
+  // 檢查使用者是否具有管理員或教師權限
   if (user.permission === '教師' || user.permission === '管理員') {
-      adminSection.style.display = 'block'; // 顯示管理員專區
+      // 如果是，則顯示管理員專區
+      adminSection.style.display = 'block';
 
-      // 綁定事件：新增題目 (這裡只是一個示例，你需要實現具體的邏輯)
+      // 為「新增題目」按鈕綁定點擊事件處理函數
       document.getElementById('addExerciseBtn').addEventListener('click', openAddExerciseModal);
-
   } else {
-      adminSection.style.display = 'none'; // 隱藏管理員專區
+      // 如果不是，則隱藏管理員專區
+      adminSection.style.display = 'none';
   }
 
-  // 載入數據
+  // 監聽班級切換事件
+  const classList = document.getElementById("classList");
+  classList.addEventListener("click", function (e) {
+      if (e.target && e.target.classList.contains("class-item")) {
+          e.preventDefault();
+          const selectedClass = e.target.dataset.class;
+          document.getElementById("currentClass").textContent = selectedClass;
+
+          // 更新 SessionStorage 中的使用者班級資訊
+          const currentUser = SessionStorageUtil.getItem('user');
+          currentUser.class = selectedClass;
+          SessionStorageUtil.setItem('user', currentUser);
+
+          console.log("切換到班級：", selectedClass);
+
+          // 顯示「加載中」提示
+          const tableBody = document.querySelector('.table tbody');
+          tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">加載中...</td></tr>';
+
+          // 重新渲染練習列表
+          fetchExercisesDataAndUserRecord();
+      }
+  });
+
+  // 檢查 SessionStorage 中是否已存在練習題和使用者記錄資料
   if (getDataFromSessionStorage('exercises') && getDataFromSessionStorage('records')) {
-    renderExercisesList();
+      // 如果是，則直接渲染練習題列表
+      renderExercisesList();
   } else {
-    fetchExercisesDataAndUserRecord();
+      // 如果否，則從伺服器獲取練習題和使用者記錄資料
+      fetchExercisesDataAndUserRecord();
   }
 });
 
-// 打開 "新增題目" 模態框
+// 函數：打開新增練習題的模態框
 function openAddExerciseModal() {
   // 創建模態框的 HTML 結構
   const modalHTML = `
@@ -89,7 +122,7 @@ function openAddExerciseModal() {
   });
 }
 
-// 提交新題目
+// 異步函數：提交新增的練習題
 async function submitNewExercise() {
   // 獲取表單數據
   const exercise = {
@@ -121,9 +154,9 @@ async function submitNewExercise() {
       if (response) {
           // 關閉模態框
           addExerciseModal.hide();
-            //成功後刷新
-            await fetchExercisesDataAndUserRecord();
-            alert('題目新增成功！');
+          //成功後刷新
+          await fetchExercisesDataAndUserRecord();
+          alert('題目新增成功！');
       }
 
 
@@ -137,116 +170,173 @@ async function submitNewExercise() {
   }
 }
 
+// 異步函數：獲取練習題和使用者記錄資料
 async function fetchExercisesDataAndUserRecord() {
   try {
-    //const [exercisesData, userRecord] = 
-    await Promise.all([
-      fetchExercisesData(),
-      fetchUserRecord(),
-    ]);
-    //console.log('All data loaded', { exercisesData, userRecord });
-    renderExercisesList();
+      // 使用 Promise.all 並行獲取練習題和使用者記錄資料，提高效率
+      await Promise.all([
+          fetchExercisesData(),
+          fetchUserRecord(),
+      ]);
+
+      // 資料獲取完成後，渲染練習題列表
+      renderExercisesList();
   } catch (error) {
-    console.error('Error fetching data:', error);
+      // 捕獲並顯示錯誤
+      console.error('Error fetching data:', error);
   }
 }
 
+// 異步函數：獲取練習題資料
 async function fetchExercisesData() {
   console.log("Fetching exercises data");
-  const classid = SessionStorageUtil.getItem('user').class;
-  return fetchData('https://script.google.com/macros/s/AKfycbyV8R5HIWe7PoKQN9BOaBW5240Sebj3Ld9qUOtkM8p3H8WxBAyHeBpbM3kQNPg5OdAa/exec', 'exercises', {classid});
+  // 從 SessionStorage 獲取使用者資訊，並取得班級 ID
+  const user = SessionStorageUtil.getItem('user');
+  const classid = user.class;
+  // 調用 fetchData 函數從伺服器獲取練習題資料
+  return fetchData('https://script.google.com/macros/s/AKfycbyV8R5HIWe7PoKQN9BOaBW5240Sebj3Ld9qUOtkM8p3H8WxBAyHeBpbM3kQNPg5OdAa/exec', 'exercises', { classid });
 }
 
+// 異步函數：獲取使用者記錄資料
 async function fetchUserRecord() {
   console.log("Fetching user record");
-  const email = SessionStorageUtil.getItem('user').email;
+  // 從 SessionStorage 獲取使用者資訊，並取得使用者 Email
+  const user = SessionStorageUtil.getItem('user');
+  const email = user.email;
+  // 調用 fetchData 函數從伺服器獲取使用者記錄資料
   return fetchData('https://script.google.com/macros/s/AKfycbwNZeJW5Kv8qPdJq2BD24-NSTFJbDWVYhB4ZYlD4ORgrAmcGuqCkAODXmO_BvGJiSS4Hw/exec', 'records', { email });
 }
 
+// 異步函數：從伺服器獲取資料
 async function fetchData(url, storageKey, body = null) {
+  // 根據是否有 body 參數，設定不同的請求選項
   const options = body ? {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(body),
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(body),
   } : {};
 
   try {
-    const response = await fetch(url, options);
-    if (!response.ok) throw new Error('Network response was not ok');
+      // 發送請求到伺服器
+      const response = await fetch(url, options);
 
-    const data = await response.json();
-    SessionStorageUtil.setItem(storageKey, JSON.stringify(data));
-    return data;
+      // 檢查回應是否成功
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+
+      // 解析回應資料
+      const data = await response.json();
+
+      // 如果有 storageKey，則將資料儲存到 SessionStorage
+      if (storageKey) {
+          SessionStorageUtil.setItem(storageKey, JSON.stringify(data));
+      }
+
+      // 返回資料
+      return data;
   } catch (error) {
-    console.error(`Error fetching data from ${url}:`, error);
+      // 顯示錯誤訊息
+      console.error(`Error fetching data from $:`, error);
   }
 }
 
-// 從 Session Storage 讀取數據的函數
+// 函數：從 Session Storage 讀取數據
 function getDataFromSessionStorage(item) {
+  // 從 SessionStorage 獲取指定項目
   const storedData = SessionStorageUtil.getItem(item);
+  // 如果有資料，則解析 JSON 字串並返回，否則返回 null
   return storedData ? JSON.parse(storedData) : null;
 }
 
-//渲染打字練習列表
+// 函數：渲染打字練習列表
 function renderExercisesList() {
+  // 獲取表格的 tbody 元素
   const tableBody = document.querySelector('.table tbody');
-  tableBody.innerHTML = ''; // 清空现有内容
+  // 清空表格內容
+  tableBody.innerHTML = '';
 
-  const exercises = getDataFromSessionStorage('exercises').data;
-  const records = getDataFromSessionStorage('records').data;
+  // 從 SessionStorage 獲取練習題和使用者記錄資料
+  const exercisesData = getDataFromSessionStorage('exercises');
+  const recordsData = getDataFromSessionStorage('records');
+
+  // 檢查 exercisesData 和 recordsData 是否存在且包含 data 屬性
+  if (!exercisesData || !exercisesData.data || !recordsData || !recordsData.data) {
+      console.error('練習題或使用者記錄資料未找到');
+      tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">沒有可用的練習題</td></tr>';
+      return;
+  }
+
+  const exercises = exercisesData.data;
+  const records = recordsData.data;
 
   // 使用 Map 提高查找速度
   const recordsMap = new Map(records.map(record => [record.id, record.progress]));
 
-  // 使用 DocumentFragment 提高性能
+  // 使用 DocumentFragment 提高效能
   const fragment = document.createDocumentFragment();
 
+  // 遍歷練習題資料
   exercises.forEach((exercise) => {
-    const progress = recordsMap.get(exercise.id) || 0; // 默认为 0
-    const row = createRow(exercise, progress);
-    fragment.appendChild(row);
+      // 獲取練習題的進度，如果沒有則默認為 0
+      const progress = recordsMap.get(exercise.id) || 0;
+      // 創建表格行
+      const row = createRow(exercise, progress);
+      // 將表格行添加到 DocumentFragment
+      fragment.appendChild(row);
   });
 
-  tableBody.appendChild(fragment); // 一次性附加所有行
+  // 將所有表格行一次性添加到表格中
+  tableBody.appendChild(fragment);
 }
 
+// 函數：創建表格行
 function createRow(exercise, progress) {
+  // 創建 tr 元素
   const row = document.createElement('tr');
+  // 根據進度獲取對應的顏色
   const progressColor = getProgressColor(progress);
+  // 根據進度判斷是否添加動畫效果
   const progressClass = progress >= 100 ? 'progress-bar-striped progress-bar-animated' : '';
 
-  const user = SessionStorageUtil.getItem('user'); // 獲取當前用戶信息
+  // 獲取當前使用者資訊
+  const user = SessionStorageUtil.getItem('user');
+  // 判斷當前使用者是否為管理員或教師
   const isAdminOrTeacher = user && (user.permission === '教師' || user.permission === '管理員');
 
+  const progressText = `${progress}%`;
+
+  // 設定表格行的 HTML 內容
   row.innerHTML = `
           <td class="align-middle">
-            <p>${exercise.id}</p>
+              <p>${exercise.id}</p>
           </td>
           <td class="align-middle">
-            <h6 class="mb-1 font-13">${exercise.title}</h6>
-            <span class="m-0 badge bg-secondary">${exercise.type}</span>
+              <h6 class="mb-1 font-13">${exercise.title}</h6>
+              <span class="m-0 badge bg-secondary">${exercise.type}</span>
           </td>
           <td class="align-middle">
-            <div class="progress-text">${progress}%</div>
-            <div class="progress" data-height="6" style="height: 6px;">
-              <div class="progress-bar ${progressClass}" data-width="${progress}%" style="width: ${progress}%; background-color: ${progressColor};""></div>
-            </div>
+              <div class="progress-text">${progressText}</div>
+              <div class="progress" data-height="6" style="height: 6px;">
+                  <div class="progress-bar ${progressClass}" data-width="${progress}%" style="width: ${progress}%; background-color: ${progressColor};"></div>
+              </div>
           </td>
           <td class="align-middle">
-            <a href="exercise.html?id=${exercise.id}" data-toggle="tooltip" title="" data-original-title="view" style="color:#ffffff;">
-            <button type="button" class="btn btn-primary btn-sm">
-            <i class="fas fa-solid fa-magnifying-glass"></i></button></a>
-            ${isAdminOrTeacher ? `
-              <button type="button" class="btn btn-secondary btn-sm" data-toggle="tooltip" title="修改設定" onclick="openEditExerciseModal('${exercise.id}')">
-                <i class="fa fa-cog" aria-hidden="true"></i>
-              </button>
-            ` : ''}
+              <a href="exercise.html?id=${exercise.id}" data-toggle="tooltip" title="" data-original-title="view" style="color:#ffffff;">
+              <button type="button" class="btn btn-primary btn-sm">
+              <i class="fas fa-solid fa-magnifying-glass"></i></button></a>
+              ${isAdminOrTeacher ? `
+                  <button type="button" class="btn btn-secondary btn-sm" data-toggle="tooltip" title="修改設定" onclick="openEditExerciseModal('${exercise.id}')">
+                      <i class="fa fa-cog" aria-hidden="true"></i>
+                  </button>
+              ` : ''}
           </td>
-        `;
+      `;
+  // 返回創建的表格行
   return row;
 }
 
+// 函數：根據進度獲取對應的顏色
 function getProgressColor(progress) {
   if (progress >= 100) return '#1E90FF'; // Blue
   if (progress >= 75) return '#28a745'; // Green
@@ -256,9 +346,10 @@ function getProgressColor(progress) {
   return '#6c757d'; // Grey for 0-24%
 }
 
+// 函數：登出
 function logout() {
-  // 清除登录状态
+  // 清除登入狀態
   SessionStorageUtil.clear();
-  // 重定向回登录界面
+  // 重定向回登入介面
   window.location.href = 'login.html';
 }
