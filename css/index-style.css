@@ -149,15 +149,21 @@ footer p {
 
 /* 響應式調整 */
 @media (max-width: 768px) {
+    /*
     .admin-section {
-        margin: 10px; /* 小屏幕上减少外边距 */
-        padding: 10px; /* 小屏幕上减少内边距 */
+        margin: 10px;  小屏幕上减少外边距 
+        padding: 10px;  小屏幕上减少内边距 
     }
-
+    */
     .admin-section .btn {
         margin-bottom: 5px; /* 小屏幕上按钮之间增加下边距 */
         margin-right: 0; /* 移除右边距，使按钮占据整行 */
     }
+}
+
+.dropdown-toggle
+{
+    white-space: normal;
 }
 
 /* 排名榜區域樣式 */
