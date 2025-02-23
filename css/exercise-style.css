@@ -78,7 +78,9 @@ footer p {
 
 .character sub {
     display: block;
+    /*
     color: #888;
+    */
     margin-top: 5px;
 }
 
