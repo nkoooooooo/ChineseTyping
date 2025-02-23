@@ -2,109 +2,148 @@
 <html lang="zh-HK">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>打字練習列表 - 中文打字平台</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap">
-  <link rel="stylesheet" href="css/index-style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>打字練習列表 - 中文打字平台</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap">
+    <link rel="stylesheet" href="css/index-style.css">
 </head>
 
 <body>
-  <!-- Sticky Navbar 上方的导航栏 -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-    <div class="container-fluid">
-      <a class="navbar-brand ms-3" href="index.html">中文打字平台</a>
-      <div class="dropdown" id="userDropdown"> <a href="#"
-          class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown"
-          aria-expanded="false">
-          <div class="navbar-text text-center p-0">
-            <span id="username">用户名</span>
-            <br>
-            <span id="userrole">學生</span>
-          </div>
-        </a>
-        <!-- 下拉菜单 -->
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-          <li><a class="dropdown-item" href="login.html" id="logout-button" onclick="logout()">登出</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <!-- 練習列表 -->
-  <div class="page-container">
-    <div class="row">
-      <div class="col-12 col-sm-12 col-md-12">
-        <div class="card">
-          <div class="card-header justify-content-center">
-            <h2>打字練習列表</h2>
-          </div>
-
-          <!-- 管理員專區 -->
-          <div id="admin-section" style="display: none; margin-left: 25px; margin-right: 25px;">
-            <div class="row">
-              <div class="col-6 d-flex align-items-center">
-                <div class="dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="classDropdown"
+    <!-- Sticky Navbar 上方的导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand ms-3" href="index.html">中文打字平台</a>
+            <div class="dropdown" id="userDropdown">
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                    切換當前班：<span id="currentClass">1D</span>
-                  </button>
-                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="classDropdown" id="classList">
-                    <li><a class="dropdown-item" href="#">1A</a></li>
-                    <li><a class="dropdown-item" href="#">1B</a></li>
-                    <li><a class="dropdown-item" href="#">1C</a></li>
-                    <li><a class="dropdown-item" href="#">1D</a></li>
-                  </ul>
+                    <div class="navbar-text text-center p-0">
+                        <span id="username">用户名</span>
+                        <br>
+                        <span id="userrole">學生</span>
+                    </div>
+                </a>
+                <!-- 下拉菜单 -->
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="login.html" id="logout-button" onclick="logout()">登出</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 練習列表 -->
+    <div class="page-container">
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-12">
+                <div class="card">
+                    <div class="card-header justify-content-center">
+                        <h2>打字練習列表</h2>
+                    </div>
+
+                    <!-- 管理員專區 -->
+                    <div id="admin-section" class="admin-section" style="display: none;">
+                      <div class="card">
+                          <div class="card-body">
+                              <div class="row align-items-center">
+                                  <div class="col-6 col-md-6 mb-2 mb-md-0">
+                                      <div class="dropdown">
+                                          <button class="btn btn-secondary dropdown-toggle" type="button" id="classDropdown"
+                                              data-bs-toggle="dropdown" aria-expanded="false">
+                                              切換當前班：<span id="currentClass">1D</span>
+                                          </button>
+                                          <ul class="dropdown-menu w-100" aria-labelledby="classDropdown" id="classList">
+                                              <li><a class="dropdown-item class-item" href="#" data-class="1A">1A</a></li>
+                                              <li><a class="dropdown-item class-item" href="#" data-class="1B">1B</a></li>
+                                              <li><a class="dropdown-item class-item" href="#" data-class="1C">1C</a></li>
+                                              <li><a class="dropdown-item class-item" href="#" data-class="1D">1D</a></li>
+                                          </ul>
+                                      </div>
+                                  </div>
+                                  <div class="col-6 col-md-6 d-flex justify-content-end">
+                                      <button class="btn btn-success me-2" id="addExerciseBtn">
+                                          <i class="fas fa-plus me-1"></i>新增題目
+                                      </button>
+                                      <!-- 後台管理按鈕 -->
+                                      <a href="admin.html" class="btn btn-primary" id="adminPanelBtn">
+                                          <i class="fas fa-cog me-1"></i>後台管理
+                                      </a>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                    </div>
+                    <!-- 管理員專區結束 -->
+
+                    <div class="card-body">
+                        <div class="table-responsive" style="overflow: hidden; outline: none;">
+                            <!-- 表格行增加條紋樣式 可滑入行 -->
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>項目</th>
+                                        <th>題目</th>
+                                        <th>狀態</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="4" style="text-align: center;">加載中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="col-6 d-flex justify-content-end">
-                <button class="btn btn-success" id="addExerciseBtn">新增題目(開發中)</button>
-              </div>
             </div>
-          </div>
-          <!-- 管理員專區結束 -->
-          
-          <div class="card-body">
-            <div class="table-responsive" style="overflow: hidden; outline: none;">
-              <!-- 表格行增加條紋樣式 可滑入行 -->
-              <table class="table table-hover">
-                <thead class="table-dark">
-                  <tr>
-                    <th>項目</th>
-                    <th>題目</th>
-                    <th>狀態</th>
-                    <th>操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colspan="4" style="text-align: center;">加載中...</td>
-                  </tr>
-                </tbody>
-              </table>
+        </div>
+      
+      <!-- 排名榜 -->
+      <div class="ranking-section">
+        <div class="card">
+            <div class="card-header justify-content-center">
+                <h2>打字高手排名榜</h2>
             </div>
-          </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>班別</th>
+                                <th>姓名</th>
+                                <th>總打字量</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ranking-table-body">
+                            <tr>
+                                <td colspan="4" style="text-align: center;">未開放相關功能...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
       </div>
     </div>
 
-  </div>
 
-  <!-- 模板來自https://www.bootdey.com/snippets/view/Assign-Project-List#html 及 https://www.bootdey.com/snippets/view/simple-Jobs-openning-list-->
+    <!-- 模板來自https://www.bootdey.com/snippets/view/Assign-Project-List#html 及 https://www.bootdey.com/snippets/view/simple-Jobs-openning-list-->
 
-  <div class="footer-container">
-    <footer>
-      <p>Copyright © SKHTKPSS.<br>All rights reserved. Powered by NKO</p>
-    </footer>
-  </div>
+    <div class="footer-container">
+        <footer>
+            <p>Copyright © SKHTKPSS.<br>All rights reserved. Powered by NKO</p>
+        </footer>
+    </div>
+
+    <script src="js/util.js"></script>
+    <script src="js/index-script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 </body>
-
-<script src="js/util.js"></script>
-<script src="js/index-script.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 </html>
