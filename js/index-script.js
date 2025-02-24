@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // 更新頁面上的使用者名稱和角色
   document.getElementById('username').textContent = user.name;
   document.getElementById('userrole').textContent = user.permission;
+  document.getElementById("currentClass").textContent = user.class;
 
   // 獲取管理員專區的 DOM 元素
   const adminSection = document.getElementById('admin-section');
