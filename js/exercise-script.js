@@ -93,11 +93,37 @@
     };
 
     // --- Utility Functions ---
+    /**
+     * Gets data safely from Session Storage using SessionStorageUtil.
+     * Ensures the data is parsed into an object/array.
+     * @param {string} key The key to retrieve.
+     * @returns {object | array | null} The parsed data or null if not found/invalid/parsing error.
+     */
     function getDataFromSessionStorage(key) {
-        // Keeping user's version
-        const item = SessionStorageUtil.getItem(key);
-        return item ? JSON.parse(item) : null;
-      }
+        try {
+            const rawValue = SessionStorageUtil.getItem(key); // Util might return string or object
+            if (rawValue !== null && rawValue !== undefined) {
+                if (typeof rawValue === 'object') {
+                    return rawValue; // Already parsed by util
+                } else if (typeof rawValue === 'string') {
+                    try {
+                        return JSON.parse(rawValue); // Parse if it's a string
+                    } catch (parseError) {
+                        console.error(`Error parsing JSON string from Session Storage item "${key}":`, parseError, "\nString was:", rawValue);
+                        return null;
+                    }
+                } else {
+                    console.warn(`Value for "${key}" has unexpected type (${typeof rawValue}):`, rawValue);
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error(`Error during SessionStorageUtil.getItem call for key "${key}":`, error);
+            return null;
+        }
+    }
 
     function scrollToElement(targetElement, containerElement) {
         if (!targetElement || !containerElement) return;

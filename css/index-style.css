@@ -1,188 +1,252 @@
+/* Global Variables & Base Styles */
 :root {
-  --font-family-base: "Noto Sans TC";
+    --font-family-base: "Noto Sans TC", sans-serif;
+    --transition-speed: 0.2s;
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --light-gray: #f8f9fa;
+    --border-color: #dee2e6;
+    --body-bg: #f4f7f6; /* Softer background */
+    --card-bg: #ffffff;
+    --card-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Softer shadow */
+    --hover-bg: rgba(0, 0, 0, 0.03);
 }
 
-html,
-body {
+html {
     height: 100%;
-    /* 确保 body 高度为 100% */
+}
+
+body {
+    min-height: 100%; /* Use min-height with flex */
     margin: 0;
-    /* 去掉默认边距 */
     font-family: var(--font-family-base);
-    background-color: #f4f4f4;
+    background-color: var(--body-bg);
     display: flex;
     flex-direction: column;
-    /* 纵向排列 */
+    font-size: 0.95rem; /* Slightly smaller base font */
+    line-height: 1.6;
 }
 
 .page-container {
-    display: flex;
-    flex-direction: column;
-    /* 纵向排列 */
-    position: relative;
-    flex: 1;
+    flex: 1 0 auto;
 }
 
-.footer-container {
-    width: 100%;
+/* Navbar */
+.navbar {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1); /* Consistent shadow */
 }
-
-footer {
-    width: 100%;
+.user-role-display {
+    font-size: 0.85em;
+    opacity: 0.8;
+    color: rgba(255, 255, 255, 0.8);
+}
+.dropdown-item {
+    transition: background-color var(--transition-speed) ease-out, color var(--transition-speed) ease-out;
+    font-size: 0.9rem;
+}
+.dropdown-item i {
+    width: 1.2em;
     text-align: center;
-    font-size: 0.9em;
-    background: #f1f1f1;
-    color: #888;
+    opacity: 0.7;
+}
+.dropdown-item:active {
+    background-color: var(--primary-color);
+    color: white !important;
 }
 
-footer p {
-    margin: 0px;
-    padding: 10px 0px 10px 0px;
-}
-
-#userrole {
-    font-size: small;
-}
-
+/* Cards */
 .card {
-    margin: 0px 30px 0px 30px;
-    display: flex;
-    background-color: #fff;
-    border-radius: 10px;
     border: none;
     position: relative;
+    background-color: var(--card-bg);
+    border-radius: 0.375rem; /* Bootstrap default */
+    box-shadow: var(--card-shadow);
+    transition: box-shadow var(--transition-speed) ease-in-out;
 }
-
+.card:hover {
+     box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1); /* Slightly larger shadow on hover */
+}
 .card .card-header {
-    width: 100%;
-    display: flex;
-    border: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1.25rem;
+    align-items: center;
+    background-color: #fff; /* Keep header white */
+}
+.card .card-body {
+    /* Padding removed for table cards */
 }
 
-.card .card-header,
-.card .card-body,
-.card .card-footer {
-    background-color: transparent;
-    padding: 20px 25px;
-}
-
-.table:not(.table-sm) thead th {
-    border-bottom: none;
-    padding-top: 15px;
-    padding-bottom: 15px;
-}
-
-.table .table-img img {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    border: 2px solid #bbbbbb;
-    -webkit-box-shadow: 5px 6px 15px 0px rgba(49, 47, 49, 0.5);
-    -moz-box-shadow: 5px 6px 15px 0px rgba(49, 47, 49, 0.5);
-    -ms-box-shadow: 5px 6px 15px 0px rgba(49, 47, 49, 0.5);
-    box-shadow: 5px 6px 15px 0px rgba(49, 47, 49, 0.5);
-    text-shadow: 0 0 black;
-}
-
-/* badge 標籤*/
-.badge {
-    vertical-align: middle;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    font-size: 12px;
-    padding: .35em .65em;
-    border-radius: .25rem;
-}
-
-/* progress-bar START */
-.progress-bar {
-    display: -ms-flexbox;
-    display: -webkit-box;
-    display: flex;
-    -ms-flex-direction: column;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    flex-direction: column;
-    -ms-flex-pack: center;
-    -webkit-box-pack: center;
-    justify-content: center;
-    overflow: hidden;
-    color: #fff;
-    text-align: center;
-    white-space: nowrap;
-    background-color: #007bff;
-    -webkit-transition: width 0.6s ease;
-    transition: width 0.6s ease;
-}
-
-.bg-success {
-    background-color: #54ca68 !important;
-}
-
-.bg-purple {
-    background-color: #9c27b0 !important;
-    color: #fff;
-}
-
-.bg-cyan {
-    background-color: #10cfbd !important;
-    color: #fff;
-}
-
-.bg-red {
-    background-color: #f44336 !important;
-    color: #fff;
-}
-
-.progress {
-    -webkit-box-shadow: 0 0.4rem 0.6rem rgba(0, 0, 0, 0.15);
-    box-shadow: 0 0.4rem 0.6rem rgba(0, 0, 0, 0.15);
-}
-
-/* progress-bar END */
-
+/* Admin Section */
 .admin-section {
-    .card .card-body {
-        padding: 0;
-    }
+    transition: background-color var(--transition-speed) ease-out;
+    border-bottom: 1px solid var(--border-color);
+}
+.admin-section .dropdown-toggle {
+    min-width: 150px;
+    font-size: 0.9rem;
+}
+.admin-section .btn-sm {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.875rem;
 }
 
-/* 響應式調整 */
+/* Table Styles */
+.table {
+    margin-bottom: 0;
+}
+.table thead th {
+    border-bottom-width: 1px;
+    padding: 0.8rem 1rem; /* Adjusted padding */
+    vertical-align: middle;
+    font-weight: 500; /* Medium weight header */
+    font-size: 0.85rem;
+    text-transform: uppercase; /* Optional: Uppercase headers */
+    letter-spacing: 0.5px; /* Optional: Spacing */
+    background-color: var(--light-gray); /* Use light gray for non-dark thead */
+}
+.table-dark thead th { /* Keep dark thead distinct */
+     background-color: #212529;
+     color: #fff;
+     border-color: #32383e;
+}
+.table tbody td {
+    vertical-align: middle;
+    padding: 0.85rem 1rem; /* Adjusted padding */
+    border-top: 1px solid var(--border-color); /* Add subtle top border */
+}
+.table-hover tbody tr {
+    transition: background-color var(--transition-speed) ease-out;
+}
+.table-hover tbody tr:hover {
+    background-color: var(--hover-bg);
+}
+.table .badge {
+    vertical-align: middle; /* Changed alignment */
+    font-weight: 500;
+    padding: 0.3em 0.6em;
+    font-size: 0.75rem; /* Smaller badge */
+}
+/* Table State Rows (Loading, Empty, Error) */
+#loading-row td, #empty-row td, #error-row td {
+    border-top: none; /* Remove border for state rows */
+}
+
+/* Progress Bar Styles */
+.progress-bar { display: flex; flex-direction: column; justify-content: center; overflow: hidden; color: #fff; text-align: center; white-space: nowrap; background-color: var(--primary-color); transition: width 0.6s ease; }
+.bg-success { background-color: var(--success-color) !important; }
+.bg-purple { background-color: #6f42c1 !important; color: #fff; }
+.bg-cyan { background-color: #0dcaf0 !important; color: #fff; }
+.bg-red { background-color: var(--danger-color) !important; color: #fff; }
+.progress { box-shadow: inset 0 0.1rem 0.1rem rgba(0, 0, 0, 0.1); height: 8px; background-color: #e9ecef; border-radius: 0.25rem; overflow: hidden; } /* Added overflow hidden */
+.progress-text { font-size: 0.8em; margin-bottom: 0.25rem; color: var(--secondary-color); }
+
+/* Action Buttons in Table */
+.table td .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    margin-left: 0.3rem;
+    line-height: 1.4;
+    transition: all var(--transition-speed) ease-out; /* Smooth all transitions */
+}
+.table td .btn-sm i {
+    vertical-align: middle; /* Better icon alignment */
+    margin: 0; /* Remove potential default margins */
+}
+.table td .btn-sm:hover {
+    opacity: 0.9;
+    transform: scale(1.05); /* Slightly larger on hover */
+}
+.table td .btn-sm:active {
+    transform: scale(0.95); /* Press down effect */
+}
+/* Specific button colors on hover */
+.table td .btn-primary:hover { background-color: #0b5ed7; border-color: #0a58ca; }
+.table td .btn-outline-secondary:hover { background-color: #e2e6ea; border-color: #d3d9df; color: #000;}
+.table td .btn-outline-danger:hover { background-color: #dc3545; border-color: #dc3545; color: #fff;}
+
+
+/* Ranking Section */
+.ranking-section { }
+.ranking-1 { color: gold; font-weight: bold; }
+.ranking-2 { color: silver; font-weight: bold; }
+.ranking-3 { color: #cd7f32; font-weight: bold; }
+
+/* Modal Styles */
+.modal-header {
+    background-color: var(--light-gray);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+}
+.modal-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+.modal-body {
+    padding: 1.5rem;
+}
+.modal-footer {
+    background-color: var(--light-gray);
+    border-top: 1px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+}
+#modalError {
+    margin-top: 1rem;
+    font-size: 0.9em;
+    padding: 0.75rem 1rem;
+}
+#modalSubmitBtn .spinner-border { display: none; }
+#modalSubmitBtn:disabled .spinner-border { display: inline-block; }
+#modalSubmitBtn:disabled .submit-text { margin-right: 0.25rem; }
+/* Style invalid feedback */
+.was-validated .form-control:invalid, .form-control.is-invalid {
+    border-color: var(--danger-color);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e"); /* Bootstrap's SVG icon */
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+.was-validated textarea.form-control:invalid, textarea.form-control.is-invalid {
+     padding-right: calc(1.5em + 0.75rem); /* Ensure space for icon in textarea */
+     background-position: top calc(0.375em + 0.1875rem) right calc(0.375em + 0.1875rem);
+}
+
+
+/* Footer */
+.footer-container {
+    flex-shrink: 0;
+    width: 100%;
+    font-size: 0.85em; /* Slightly smaller footer text */
+    background: #e9ecef; /* Match light gray */
+    color: var(--secondary-color);
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+}
+.footer-container p {
+    margin: 0;
+    padding: 12px 0; /* Adjusted padding */
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-    /*
-    .admin-section {
-        margin: 10px;  小屏幕上减少外边距 
-        padding: 10px;  小屏幕上减少内边距 
+    .admin-section .btn-sm {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.4rem;
     }
-    */
-    .admin-section .btn {
-        margin-bottom: 5px; /* 小屏幕上按钮之间增加下边距 */
-        margin-right: 0; /* 移除右边距，使按钮占据整行 */
+    .card .card-header h1, .card .card-header .fs-5 {
+        font-size: 1.1rem;
     }
-}
-
-.dropdown-toggle
-{
-    white-space: normal;
-}
-
-/* 排名榜區域樣式 */
-.ranking-section {
-  margin: 20px 0px;
-}
-
-/* 排名顏色樣式 */
-.ranking-1 {
-  color: gold;
-  font-weight: bold;
-}
-
-.ranking-2 {
-  color: silver;
-  font-weight: bold;
-}
-
-.ranking-3 {
-  color: #cd7f32;
-  font-weight: bold;
+    .table thead th, .table tbody td {
+        font-size: 0.85rem;
+        padding: 0.7rem 0.75rem; /* Adjust padding for mobile */
+    }
+    .table td .btn-sm {
+        margin-left: 0.2rem;
+    }
+    .modal-body, .modal-footer, .modal-header {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .modal-body { font-size: 0.9rem; }
 }
