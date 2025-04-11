@@ -167,8 +167,8 @@
                  let e = `HTTP status: ${response.status}`; try { const d=await response.json();e+=` - ${JSON.stringify(d)}`}catch(err){} throw new Error(`Network response was not ok. ${e}`);
             }
             await response.json(); // Process result if needed, currently ignored
-            showFeedback("進度已成功儲存！", false);
             updateUserRecord(state.user.email).catch(err => console.warn("BG record update failed:", err));
+            showFeedback("進度已成功儲存！", false);
         } catch (error) {
             console.error("Error submitting exercise progress:", error);
             showFeedback("儲存失敗，請稍後再試。", true);
