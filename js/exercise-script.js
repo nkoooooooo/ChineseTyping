@@ -167,7 +167,11 @@
                  let e = `HTTP status: ${response.status}`; try { const d=await response.json();e+=` - ${JSON.stringify(d)}`}catch(err){} throw new Error(`Network response was not ok. ${e}`);
             }
             await response.json(); // Process result if needed, currently ignored
-            updateUserRecord(state.user.email).catch(err => console.warn("BG record update failed:", err));
+            console.log("Progress submitted, now updating records..."); // 添加日誌
+            // 使用 await 等待 updateUserRecord 完成
+            await updateUserRecord(state.user.email);
+            console.log("User records updated successfully."); // 添加日誌
+            // 只有在 updateUserRecord 成功後才顯示成功反饋
             showFeedback("進度已成功儲存！", false);
         } catch (error) {
             console.error("Error submitting exercise progress:", error);
@@ -190,7 +194,9 @@
             SessionStorageUtil.setItem("records", JSON.stringify(data)); // Potential double stringify
             console.log("User records updated successfully via background task.");
         } catch (error) {
-            console.error("Error updating user records in background:", error);
+            console.error("Error updating user records:", error); // 更新日誌訊息
+            // 將錯誤重新拋出，以便 submitExercise 中的 await 可以捕獲到
+            throw error;
         }
     }
 
