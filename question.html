@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教材題庫管理 Studio - 聖公會蔡功譜中學</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+    <style>
+        :root { 
+            --font: "Noto Sans TC", sans-serif; 
+            --tkp-blue: #00479d; --tkp-blue-light: #eff6ff; --tkp-accent: #4f46e5;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --bg: #f8fafc; --surface: #ffffff; --text-main: #1e293b; --text-muted: #64748b; --border-light: #e2e8f0;
+            --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --shadow-premium: 0 10px 30px -5px rgba(0, 71, 157, 0.05), 0 4px 12px -2px rgba(0, 71, 157, 0.02);
+            --shadow-hover: 0 20px 40px -5px rgba(0, 71, 157, 0.12), 0 8px 20px -4px rgba(0, 71, 157, 0.05);
+        }
+        body { background-color: var(--bg); font-family: var(--font); color: var(--text-main); -webkit-font-smoothing: antialiased; }
+        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-light); }
+        .user-pill { border: 1px solid var(--border-light); border-radius: 999px; background: var(--surface); padding: 0 16px; height: 38px; display: inline-flex; align-items: center; }
+        .btn-header { background-color: var(--tkp-blue); color: white !important; border: none; font-weight: 800; border-radius: 999px; padding: 0 1.4rem; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; height: 38px; }
+        
+        .admin-card { background: white; border-radius: 24px; border: 1px solid rgba(226, 232, 240, 0.8); padding: 2.2rem; margin-bottom: 2rem; box-shadow: var(--shadow-premium); transition: var(--transition-spring); }
+        .admin-card:hover { box-shadow: var(--shadow-hover); }
+        .sub-nav .nav-link { color: #64748b; font-weight: 700; border-radius: 12px; margin-right: 8px; transition: var(--transition-spring); padding: 0.6rem 1.2rem; }
+        .sub-nav .nav-link:hover { background-color: #f1f5f9; color: var(--tkp-blue); }
+        .sub-nav .nav-link.active { background-color: var(--tkp-blue) !important; color: white !important; }
+        
+        .table-inline-input {
+            border: 1px solid transparent; background: transparent; border-radius: 8px;
+            padding: 6px 12px; font-weight: 700; color: var(--text-main); transition: var(--transition-spring); width: 100%;
+        }
+        .table-inline-input:hover { border-color: #cbd5e1; background: #fff; }
+        .table-inline-input:focus { border-color: var(--tkp-blue); background: #fff; outline: none; box-shadow: 0 0 0 4px rgba(0, 71, 157, 0.12); }
+        
+        .table-inline-select {
+            border: 1px solid transparent; background: transparent; border-radius: 8px;
+            padding: 6px 12px; font-weight: 700; color: var(--text-main); transition: var(--transition-spring); cursor: pointer;
+        }
+        .table-inline-select:hover { border-color: #cbd5e1; background: #fff; }
+        .table-inline-select:focus { border-color: var(--tkp-blue); background: #fff; outline: none; }
+
+        .row-save-indicator { width: 36px; text-align: center; font-size: 1.15rem; font-weight: bold; }
+
+        .batch-bar { 
+            position: fixed; bottom: 30px; left: 50%; transform: translate3d(-50%, 150%, 0); 
+            background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 24px; 
+            padding: 16px 32px; display: flex; align-items: center; gap: 18px; 
+            box-shadow: 0 25px 60px -10px rgba(0,0,0,0.4); z-index: 1040; color: white;
+            border: 1px solid rgba(255,255,255,0.15); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .batch-bar.show { transform: translate3d(-50%, 0, 0); }
+        .batch-bar select { background: #1e293b; border: 1px solid #475569; color: white; border-radius: 12px; padding: 8px 16px; font-weight: 700; font-size: 0.88rem; transition: var(--transition-spring); }
+        .batch-bar select:focus { outline: none; border-color: #3b82f6; }
+
+        .align-grid { display: flex; flex-wrap: wrap; gap: 8px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 1rem; min-height: 80px; max-height: 250px; overflow-y: auto; }
+        .align-block { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; background: white; border: 1px solid #e2e8f0; border-radius: 8px; width: 55px; height: 55px; font-weight: bold; position: relative; }
+        .align-block span { font-size: 1.1rem; line-height: 1; }
+        .align-block sub { font-size: 0.68rem !important; color: var(--tkp-blue); position: absolute; bottom: 4px; font-weight: 800; }
+        .align-block.block-err { border: 2px dashed var(--danger); background-color: #fef2f2; color: var(--danger); }
+        .align-block.block-err sub { color: var(--danger); }
+        .align-block.block-punc { border: 1px solid #bbf7d0; background-color: #f0fdf4; color: #166534; }
+        .align-block.block-punc sub { color: #166534; }
+        
+        .anal-card { background: var(--tkp-blue-light); border: 1px solid #bfdbfe; border-radius: 14px; padding: 12px 16px; margin-top: 15px; }
+        
+        .pagination-container { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+        .page-btn { border: 1px solid #cbd5e1; background: white; border-radius: 10px; padding: 6px 14px; font-weight: bold; color: #475569; transition: var(--transition-spring); }
+        .page-btn:hover:not(.disabled) { background: #f1f5f9; cursor: pointer; }
+        .page-btn.active { background: var(--tkp-blue); color: white; border-color: var(--tkp-blue); box-shadow: 0 4px 10px rgba(0, 71, 157, 0.2); }
+        .page-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* 📱 跨端標準化觸控目標 (Apple HIG & WCAG: >= 44px) 與壓感互動機制 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        button, .btn, .page-btn, .table-inline-input, .table-inline-select {
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        button:active:not(:disabled),
+        .btn:active:not(:disabled),
+        .page-btn:active {
+            transform: scale(0.96) !important;
+        }
+
+        /* 向量狀態圓點指示器 */
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .status-dot-active { background-color: var(--success); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+        .status-dot-disabled { background-color: var(--danger); box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2); }
+
+        /* 📱 iPad 平板專屬響應式優化 */
+        @media (max-width: 991.98px) {
+            .admin-card { padding: 1.4rem; border-radius: 20px; }
+            .batch-bar { width: 94%; padding: 12px 18px; flex-wrap: wrap; justify-content: center; bottom: 15px; }
+            .table-responsive { max-height: 55vh; }
+        }
+
+        footer { text-align: center; padding: 2rem 0; font-size: 0.82em; color: #64748b; font-weight: 600; }
+    </style>
+    <script>
+        // 🔒 統一傳輸解碼安全組
+        const SessionStorageUtil = {
+            _mem: {},
+            setItem: function(key, value) { 
+                try {
+                    const jsonStr = JSON.stringify(value);
+                    const encoded = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                        return String.fromCharCode(parseInt(p1, 16));
+                    }));
+                    if (window.sessionStorage) sessionStorage.setItem(key, encoded);
+                    this._mem[key] = value;
+                } catch(e) { this._mem[key] = value; }
+            },
+            getItem: function(key) { 
+                try {
+                    let raw = null;
+                    if (window.sessionStorage) raw = sessionStorage.getItem(key);
+                    if (!raw) return this._mem[key] || null;
+                    try {
+                        const decoded = decodeURIComponent(atob(raw).split("").map(function(c) {
+                            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+                        }).join(""));
+                        return JSON.parse(decoded);
+                    } catch(decodeErr) {
+                        return JSON.parse(raw);
+                    }
+                } catch(e) { return this._mem[key] || null; }
+            },
+            clear: function() {
+                try { if (window.sessionStorage) sessionStorage.clear(); } catch(e) {}
+                this._mem = {};
+            }
+        };
+
+        const SecureCache = {
+            set: function(key, value) {
+                const wrapper = { value: value, timestamp: Date.now() };
+                SessionStorageUtil.setItem(key, wrapper);
+            },
+            get: function(key, ttlMs) {
+                const wrapper = SessionStorageUtil.getItem(key);
+                if (!wrapper) return null;
+                if (wrapper && wrapper.timestamp && (Date.now() - wrapper.timestamp < ttlMs)) return wrapper.value;
+                return null;
+            }
+        };
+
+        const currentUser = SessionStorageUtil.getItem('user');
+        if (!currentUser || (currentUser.permission !== '教師' && currentUser.permission !== '管理員')) {
+            window.location.replace('index.html');
+        }
+    </script>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar glass-nav sticky-top">
+        <div class="container-fluid px-4 py-2">
+            <a class="navbar-brand fw-900 d-flex align-items-center" href="index.html" style="text-decoration: none;">
+                <img src="img/tkp-logo.png" alt="Logo" class="me-2" style="height: 38px;" onerror="this.src='https://www.tkp.edu.hk/images/logo.png'">
+                <span style="color: var(--tkp-blue); font-weight: 900; font-size: 1.35rem;">聖公會蔡功譜中學</span>
+                <span class="text-muted ms-2 border-start ps-2" style="font-weight: 700; font-size: 1.25rem; border-color: var(--border-light) !important;">教材題庫中心</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <div class="user-pill shadow-sm">
+                    <i class="fas fa-user-circle text-primary me-2 fs-5"></i>
+                    <div class="text-start lh-sm" style="font-size: 0.85rem;">
+                        <strong class="text-dark" id="username">載入中...</strong>
+                        <span class="text-muted ms-2 ps-2 border-start small fw-bold" id="userrole">教師</span>
+                    </div>
+                </div>
+                <a href="index.html" class="btn-header"><i class="fas fa-arrow-left me-2"></i>返回大廳</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5 flex-grow-1">
+        <ul class="nav nav-pills sub-nav mb-4 bg-white p-2 rounded-4 border shadow-sm" id="adminModuleNav">
+            <li class="nav-item"><a class="nav-link" href="admin.html"><i class="fas fa-chart-line me-2"></i>數據戰情室 (Dashboard)</a></li>
+            <li class="nav-item"><a class="nav-link" href="student.html"><i class="fas fa-users-cog me-2"></i>學生帳戶與權限中心</a></li>
+            <li class="nav-item"><a class="nav-link active" href="question.html"><i class="fas fa-book-open me-2"></i>課程教材與題庫 Studio</a></li>
+        </ul>
+
+        <div class="admin-card">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                <h4 class="fw-900 mb-0 text-dark"><i class="fas fa-file-alt text-primary me-2"></i>教材庫與智慧發佈 Studio</h4>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-success rounded-pill btn-sm fw-bold px-3 py-2" onclick="openExerciseModal()"><i class="fas fa-plus me-1"></i>上架全新打字教材</button>
+                    <button class="btn btn-primary rounded-pill btn-sm fw-bold px-3 py-2" onclick="openImportExerciseModal()"><i class="fas fa-file-import me-1"></i>批次匯入題庫</button>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary dropdown-toggle rounded-pill btn-sm fw-bold px-3 py-2" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-file-export me-1"></i>匯出題庫備份
+                        </button>
+                        <ul class="dropdown-menu shadow border-0 rounded-3">
+                            <li><a class="dropdown-item fw-bold py-2" href="javascript:void(0)" onclick="exportExercisesJSON()"><i class="fas fa-code text-primary me-2"></i>匯出完整 JSON 檔案</a></li>
+                            <li><a class="dropdown-item fw-bold py-2" href="javascript:void(0)" onclick="exportExercisesCSV()"><i class="fas fa-file-csv text-success me-2"></i>匯出 Excel / CSV 表格</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-outline-danger rounded-pill btn-sm fw-bold px-3 py-2" onclick="promptClearExercises()"><i class="fas fa-trash-alt me-1"></i>清空題庫</button>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4 bg-light p-3 rounded-4 border">
+                <div class="col-12 col-md-4">
+                    <label class="form-label text-muted small fw-bold"><i class="fas fa-search me-1"></i>全局模糊搜尋 (隨打隨搜)</label>
+                    <input type="text" id="exerciseGlobalSearch" class="form-control form-control-sm rounded-3" style="height: 38px;" placeholder="關鍵字：輸入教材ID、標題、啟用對象..." onkeyup="filterExercisesCross()">
+                </div>
+                <div class="col-4 col-md-2">
+                    <label class="form-label text-muted small fw-bold">打字模式</label>
+                    <select id="exerciseModeFilter" class="form-select form-select-sm rounded-3" style="height: 38px;" onchange="filterExercisesCross()">
+                        <option value="">所有模式</option>
+                        <option value="速成模式">速成模式</option>
+                        <option value="拼音模式">拼音模式</option>
+                        <option value="一般打字">一般打字</option>
+                    </select>
+                </div>
+                <div class="col-4 col-md-3">
+                    <label class="form-label text-muted small fw-bold">教材分類</label>
+                    <select id="exerciseCategoryFilter" class="form-select form-select-sm rounded-3" style="height: 38px;" onchange="filterExercisesCross()">
+                        <option value="">所有分類</option>
+                        <option value="練習">練習</option>
+                        <option value="考試">考試</option>
+                        <option value="計時">計時</option>
+                        <option value="小測">小測</option>
+                    </select>
+                </div>
+                <div class="col-4 col-md-3">
+                    <label class="form-label text-muted small fw-bold">狀態</label>
+                    <select id="exerciseStatusFilter" class="form-select form-select-sm rounded-3" style="height: 38px;" onchange="filterExercisesCross()">
+                        <option value="">所有狀態</option>
+                        <option value="1">啟用開放 (不分排程)</option>
+                        <option value="0">手動停用</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover border-top align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="40"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" style="transform: scale(1.2); cursor: pointer;"></th>
+                            <th width="50">狀態</th>
+                            <th width="70">ID</th>
+                            <th>教材標題 (可編輯)</th>
+                            <th width="120">打字模式</th>
+                            <th width="140">文章分類</th>
+                            <th width="140">啟用對象</th>
+                            <th width="150">手動開放狀態</th>
+                            <th class="text-end" width="160">教材操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exercisesTableBody">
+                        <tr><td colspan="9" class="text-center py-5"><div class="spinner-border text-primary spinner-border-sm me-2"></div>正在讀取題庫數據...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-container" id="exercisesPagination"></div>
+        </div>
+    </div>
+
+    <!-- 批量修改懸浮控制中心 -->
+    <div class="batch-bar shadow-lg" id="batchActionBar">
+        <span class="fw-bold"><i class="fas fa-check-square text-success me-1 fs-5"></i>已選取 <span id="batchCount" class="text-warning">0</span> 個教材</span>
+        <div class="vr bg-secondary" style="height: 24px; opacity: 0.5;"></div>
+
+        <select id="batchModeSelect">
+            <option value="">批量修改打字模式...</option>
+            <option value="速成模式">速成模式</option>
+            <option value="拼音模式">拼音模式</option>
+            <option value="一般打字">一般打字</option>
+        </select>
+        <select id="batchCategorySelect" class="form-select form-select-sm text-white" style="background:#1e293b; border:1px solid #475569; width:150px; border-radius:10px;">
+            <option value="">批量修改分類...</option>
+            <option value="練習">練習</option>
+            <option value="考試">考試</option>
+            <option value="計時">計時</option>
+            <option value="小測">小測</option>
+        </select>
+        <input type="text" id="batchTargetSelect" class="form-control form-control-sm text-white" style="background:#1e293b; border:1px solid #475569; width:150px; border-radius:10px;" placeholder="批量發佈班級 (1A,1D)...">
+
+        <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold" onclick="applyBatchModification()"><i class="fas fa-save me-1"></i>儲存變更</button>
+        <div class="vr bg-secondary" style="height: 24px; opacity: 0.5;"></div>
+        
+        <button class="btn btn-warning btn-sm rounded-pill px-3 fw-bold text-dark" onclick="applyBatchStatus(0)"><i class="fas fa-ban me-1"></i>批量關閉</button>
+        <button class="btn btn-success btn-sm rounded-pill px-3 fw-bold" onclick="applyBatchStatus(1)"><i class="fas fa-check me-1"></i>批量發佈</button>
+        <button class="btn btn-danger btn-sm rounded-pill px-3 fw-bold" onclick="applyBatchDelete()"><i class="fas fa-trash-alt me-1"></i>永久刪除題庫</button>
+    </div>
+
+    <!-- 教材編輯 Studio Modal -->
+    <div class="modal fade" id="exerciseModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 28px;">
+                <div class="modal-header bg-light border-0 py-3 px-4">
+                    <h5 class="modal-title fw-900 text-primary" id="exerciseModalTitle">教材創作 Studio</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="max-height: 80vh; overflow-y: auto;">
+                    <form id="exerciseForm">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label text-muted small fw-bold">教材 ID (唯一數值)</label>
+                                <input type="number" id="ex-id" class="form-control form-control-sm" required placeholder="如: 103">
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label text-muted small fw-bold">教材標題</label>
+                                <input type="text" id="ex-title" class="form-control form-control-sm" required placeholder="如: 蔡功譜課文挑戰《岳陽樓記》">
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <label class="form-label text-muted small fw-bold">漢字正文 (Text1)</label>
+                                <textarea id="ex-text1" class="form-control font-monospace" style="border-radius: 14px;" rows="4" required placeholder="請貼上中文漢字..." onkeyup="checkKeystrokeAlignment()"></textarea>
+                                <div class="text-end text-muted small mt-1">漢字字數: <span id="text1-count" class="fw-bold text-dark">0</span></div>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label text-muted small fw-bold mb-0">輔助字根/拆碼 (Text2，每個漢字拆碼之間以空白鍵隔開，標點位置系統自動補齊佔位)</label>
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2 py-0" style="font-size: 0.78rem;" onclick="autoGenerateRoots()"><i class="fas fa-magic me-1"></i>智慧自動解析字根</button>
+                                </div>
+                                <textarea id="ex-text2" class="form-control font-monospace" style="border-radius: 14px;" rows="2" placeholder="如: 一火 戈戈 十口" onkeyup="checkKeystrokeAlignment()"></textarea>
+                                <div class="text-end text-muted small mt-1">解析字根數: <span id="text2-count" class="fw-bold text-dark">0</span></div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label text-muted small fw-bold"><i class="fas fa-magic text-primary me-1"></i>漢字字根對齊視覺化棋盤 (智慧排點對齊防偏移)</label>
+                                <div class="align-grid" id="visualAlignGrid"></div>
+                                <div id="alignment-checker" class="small fw-bold mt-2"></div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="anal-card" id="exAnalyticsPanel">
+                                    <h6 class="fw-bold text-primary mb-2"><i class="fas fa-stethoscope"></i> 教材長度與難易度估算儀</h6>
+                                    <div class="row g-2 text-dark" style="font-size: 0.88rem;">
+                                        <div class="col-6 col-md-3"><strong>標點比例：</strong><span id="analPunc">0%</span></div>
+                                        <div class="col-6 col-md-3"><strong>預估打字難度：</strong><span id="analDifficulty" class="badge bg-success">中等</span></div>
+                                        <div class="col-12 col-md-6"><strong>中學生預估打完用時：</strong><span id="analTime" class="text-primary fw-bold">0</span> 秒</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label text-muted small fw-bold">練習模式</label>
+                                <select id="ex-mode" class="form-select form-select-sm" onchange="checkKeystrokeAlignment()">
+                                    <option value="速成模式">速成模式</option>
+                                    <option value="拼音模式">拼音模式</option>
+                                    <option value="一般打字">一般打字 (不提供提示)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label text-muted small fw-bold mb-0">啟用班級 (支援下拉快速選擇)</label>
+                                </div>
+                                <select id="ex-target-preset" class="form-select form-select-sm mb-1" onchange="onTargetPresetChange(this.value)">
+                                    <option value="">-- 請選擇常見班級或自訂 --</option>
+                                    <option value="ALL">全校所有班級 (ALL)</option>
+                                    <optgroup label="全級別統一開放">
+                                        <option value="F1">F.1 中一全級 (1A, 1B, 1C, 1D)</option>
+                                        <option value="F2">F.2 中二全級 (2A, 2B, 2C, 2D)</option>
+                                        <option value="F3">F.3 中三全級 (3A, 3B, 3C, 3D)</option>
+                                        <option value="F4">F.4 中四全級 (4A, 4B)</option>
+                                        <option value="F5">F.5 中五全級 (5A)</option>
+                                        <option value="F6">F.6 中六全級 (6A)</option>
+                                    </optgroup>
+                                    <optgroup label="單一指定班別">
+                                        <option value="1A">1A 班</option><option value="1B">1B 班</option><option value="1C">1C 班</option><option value="1D">1D 班</option>
+                                        <option value="2A">2A 班</option><option value="2B">2B 班</option><option value="2C">2C 班</option><option value="2D">2D 班</option>
+                                        <option value="3A">3A 班</option><option value="3B">3B 班</option><option value="3C">3C 班</option><option value="3D">3D 班</option>
+                                        <option value="4A">4A 班</option><option value="4B">4B 班</option><option value="5A">5A 班</option><option value="6A">6A 班</option>
+                                        <option value="教師組">教師組 (課堂演練)</option>
+                                    </optgroup>
+                                </select>
+                                <div class="mb-1 d-flex flex-wrap gap-1">
+                                    <button type="button" class="btn btn-outline-primary btn-sm py-0 px-1.5" style="font-size: 0.7rem;" onclick="setTargetClass('ALL')">全校</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1.5" style="font-size: 0.7rem;" onclick="setTargetClass('F1')">中一</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1.5" style="font-size: 0.7rem;" onclick="setTargetClass('F2')">中二</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1.5" style="font-size: 0.7rem;" onclick="setTargetClass('F3')">中三</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1.5" style="font-size: 0.7rem;" onclick="appendTargetClass('1A')">+1A</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1.5" style="font-size: 0.7rem;" onclick="appendTargetClass('1B')">+1B</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1.5" style="font-size: 0.7rem;" onclick="appendTargetClass('1C')">+1C</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1.5" style="font-size: 0.7rem;" onclick="appendTargetClass('1D')">+1D</button>
+                                </div>
+                                <input type="text" id="ex-target" class="form-control form-control-sm" required placeholder="如: ALL, 1A,1D, F1">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="form-label text-muted small fw-bold mb-1">教材分類</label>
+                                </div>
+                                <div class="mb-1 d-flex flex-wrap gap-1">
+                                    <button type="button" class="btn btn-outline-success btn-sm py-0 px-1.5" style="font-size: 0.7rem;" onclick="setExerciseType('練習')">練習</button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm py-0 px-1.5" style="font-size: 0.7rem;" onclick="setExerciseType('考試')">考試</button>
+                                    <button type="button" class="btn btn-outline-warning btn-sm py-0 px-1.5 text-dark" style="font-size: 0.7rem;" onclick="setExerciseType('計時')">計時</button>
+                                    <button type="button" class="btn btn-outline-info btn-sm py-0 px-1.5" style="font-size: 0.7rem;" onclick="setExerciseType('小測')">小測</button>
+                                </div>
+                                <select id="ex-type" class="form-select form-select-sm">
+                                    <option value="練習">練習 (課後自主練習)</option>
+                                    <option value="考試">考試 (課堂正式考核)</option>
+                                    <option value="計時">計時 (限時衝刺挑戰)</option>
+                                    <option value="小測">小測 (課堂隨堂評估)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted small fw-bold mb-1">
+                                    <i class="fas fa-stopwatch text-warning me-1"></i>挑戰限時秒數 (0=系統自動估算)
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" id="ex-duration" class="form-control" min="0" max="1800" value="0" placeholder="0 = 自動">
+                                    <span class="input-group-text bg-light text-muted fw-bold">秒</span>
+                                </div>
+                                <div class="d-flex gap-1 mt-1">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.68rem;" onclick="document.getElementById('ex-duration').value='30'">30s</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.68rem;" onclick="document.getElementById('ex-duration').value='60'">60s</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.68rem;" onclick="document.getElementById('ex-duration').value='120'">2分鐘</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.68rem;" onclick="document.getElementById('ex-duration').value='180'">3分鐘</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: 0.68rem;" onclick="document.getElementById('ex-duration').value='0'">自動</button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted small fw-bold">排程上架日期</label>
+                                <input type="date" id="ex-sdate" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted small fw-bold">排程下架日期</label>
+                                <input type="date" id="ex-edate" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-12 mt-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="ex-status" checked style="transform: scale(1.25);">
+                                    <label class="form-check-label fw-bold ms-2">立即對上述發佈對象開放該教材</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0 p-4 bg-light" style="border-radius: 0 0 28px 28px;">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-5 fw-bold shadow" id="saveExBtn" onclick="saveExercise()">保存並智慧發佈</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📥 批次匯入教材題庫 Modal -->
+    <div class="modal fade" id="importExercisesModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 28px;">
+                <div class="modal-header bg-light border-0 py-3 px-4">
+                    <h5 class="modal-title fw-900 text-primary mb-0"><i class="fas fa-file-import me-2"></i>批次匯入教材題庫</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="max-height: 80vh; overflow-y: auto;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted small">支援 JSON 格式物件陣列或 CSV 逗號分隔檔案</span>
+                        <button type="button" class="btn btn-outline-success btn-sm rounded-pill fw-bold" onclick="downloadExerciseCsvTemplate()"><i class="fas fa-download me-1"></i>下載 CSV 題庫範本</button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">選擇檔案上傳 (.json / .csv)</label>
+                        <input type="file" id="exerciseFileInput" class="form-control form-control-sm" accept=".json,.csv" onchange="handleExerciseFileUpload(event)">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">或直接在此貼上 JSON 陣列或 CSV 文字內容</label>
+                        <textarea id="importExercisePasteArea" class="form-control font-monospace" rows="7" style="border-radius: 14px;" placeholder="貼上範例 (JSON)：&#10;[&#10;  { &quot;title&quot;: &quot;短文一&quot;, &quot;text1&quot;: &quot;白日依山盡&quot;, &quot;mode&quot;: &quot;速成模式&quot;, &quot;type&quot;: &quot;練習&quot;, &quot;target&quot;: &quot;ALL&quot; }&#10;]&#10;&#10;或 CSV (標題,漢字,拆碼/拼音,模式,分類,目標班級)"></textarea>
+                    </div>
+
+                    <div id="importExercisePreviewAlert" class="alert alert-info py-2 px-3 small border-0 rounded-3 mb-0 d-none"></div>
+                </div>
+                <div class="modal-footer border-0 p-4 bg-light" style="border-radius: 0 0 28px 28px;">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-5 fw-bold shadow" id="confirmImportExBtn" onclick="submitBatchExercises()"><i class="fas fa-cloud-upload-alt me-1"></i>確認解析並匯入</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚠️ 清空題庫防呆保護 Modal -->
+    <div class="modal fade" id="clearExercisesModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 28px;">
+                <div class="modal-header bg-danger text-white border-0 py-3 px-4" style="border-radius: 28px 28px 0 0;">
+                    <h5 class="modal-title fw-900 mb-0"><i class="fas fa-exclamation-triangle me-2"></i>清空教材題庫高危操作</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-danger fw-bold mb-2">警告：此操作將從雲端資料庫永久刪除選定教材，且關聯的學生作答成績將同步聯鎖清除！</p>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">請選擇欲清空的題庫範圍</label>
+                        <select id="clearExScopeSelect" class="form-select form-select-sm">
+                            <option value="ALL">清空「所有教材題庫」（徹底歸零）</option>
+                            <option value="小測">僅清空「小測」分類教材</option>
+                            <option value="考試">僅清空「考試」分類教材</option>
+                            <option value="計時">僅清空「計時」分類教材</option>
+                            <option value="練習">僅清空「練習」分類教材</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">安全防呆確認：請在下方輸入 <span class="text-danger fw-bold">確認清空</span></label>
+                        <input type="text" id="clearExConfirmInput" class="form-control form-control-sm text-center fw-bold" placeholder="請輸入：確認清空" onkeyup="checkClearExConfirmMatch()">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 bg-light" style="border-radius: 0 0 28px 28px;">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="confirmClearExBtn" onclick="executeClearExercises()" disabled><i class="fas fa-trash-alt me-1"></i>執行清空操作</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-4" style="z-index: 1060;">
+        <div id="sysToast" class="toast align-items-center text-white border-0 shadow-lg" style="border-radius: 12px; background: rgba(0,0,0,0.85);" role="alert">
+            <div class="d-flex p-2 justify-content-center"><div class="toast-body fw-bold fs-6" id="sysToastBody"></div></div>
+        </div>
+    </div>
+
+    <footer>
+        Copyright © 2026 S.K.H. Tsoi Kung Po Secondary School. All rights reserved.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/pyshengdiao.js"></script>
+    <script src="js/typing_converter.js"></script>
+    <script>
+        const API_URL = "https://tkp-typing-api.tvbar.workers.dev/";
+        const CACHE_TTL_ADMIN_EXERCISES = 10 * 60 * 1000; 
+
+        let allExercises = [], filteredExercises = [];
+        let exerciseModal = null;
+        let exercisePage = 1;
+        const pageSize = 50;
+
+        const rowDebounceTimers = {};
+
+        function showToast(msg) {
+            const toastEl = document.getElementById('sysToast'); 
+            document.getElementById('sysToastBody').innerHTML = msg;
+            new bootstrap.Toast(toastEl, { delay: 2500 }).show();
+        }
+
+        async function callAPI(action, payload = {}) { 
+            return await fetch(API_URL, { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json", "Authorization": currentUser ? currentUser.email : "" }, 
+                body: JSON.stringify({ action, payload }) 
+            }).then(r => r.json()); 
+        }
+
+        async function loadAdminExercises(force = false) {
+            let cached = SecureCache.get('admin_exercises', CACHE_TTL_ADMIN_EXERCISES);
+            if (!force && cached) {
+                allExercises = cached; filterExercisesCross(); return;
+            }
+            try {
+                const res = await callAPI('getExercises', { role: '教師', classid: '教師組' });
+                if (res.status) {
+                    allExercises = res.data;
+                    SecureCache.set('admin_exercises', res.data);
+                    filterExercisesCross();
+                }
+            } catch(e) { showToast("無法與伺服器連接！"); }
+        }
+
+        function normalizeModeClient(m) {
+            const s = String(m || "").trim();
+            if (s.includes("速成") || s.includes("倉頡")) return "速成模式";
+            if (s.includes("拼音")) return "拼音模式";
+            return "一般打字";
+        }
+
+        function normalizeTypeClient(t) {
+            const s = String(t || "").trim();
+            if (s.includes("考試")) return "考試";
+            if (s.includes("計時")) return "計時";
+            if (s.includes("小測")) return "小測";
+            return "練習";
+        }
+
+        function filterExercisesCross() {
+            const globalKeyword = document.getElementById('exerciseGlobalSearch').value.trim().toLowerCase();
+            const modeVal = document.getElementById('exerciseModeFilter').value;
+            const categoryVal = document.getElementById('exerciseCategoryFilter').value;
+            const statusVal = document.getElementById('exerciseStatusFilter').value;
+
+            filteredExercises = allExercises.filter(e => {
+                const stdM = normalizeModeClient(e.mode);
+                const stdT = normalizeTypeClient(e.type);
+                const fuzzyStr = `${e.id} ${e.title} ${stdT} ${e.target} ${stdM}`.toLowerCase();
+                const matchGlobal = globalKeyword === "" ? true : fuzzyStr.includes(globalKeyword);
+                const matchMode = modeVal === "" ? true : stdM === modeVal;
+                const matchCategory = categoryVal === "" ? true : stdT === categoryVal;
+
+                let matchStatus = true;
+                if (statusVal !== "") {
+                    const isEnabled = Number(e.status) === 1;
+                    matchStatus = statusVal === "1" ? isEnabled : !isEnabled;
+                }
+
+                return matchGlobal && matchMode && matchCategory && matchStatus;
+            });
+
+            exercisePage = 1;
+            renderExercisesTable();
+        }
+
+        function renderExercisesTable() {
+            const tbody = document.getElementById('exercisesTableBody');
+            tbody.innerHTML = "";
+            document.getElementById('selectAllCheckbox').checked = false;
+            updateBatchBarVisibility();
+
+            if (filteredExercises.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">無符合條件的教材題目</td></tr>`;
+                document.getElementById('exercisesPagination').innerHTML = ''; return;
+            }
+
+            const paginated = filteredExercises.slice((exercisePage - 1) * pageSize, exercisePage * pageSize);
+            tbody.innerHTML = paginated.map(e => {
+                const isEnabled = Number(e.status) === 1;
+                const stdMode = normalizeModeClient(e.mode);
+                const stdType = normalizeTypeClient(e.type);
+
+                let scheduleTagHtml = "";
+                const tag = e.adminTag || "正常";
+                if (tag.includes("已過期")) {
+                    scheduleTagHtml = `<span class="badge bg-warning-light text-warning fw-bold border border-warning-subtle ms-2 small"><i class="fas fa-history me-1"></i>學生端已過期</span>`;
+                } else if (tag.includes("未開放")) {
+                    scheduleTagHtml = `<span class="badge bg-info-light text-primary fw-bold border border-info-subtle ms-2 small"><i class="fas fa-clock me-1"></i>排程未開始</span>`;
+                }
+
+                return `
+                <tr id="row-${e.id}" class="${!isEnabled ? 'table-danger opacity-75' : ''}">
+                    <td><input type="checkbox" class="exercise-item-checkbox" data-id="${e.id}" onchange="updateBatchBarVisibility()" style="transform: scale(1.2); cursor: pointer;"></td>
+                    <td><div class="row-save-indicator" id="save-ind-${e.id}"></div></td>
+                    <td><strong>${e.id}</strong></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <input type="text" class="table-inline-input inline-title flex-grow-1" value="${e.title}" oninput="triggerAutosave('${e.id}')">
+                            ${scheduleTagHtml}
+                        </div>
+                    </td>
+                    <td>
+                        <select class="table-inline-select inline-mode" onchange="triggerAutosave('${e.id}')">
+                            <option value="速成模式" ${stdMode === '速成模式' ? 'selected' : ''}>速成模式</option>
+                            <option value="拼音模式" ${stdMode === '拼音模式' ? 'selected' : ''}>拼音模式</option>
+                            <option value="一般打字" ${stdMode === '一般打字' ? 'selected' : ''}>一般打字</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="table-inline-select inline-type" onchange="triggerAutosave('${e.id}')">
+                            <option value="練習" ${stdType === '練習' ? 'selected' : ''}>練習</option>
+                            <option value="考試" ${stdType === '考試' ? 'selected' : ''}>考試</option>
+                            <option value="計時" ${stdType === '計時' ? 'selected' : ''}>計時</option>
+                            <option value="小測" ${stdType === '小測' ? 'selected' : ''}>小測</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" class="table-inline-input inline-target" value="${e.target || ''}" oninput="triggerAutosave('${e.id}')">
+                    </td>
+                    <td>
+                        <select class="table-inline-select inline-status" onchange="triggerAutosave('${e.id}')">
+                            <option value="1" ${isEnabled ? 'selected' : ''}>啟用開放</option>
+                            <option value="0" ${!isEnabled ? 'selected' : ''}>手動停用</option>
+                        </select>
+                    </td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-success rounded-pill me-1" onclick="copyExercise('${e.id}')" title="快速複製教材"><i class="fas fa-copy"></i></button>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill me-1" onclick="openEditExerciseModal('${e.id}')" title="編輯詳情"><i class="fas fa-pen-nib"></i></button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteExercise('${e.id}')" title="刪除教材"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+            `}).join("");
+
+            renderPagination('exercisesPagination', filteredExercises.length, exercisePage, p => { exercisePage = p; renderExercisesTable(); });
+        }
+
+        function triggerAutosave(exId) {
+            const indicator = document.getElementById(`save-ind-${exId}`);
+            if (indicator) {
+                indicator.innerHTML = `<i class="fas fa-pen text-muted" title="輸入中..."></i>`;
+            }
+
+            clearTimeout(rowDebounceTimers[exId]);
+            rowDebounceTimers[exId] = setTimeout(() => executeAutosave(exId), 800);
+        }
+
+        // 🌟 核心修復：寫回狀態一律嚴格比對 status，排除複雜的 adminTag 比對邏輯
+        async function executeAutosave(exId) {
+            const row = document.getElementById(`row-${exId}`);
+            const indicator = document.getElementById(`save-ind-${exId}`);
+            if (!row || !indicator) return;
+
+            const exIdx = allExercises.findIndex(e => String(e.id) === String(exId));
+            if (exIdx === -1) return;
+            const ex = allExercises[exIdx];
+
+            const title = row.querySelector('.inline-title').value.trim();
+            const mode = row.querySelector('.inline-mode').value;
+            const type = row.querySelector('.inline-type').value.trim();
+            const target = row.querySelector('.inline-target').value.trim();
+            const status = parseInt(row.querySelector('.inline-status').value, 10);
+
+            if (!title || !type || !target) {
+                indicator.innerHTML = `<i class="fas fa-times-circle text-danger" title="欄位不可為空"></i>`;
+                return;
+            }
+
+            // 🌟 精簡比對，僅比對真實 status 值
+            const isUnchanged = ex.title === title && 
+                                ex.mode === mode && 
+                                ex.type === type && 
+                                ex.target === target && 
+                                Number(ex.status) === status;
+            
+            if (isUnchanged) {
+                indicator.innerHTML = "";
+                return;
+            }
+
+            indicator.innerHTML = `<span class="spinner-border spinner-border-sm text-primary" style="width: 1rem; height: 1rem;"></span>`;
+
+            const payload = {
+                id: String(ex.id),
+                title: title,
+                text1: ex.text1 || "",
+                text2: ex.text2 || "",
+                mode: mode,
+                type: type,
+                sDate: ex.sDate || new Date().toISOString().split('T')[0],
+                eDate: ex.eDate || new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0],
+                target: target,
+                status: status
+            };
+
+            try {
+                const res = await callAPI('saveExercise', payload);
+                if (res.status) {
+                    indicator.innerHTML = `<i class="fas fa-check-circle text-success" title="自動存檔成功"></i>`;
+                    
+                    // 🌟 同步更新記憶體快取中的狀態與高亮
+                    allExercises[exIdx] = { ...ex, ...payload };
+                    SecureCache.set('admin_exercises', allExercises);
+
+                    if (status === 0) {
+                        row.classList.add('table-danger', 'opacity-75');
+                    } else {
+                        row.classList.remove('table-danger', 'opacity-75');
+                    }
+
+                    setTimeout(() => { indicator.innerHTML = ""; }, 1500);
+                } else {
+                    indicator.innerHTML = `<i class="fas fa-exclamation-triangle text-danger" title="${res.error}"></i>`;
+                }
+            } catch(e) {
+                indicator.innerHTML = `<i class="fas fa-wifi text-danger" title="網路異常"></i>`;
+            }
+        }
+
+        function toggleSelectAll() {
+            const state = document.getElementById('selectAllCheckbox').checked;
+            document.querySelectorAll('.exercise-item-checkbox').forEach(cb => cb.checked = state);
+            updateBatchBarVisibility();
+        }
+
+        function updateBatchBarVisibility() {
+            const checkedBoxes = document.querySelectorAll('.exercise-item-checkbox:checked');
+            const bar = document.getElementById('batchActionBar');
+            if (checkedBoxes.length > 0) {
+                bar.classList.add('show');
+                document.getElementById('batchCount').textContent = checkedBoxes.length;
+            } else { bar.classList.remove('show'); }
+        }
+
+        async function applyBatchModification() {
+            const checkedBoxes = document.querySelectorAll('.exercise-item-checkbox:checked');
+            const targetIds = Array.from(checkedBoxes).map(cb => cb.getAttribute('data-id'));
+            if (targetIds.length === 0) return;
+
+            const mVal = document.getElementById('batchModeSelect').value;
+            const cVal = document.getElementById('batchCategorySelect').value.trim();
+            const tVal = document.getElementById('batchTargetSelect').value.trim();
+
+            if (!mVal && !cVal && !tVal) return showToast("請至少輸入或選擇一項批量修改的屬性！");
+
+            if (confirm(`確定要對選定的 ${targetIds.length} 個教材進行批量屬性更新嗎？`)) {
+                try {
+                    const updates = targetIds.map(async (id) => {
+                        const orig = allExercises.find(e => String(e.id) === String(id));
+                        if (!orig) return;
+                        return callAPI('saveExercise', {
+                            id: String(orig.id),
+                            title: orig.title,
+                            text1: orig.text1 || "",
+                            text2: orig.text2 || "",
+                            mode: mVal || orig.mode,
+                            type: cVal || orig.type,
+                            sDate: orig.sDate || new Date().toISOString().split('T')[0],
+                            eDate: orig.eDate || new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0],
+                            target: tVal || orig.target,
+                            status: Number(orig.status)
+                        });
+                    });
+                    await Promise.all(updates);
+                    showToast("<i class='fas fa-check-circle text-success me-1'></i> 批量教材屬性更新成功！");
+                    loadAdminExercises(true);
+                } catch(e) { showToast("批次更新失敗！"); }
+            }
+        }
+
+        async function applyBatchStatus(statusValue) {
+            const checkedBoxes = document.querySelectorAll('.exercise-item-checkbox:checked');
+            const targetIds = Array.from(checkedBoxes).map(cb => cb.getAttribute('data-id'));
+            if (targetIds.length === 0) return;
+
+            const text = statusValue === 1 ? "一鍵批量發佈開放" : "一鍵批量停用關閉";
+            if (confirm(`確定執行選定 ${targetIds.length} 個教材的 [${text}] 嗎？`)) {
+                try {
+                    const updates = targetIds.map(async (id) => {
+                        const orig = allExercises.find(e => String(e.id) === String(id));
+                        if (!orig) return;
+                        return callAPI('saveExercise', {
+                            id: String(orig.id),
+                            title: orig.title,
+                            text1: orig.text1 || "",
+                            text2: orig.text2 || "",
+                            mode: orig.mode,
+                            type: orig.type,
+                            sDate: orig.sDate,
+                            eDate: orig.eDate,
+                            target: orig.target,
+                            status: statusValue
+                        });
+                    });
+                    await Promise.all(updates);
+                    showToast(`<i class='fas fa-check text-success me-1'></i> 已將 ${targetIds.length} 個教材設定為：${statusValue === 1 ? '開放' : '停用'}`);
+                    loadAdminExercises(true);
+                } catch(e) {}
+            }
+        }
+
+        async function applyBatchDelete() {
+            const checkedBoxes = document.querySelectorAll('.exercise-item-checkbox:checked');
+            const targetIds = Array.from(checkedBoxes).map(cb => cb.getAttribute('data-id'));
+            if (targetIds.length === 0) return;
+
+            if (confirm(`【教材庫徹底刪除警告】\n您正準備永久刪除這 ${targetIds.length} 個教材題目！\n這會將它們自雲端資料庫抹除，且學生的所有歷史練習成績與暫存也將一併被永久清空！確定刪除嗎？`)) {
+                try {
+                    const deletes = targetIds.map(id => callAPI('deleteExercise', { id: String(id) }));
+                    await Promise.all(deletes);
+                    showToast("<i class='fas fa-trash-alt text-success me-1'></i> 選定教材及其成績牆歷史已被安全徹底清除！");
+                    loadAdminExercises(true);
+                } catch(e) { showToast("刪除通訊失敗！"); }
+            }
+        }
+
+        function checkKeystrokeAlignment() {
+            const t1 = document.getElementById('ex-text1').value;
+            const t2 = document.getElementById('ex-text2').value.trim();
+            
+            const chars = t1.split("");
+            const keys = t2 ? t2.split(/\s+/) : [];
+
+            document.getElementById('text1-count').textContent = chars.length;
+
+            const visualAlignGrid = document.getElementById('visualAlignGrid');
+            visualAlignGrid.innerHTML = "";
+
+            let alignedKeys = [];
+            let keyPtr = 0;
+
+            chars.forEach((char) => {
+                if (/[，。、！：；「」？_,\-‐—～()（）《》〈〉［］【】]/i.test(char)) {
+                    alignedKeys.push("符號"); 
+                } else {
+                    alignedKeys.push(keys[keyPtr] || "");
+                    keyPtr++;
+                }
+            });
+
+            document.getElementById('text2-count').textContent = keyPtr;
+
+            const maxLen = Math.max(chars.length, alignedKeys.length);
+            for (let i = 0; i < maxLen; i++) {
+                const char = chars[i] || "";
+                const key = alignedKeys[i] || "";
+                
+                const isPunc = /[，。、！：；「」？_,\-‐—～()（）《》〈〉［］【】]/i.test(char);
+                const isErr = !isPunc && (char === "" || key === "");
+
+                const block = document.createElement('div');
+                block.className = `align-block ${isPunc ? 'block-punc' : ''} ${isErr ? 'block-err' : ''}`;
+                block.innerHTML = `
+                    <span>${char || "?"}</span>
+                    <sub>${isPunc ? "符號" : (key || "缺")}</sub>
+                `;
+                visualAlignGrid.appendChild(block);
+            }
+
+            const feedback = document.getElementById('alignment-checker');
+            const saveBtn = document.getElementById('saveExBtn');
+            const mode = normalizeModeClient(document.getElementById('ex-mode').value);
+
+            if (chars.length === 0) { feedback.innerHTML = ""; saveBtn.disabled = true; return; }
+
+            // 🌟 核心修復：一般打字模式不強制要求輸入字根拆碼，徹底解放教師發佈自由度
+            if (mode === "一般打字") {
+                feedback.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> 「一般打字」模式：不需要字根或拼音，可直接儲存發佈 (文章共 ${chars.length} 個字元)。</span>`;
+                saveBtn.disabled = false;
+            } else {
+                const trueTextCharsCount = chars.filter(c => !/[，。、！：；「」？_,\-‐—～()（）《》〈〉［］【】\s\r\n\t]/i.test(c)).length;
+
+                if (trueTextCharsCount === keyPtr) {
+                    const label = mode === "拼音模式" ? "漢字與拼音" : "漢字與字根";
+                    feedback.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> ${label}完美對齊 (共 ${trueTextCharsCount} 個漢字，${chars.length - trueTextCharsCount} 個標點符號)！</span>`;
+                    saveBtn.disabled = false;
+                } else if (keyPtr === 0) {
+                    feedback.innerHTML = `<span class="text-warning"><i class="fas fa-info-circle me-1"></i> 提示：目前尚未填寫${mode === '拼音模式' ? '拼音' : '字根'}。可點選上方「智慧自動解析」自動生成，或切換為「一般打字」模式。</span>`;
+                    saveBtn.disabled = false;
+                } else {
+                    const label = mode === "拼音模式" ? "拼音" : "拆碼";
+                    feedback.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> 字數不對齊：文章內有 ${trueTextCharsCount} 個漢字，${label}卻有 ${keyPtr} 組 (相差 ${Math.abs(trueTextCharsCount - keyPtr)} 字)。請修正！</span>`;
+                    saveBtn.disabled = true;
+                }
+            }
+
+            const puncs = chars.filter(c => /[，。、！：；「」？_,-]/.test(c)).length;
+            const puncRate = chars.length > 0 ? ((puncs / chars.length) * 100).toFixed(0) : 0;
+            document.getElementById('analPunc').textContent = `${puncRate}%`;
+
+            const avgKeyLen = keys.length > 0 ? (keys.join('').length / keys.length) : 0;
+            let diff = "簡單 (適合初學)";
+            let diffClass = "bg-success";
+            if (avgKeyLen > 2.5) { diff = "困難 (適合高年級)"; diffClass = "bg-danger"; }
+            else if (avgKeyLen > 1.6) { diff = "中等 (標準難度)"; diffClass = "bg-warning text-dark"; }
+
+            const analDiff = document.getElementById('analDifficulty');
+            analDiff.textContent = diff;
+            analDiff.className = `badge ${diffClass}`;
+
+            const estimatedTime = chars.length > 0 ? Math.round((chars.length / 18) * 60) : 0;
+            document.getElementById('analTime').textContent = estimatedTime;
+        }
+
+        // 🎯 快速選擇目標班級與教材分類輔助函數
+        function setTargetClass(cls) {
+            document.getElementById('ex-target').value = cls;
+            const presetSelect = document.getElementById('ex-target-preset');
+            if (presetSelect) presetSelect.value = cls;
+        }
+
+        function onTargetPresetChange(val) {
+            if (!val) return;
+            document.getElementById('ex-target').value = val;
+        }
+
+        function setExerciseType(t) {
+            const select = document.getElementById('ex-type');
+            if (select) select.value = t;
+        }
+
+        function appendTargetClass(cls) {
+            const input = document.getElementById('ex-target');
+            let current = input.value.trim();
+            if (!current || current === 'ALL' || current === '全校') {
+                input.value = cls;
+                return;
+            }
+            const list = current.split(',').map(s => s.trim()).filter(Boolean);
+            if (!list.includes(cls)) {
+                list.push(cls);
+                input.value = list.join(',');
+            }
+        }
+
+        // 📚 常用字根字典 (速成)
+        const CANGJIE_RADICALS = {
+            "一":"一","乙":"弓九","二":"一一","十":"十","丁":"一弓","七":"十山","八":"竹人","九":"大弓","人":"人","入":"人","儿":"竹山",
+            "刀":"尸竹","力":"大尸","又":"弓水","三":"一一一","于":"一十","干":"一十","士":"十","土":"土","工":"一","才":"木竹","寸":"木戈",
+            "下":"一卜","大":"大","丈":"十大","与":"卜尸","万":"一尸","上":"卜一","小":"弓金","口":"口","山":"山","巾":"中月","千":"竹十",
+            "川":"中中","夕":"弓戈","久":"弓人","女":"女","子":"弓木","王":"一土","天":"一大","夫":"手人","木":"木","五":"一尸","不":"一火",
+            "太":"大戈","犬":"戈大","友":"大水","日":"日","中":"中","月":"月","水":"水","火":"火","金":"金","竹":"竹","戈":"戈","心":"心",
+            "手":"手","尸":"尸","廿":"廿","田":"田","卜":"卜","難":"難","重":"重","白":"竹日","依":"人女","盡":"難金","黃":"廿金","河":"水口",
+            "海":"水卜","流":"水戈","蔡":"廿月","功":"一尸","譜":"卜日","學":"竹木","校":"木大","文":"卜大","字":"十木","打":"手弓","練":"女火",
+            "習":"尸日","考":"十尸","試":"卜戈","課":"卜木","堂":"火土","教":"十木","師":"竹月","生":"竹一","挑":"手人","戰":"口戈","香":"竹日",
+            "港":"水山","公":"金戈","會":"人日","岳":"山山","陽":"弓竹","樓":"木女","記":"卜山","慶":"戈水","春":"手日","夏":"一水","秋":"竹火",
+            "冬":"竹卜","風":"竹戈","雨":"一月","花":"廿心","草":"廿十","樹":"木戈","石":"一口","成":"戈尸","行":"竹弓","走":"土人","道":"卜山",
+            "路":"口口","家":"十人","國":"田戈","民":"口女","自":"竹目","平":"一十","安":"十女","樂":"竹木","快":"心大","高":"卜口","興":"竹金",
+            "明":"日月","紅":"女一","綠":"女水","藍":"廿廿","黑":"田火","進":"卜土","步":"卜竹","時":"日戈","間":"日日","長":"尸女","多":"弓弓",
+            "少":"火竹","好":"女木","美":"廿大","善":"廿口","真":"十金","理":"一土","想":"木心","希":"大月","望":"卜土","愛":"月水","讀":"卜金",
+            "書":"手日","筆":"竹手","墨":"土土","紙":"女火","電":"一山","腦":"月山","網":"月山","訊":"卜十","速":"卜人","度":"戈水","準":"水十",
+            "確":"一口","極":"木水","第":"竹弓","名":"弓口","冠":"月戈","軍":"十十","得":"竹戈","分":"金尸","數":"女大",
+            "床":"戈木","前":"廿弓","光":"火山","疑":"心大","是":"日人","地":"土木","霜":"一山","舉":"竹手","頭":"一金","低":"人心","思":"田心","故":"十水","鄉":"女戈"
+        };
+
+        // 📚 常用漢字漢語拼音字典 (拼音模式)
+        const PINYIN_RADICALS = {
+            "一":"yi","乙":"yi","二":"er","十":"shi","丁":"ding","七":"qi","八":"ba","九":"jiu","人":"ren","入":"ru","兒":"er",
+            "刀":"dao","力":"li","又":"you","三":"san","于":"yu","干":"gan","士":"shi","土":"tu","工":"gong","才":"cai","寸":"cun",
+            "下":"xia","大":"da","丈":"zhang","與":"yu","萬":"wan","上":"shang","小":"xiao","口":"kou","山":"shan","巾":"jin","千":"qian",
+            "川":"chuan","夕":"xi","久":"jiu","女":"nv","子":"zi","王":"wang","天":"tian","夫":"fu","木":"mu","五":"wu","不":"bu",
+            "太":"tai","犬":"quan","友":"you","日":"ri","中":"zhong","月":"yue","水":"shui","火":"huo","金":"jin","竹":"zhu","戈":"ge","心":"xin",
+            "手":"shou","尸":"shi","廿":"nian","田":"tian","卜":"bu","白":"bai","依":"yi","盡":"jin","黃":"huang","河":"he","海":"hai","流":"liu",
+            "蔡":"cai","功":"gong","譜":"pu","學":"xue","校":"xiao","文":"wen","字":"zi","打":"da","練":"lian","習":"xi","考":"kao","試":"shi",
+            "課":"ke","堂":"tang","教":"jiao","師":"shi","生":"sheng","挑":"tiao","戰":"zhan","香":"xiang","港":"gang","公":"gong","會":"hui",
+            "岳":"yue","陽":"yang","樓":"lou","記":"ji","慶":"qing","春":"chun","夏":"xia","秋":"qiu","冬":"dong","風":"feng","雨":"yu","花":"hua",
+            "草":"cao","樹":"shu","石":"shi","成":"cheng","行":"xing","走":"zou","道":"dao","路":"lu","家":"jia","國":"guo","民":"min","自":"zi",
+            "平":"ping","安":"an","樂":"le","快":"kuai","高":"gao","興":"xing","明":"ming","紅":"hong","綠":"lv","藍":"lan","黑":"hei","進":"jin",
+            "步":"bu","時":"shi","間":"jian","長":"chang","多":"duo","少":"shao","好":"hao","美":"mei","善":"shan","真":"zhen","理":"li","想":"xiang",
+            "希":"xi","望":"wang","愛":"ai","讀":"du","書":"shu","筆":"bi","墨":"mo","紙":"zhi","電":"dian","腦":"nao","網":"wang","訊":"xun",
+            "速":"su","度":"du","準":"zhun","確":"que","極":"ji","第":"di","名":"ming","冠":"guan","軍":"jun","得":"de","分":"fen","數":"shu",
+            "床":"chuang","前":"qian","光":"guang","疑":"yi","是":"shi","地":"di","霜":"shuang","舉":"ju","頭":"tou","低":"di","思":"si","故":"gu","鄉":"xiang"
+        };
+
+        async function autoGenerateRoots() {
+            const t1 = document.getElementById('ex-text1').value;
+            if (!t1.trim()) return showToast("請先在上方輸入漢字正文 (Text1)！");
+
+            const mode = normalizeModeClient(document.getElementById('ex-mode').value);
+            if (mode === "一般打字") {
+                document.getElementById('ex-text2').value = "";
+                checkKeystrokeAlignment();
+                return showToast("「一般打字」模式無需填寫字根或拼音！");
+            }
+
+            const btn = document.querySelector('button[onclick="autoGenerateRoots()"]');
+            const originalHtml = btn ? btn.innerHTML : "";
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>字庫解析中...`;
+            }
+
+            try {
+                if (mode === "拼音模式") {
+                    // 🌟 1. 漢語拼音智慧轉換 (基於 pyshengdiao.js 全字庫，自動排除標點)
+                    let result = "";
+                    if (typeof TypingConverter !== "undefined" && TypingConverter.toPinyin) {
+                        result = TypingConverter.toPinyin(t1);
+                    } else if (typeof PinyinHelper !== "undefined") {
+                        result = PinyinHelper.convertText(t1);
+                    } else if (typeof trans === "function") {
+                        result = trans(t1);
+                    } else {
+                        const isPunc = (c) => /[，。、！：；「」？_,\-‐—～()（）《》〈〉［］【】\s\r\n\t]/i.test(c);
+                        result = t1.split("").filter(c => !isPunc(c)).map(c => PINYIN_RADICALS[c] || c).join(" ");
+                    }
+
+                    document.getElementById('ex-text2').value = result;
+                    checkKeystrokeAlignment();
+                    showToast("<i class='fas fa-magic text-success me-1'></i> 已透過漢語拼音全字庫自動解析完成！");
+                } else {
+                    // 🌟 2. 速成模式智慧轉換 (基於 words_codes.json 全字庫，取頭尾兩碼)
+                    let result = "";
+                    if (typeof TypingConverter !== "undefined" && TypingConverter.ensureWordsCodes) {
+                        await TypingConverter.ensureWordsCodes();
+                        result = TypingConverter.toQuick(t1);
+                    } else {
+                        const isPunc = (c) => /[，。、！：；「」？_,\-‐—～()（）《》〈〉［］【】\s\r\n\t]/i.test(c);
+                        result = t1.split("").filter(c => !isPunc(c)).map(c => {
+                            const cj = CANGJIE_RADICALS[c];
+                            return cj ? (cj.length > 2 ? cj[0] + cj[cj.length - 1] : cj) : c;
+                        }).join(" ");
+                    }
+
+                    document.getElementById('ex-text2').value = result;
+                    checkKeystrokeAlignment();
+                    showToast("<i class='fas fa-magic text-success me-1'></i> 已透過 words_codes 倉頡全字庫智慧解析速成字根（頭尾兩碼）！");
+                }
+            } catch (err) {
+                // 降級容錯保障
+                if (mode === "拼音模式") {
+                    const isPunc = (c) => /[，。、！：；「」？_,\-‐—～()（）《》〈〉［］【】\s\r\n\t]/i.test(c);
+                    document.getElementById('ex-text2').value = t1.split("").filter(c => !isPunc(c)).map(c => PINYIN_RADICALS[c] || c).join(" ");
+                } else {
+                    const isPunc = (c) => /[，。、！：；「」？_,\-‐—～()（）《》〈〉［］【】\s\r\n\t]/i.test(c);
+                    document.getElementById('ex-text2').value = t1.split("").filter(c => !isPunc(c)).map(c => {
+                        const cj = CANGJIE_RADICALS[c];
+                        return cj ? (cj.length > 2 ? cj[0] + cj[cj.length - 1] : cj) : c;
+                    }).join(" ");
+                }
+                checkKeystrokeAlignment();
+                showToast("<i class='fas fa-info-circle text-warning me-1'></i> 網路連線延遲，已自動啟用常規降級字庫解析！");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            }
+        }
+
+        function openExerciseModal() {
+            document.getElementById('exerciseForm').reset();
+            document.getElementById('ex-id').disabled = false;
+
+            const existingIds = allExercises.map(e => parseInt(e.id)).filter(id => !isNaN(id));
+            const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 101;
+            document.getElementById('ex-id').value = nextId;
+            document.getElementById('ex-mode').value = "速成模式";
+            document.getElementById('ex-type').value = "練習";
+            document.getElementById('ex-target').value = "ALL";
+            document.getElementById('ex-duration').value = "0";
+
+            document.getElementById('exerciseModalTitle').innerHTML = `<i class='fas fa-plus me-1 text-success'></i>上架全新中文教材`;
+            document.getElementById('ex-sdate').value = new Date().toISOString().split('T')[0];
+            let nextYear = new Date(); nextYear.setFullYear(nextYear.getFullYear() + 1);
+            document.getElementById('ex-edate').value = nextYear.toISOString().split('T')[0];
+
+            checkKeystrokeAlignment();
+            exerciseModal.show();
+        }
+
+        async function openEditExerciseModal(id) {
+            try {
+                const res = await callAPI('getExerciseById', { id });
+                if(res.status && res.data) {
+                    const d = res.data;
+                    document.getElementById('ex-id').value = d.id;
+                    document.getElementById('ex-id').disabled = true;
+                    document.getElementById('ex-title').value = d.title;
+                    document.getElementById('ex-text1').value = d.text1;
+                    document.getElementById('ex-text2').value = d.text2;
+                    document.getElementById('ex-mode').value = normalizeModeClient(d.mode);
+                    document.getElementById('ex-target').value = d.target;
+                    document.getElementById('ex-type').value = normalizeTypeClient(d.type);
+                    document.getElementById('ex-duration').value = d.duration || 0;
+                    document.getElementById('ex-sdate').value = d.sDate;
+                    document.getElementById('ex-edate').value = d.eDate;
+                    document.getElementById('ex-status').checked = Number(d.status) === 1;
+
+                    document.getElementById('exerciseModalTitle').innerHTML = `<i class='fas fa-pen-nib me-1 text-primary'></i>修改教材設定`;
+                    checkKeystrokeAlignment();
+                    exerciseModal.show();
+                }
+            } catch(e) { showToast("教材載入失敗！"); }
+        }
+
+        async function copyExercise(id) {
+            try {
+                const res = await callAPI('getExerciseById', { id });
+                if (res.status && res.data) {
+                    const d = res.data;
+                    document.getElementById('exerciseForm').reset();
+                    document.getElementById('ex-id').disabled = false;
+
+                    const existingIds = allExercises.map(e => parseInt(e.id)).filter(id => !isNaN(id));
+                    const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 101;
+                    document.getElementById('ex-id').value = nextId;
+
+                    document.getElementById('ex-title').value = `${d.title} (複製)`;
+                    document.getElementById('ex-text1').value = d.text1;
+                    document.getElementById('ex-text2').value = d.text2;
+                    document.getElementById('ex-mode').value = normalizeModeClient(d.mode);
+                    document.getElementById('ex-target').value = d.target;
+                    document.getElementById('ex-type').value = normalizeTypeClient(d.type);
+                    document.getElementById('ex-duration').value = d.duration || 0;
+
+                    document.getElementById('ex-sdate').value = new Date().toISOString().split('T')[0];
+                    let nextYear = new Date(); nextYear.setFullYear(nextYear.getFullYear() + 1);
+                    document.getElementById('ex-edate').value = nextYear.toISOString().split('T')[0];
+                    document.getElementById('ex-status').checked = true;
+
+                    document.getElementById('exerciseModalTitle').innerHTML = `<i class='fas fa-copy me-1 text-success'></i>快速複製教材`;
+                    checkKeystrokeAlignment();
+                    exerciseModal.show();
+                }
+            } catch(e) { showToast("無法讀取教材範本！"); }
+        }
+
+        async function saveExercise() {
+            const sDate = document.getElementById('ex-sdate').value;
+            const eDate = document.getElementById('ex-edate').value;
+            if (new Date(sDate) > new Date(eDate)) {
+                return showToast("排程日期錯誤：上架日期不得晚於下架日期！");
+            }
+
+            const payload = {
+                id: document.getElementById('ex-id').value.trim(),
+                title: document.getElementById('ex-title').value.trim(),
+                text1: document.getElementById('ex-text1').value.trim(),
+                text2: document.getElementById('ex-text2').value.trim(),
+                mode: normalizeModeClient(document.getElementById('ex-mode').value),
+                target: document.getElementById('ex-target').value.trim(),
+                type: normalizeTypeClient(document.getElementById('ex-type').value),
+                duration: parseInt(document.getElementById('ex-duration').value, 10) || 0,
+                sDate,
+                eDate,
+                status: document.getElementById('ex-status').checked ? 1 : 0
+            };
+
+            if (!payload.id || !payload.title || !payload.text1) return showToast("所有必填項均必須輸入！");
+
+            const btn = document.getElementById('saveExBtn');
+            btn.disabled = true; btn.innerHTML = "雲端寫入中...";
+
+            try {
+                const res = await callAPI('saveExercise', payload);
+                if (res.status) {
+                    showToast("<i class='fas fa-check-circle text-success me-1'></i> 教材儲存與智慧發佈成功！");
+                    exerciseModal.hide();
+                    loadAdminExercises(true); 
+                } else { showToast(`儲存失敗: ${res.error}`); }
+            } catch(e) { showToast("伺服器連線超時！"); }
+            finally { btn.disabled = false; btn.innerHTML = "保存並智慧發佈"; }
+        }
+
+        async function deleteExercise(id) {
+            if (confirm(`永久警告：確定要將打字題目 ID: "${id}" 永久刪除嗎？學生的所有歷史成績也將被清除！`)) {
+                const res = await callAPI('deleteExercise', { id });
+                if (res.status) {
+                    showToast("<i class='fas fa-trash-alt text-success me-1'></i>教材已被安全從雲端移除！");
+                    loadAdminExercises(true);
+                }
+            }
+        }
+
+        // 📦 匯出題庫備份為 JSON
+        function exportExercisesJSON() {
+            if (allExercises.length === 0) return showToast("題庫內尚無資料可供匯出！");
+            const exportData = allExercises.map(e => ({
+                id: e.id,
+                title: e.title,
+                text1: e.text1,
+                text2: e.text2 || "",
+                mode: normalizeModeClient(e.mode),
+                type: normalizeTypeClient(e.type),
+                target: e.target || "ALL",
+                duration: parseInt(e.duration, 10) || 0,
+                sDate: e.sDate,
+                eDate: e.eDate,
+                status: Number(e.status) === 1 ? 1 : 0
+            }));
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `SKH_TKP_Exercises_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("<i class='fas fa-check-circle text-success me-1'></i> 題庫 JSON 備份檔已成功導出！");
+        }
+
+        // 📊 匯出題庫備份為 CSV (Excel 友善)
+        function exportExercisesCSV() {
+            if (allExercises.length === 0) return showToast("題庫內尚無資料可供匯出！");
+            const escapeCSV = (val) => {
+                if (val === null || val === undefined) return '';
+                let str = String(val).trim();
+                if (str.startsWith('=') || str.startsWith('+') || str.startsWith('-') || str.startsWith('@')) str = "'" + str;
+                if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+                    return `"${str.replace(/"/g, '""')}"`;
+                }
+                return str;
+            };
+
+            let csv = "﻿";
+            csv += "教材ID,標題,漢字正文,拆碼拼音,打字模式,教材分類,限時秒數,啟用對象,上架日期,下架日期,狀態\n";
+
+            allExercises.forEach(e => {
+                csv += [
+                    escapeCSV(e.id),
+                    escapeCSV(e.title),
+                    escapeCSV(e.text1),
+                    escapeCSV(e.text2 || ""),
+                    escapeCSV(normalizeModeClient(e.mode)),
+                    escapeCSV(normalizeTypeClient(e.type)),
+                    escapeCSV(e.duration || 0),
+                    escapeCSV(e.target || "ALL"),
+                    escapeCSV(e.sDate || ""),
+                    escapeCSV(e.eDate || ""),
+                    escapeCSV(Number(e.status) === 1 ? "1" : "0")
+                ].join(",") + "\n";
+            });
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `SKH_TKP_Exercises_Table_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("<i class='fas fa-file-csv text-success me-1'></i> 題庫 CSV 報表已成功導出！");
+        }
+
+        // 📥 批次匯入題庫對話框與檔案讀取
+        let importExercisesModalInstance = null;
+        let clearExercisesModalInstance = null;
+
+        function openImportExerciseModal() {
+            document.getElementById('importExercisePasteArea').value = "";
+            document.getElementById('exerciseFileInput').value = "";
+            const alertBox = document.getElementById('importExercisePreviewAlert');
+            alertBox.classList.add('d-none');
+            importExercisesModalInstance.show();
+        }
+
+        function downloadExerciseCsvTemplate() {
+            const template = "﻿教材ID,標題,漢字正文,拆碼拼音,打字模式,教材分類,啟用對象,上架日期,下架日期,狀態\n" +
+                             "101,登鸛雀樓,白日依山盡 黃河入海流,竹日 日 人女 山 難金 廿金 水口 人 水卜 水戈,速成模式,練習,ALL,2026-09-01,2027-08-31,1\n" +
+                             "102,春曉(拼音),春眠不覺曉 處處聞啼鳥,chun mian bu jue xiao chu chu wen ti niao,拼音模式,小測,F1,2026-09-01,2027-08-31,1\n";
+            const blob = new Blob([template], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "SKH_TKP_Exercise_Import_Template.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function handleExerciseFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('importExercisePasteArea').value = e.target.result;
+                showToast("<i class='fas fa-file-alt text-primary me-1'></i> 檔案已讀取完成，請檢視或直接點擊匯入！");
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+
+        async function submitBatchExercises() {
+            const raw = document.getElementById('importExercisePasteArea').value.trim();
+            if (!raw) return showToast("請貼上文字或選擇欲上傳之檔案！");
+
+            let exerciseList = [];
+
+            // 1. 嘗試 JSON 解析
+            if (raw.startsWith('[') || raw.startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    exerciseList = Array.isArray(parsed) ? parsed : [parsed];
+                } catch(e) {
+                    return showToast("JSON 語法錯誤，請檢查符號與括號！");
+                }
+            } else {
+                // 2. CSV 解析
+                const lines = raw.split(/\r?\n/).filter(line => line.trim().length > 0);
+                if (lines.length === 0) return showToast("內容為空！");
+
+                // 若首行為標題則略過
+                let startIndex = 0;
+                if (lines[0].includes("標題") || lines[0].includes("漢字") || lines[0].includes("title")) {
+                    startIndex = 1;
+                }
+
+                for (let i = startIndex; i < lines.length; i++) {
+                    const parts = lines[i].split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                    if (parts.length >= 2) {
+                        // 支援帶有 duration 之 11 欄結構或標準結構
+                        const hasDurationCol = !isNaN(parseInt(parts[6], 10)) && parts[6].length <= 5 && !parts[6].includes("A") && !parts[6].includes("F");
+                        const durationVal = hasDurationCol ? parseInt(parts[6], 10) : 0;
+                        const targetVal = hasDurationCol ? (parts[7] || "ALL") : (parts[6] || "ALL");
+                        const sDateVal = hasDurationCol ? (parts[8] || new Date().toISOString().split('T')[0]) : (parts[7] || new Date().toISOString().split('T')[0]);
+                        const eDateVal = hasDurationCol ? (parts[9] || new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]) : (parts[8] || new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]);
+                        const statusVal = hasDurationCol ? (parts[10] !== undefined ? parseInt(parts[10], 10) : 1) : (parts[9] !== undefined ? parseInt(parts[9], 10) : 1);
+
+                        exerciseList.push({
+                            id: parts[0] || "",
+                            title: parts[1] || `匯入教材 ${i}`,
+                            text1: parts[2] || parts[1],
+                            text2: parts[3] || "",
+                            mode: parts[4] || "速成模式",
+                            type: parts[5] || "練習",
+                            duration: durationVal,
+                            target: targetVal,
+                            sDate: sDateVal,
+                            eDate: eDateVal,
+                            status: statusVal
+                        });
+                    }
+                }
+            }
+
+            if (exerciseList.length === 0) {
+                return showToast("未能解析出任何有效的教材資料，請確認格式！");
+            }
+
+            const btn = document.getElementById('confirmImportExBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>匯入中 (${exerciseList.length} 篇)...`;
+
+            try {
+                const res = await callAPI('bulkImportExercises', { exercises: exerciseList });
+                if (res.status) {
+                    showToast(`<i class='fas fa-check-circle text-success me-1'></i> ${res.message || '批次匯入成功！'}`);
+                    importExercisesModalInstance.hide();
+                    loadAdminExercises(true);
+                } else {
+                    showToast("匯入失敗: " + (res.error || "未知錯誤"));
+                }
+            } catch(e) {
+                showToast("連線伺服器異常！");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-cloud-upload-alt me-1"></i>確認解析並匯入`;
+            }
+        }
+
+        // ⚠️ 清空題庫防呆操作
+        function promptClearExercises() {
+            document.getElementById('clearExConfirmInput').value = "";
+            document.getElementById('confirmClearExBtn').disabled = true;
+            clearExercisesModalInstance.show();
+        }
+
+        function checkClearExConfirmMatch() {
+            const val = document.getElementById('clearExConfirmInput').value.trim();
+            document.getElementById('confirmClearExBtn').disabled = (val !== "確認清空");
+        }
+
+        async function executeClearExercises() {
+            const scope = document.getElementById('clearExScopeSelect').value;
+            const btn = document.getElementById('confirmClearExBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>清空中...`;
+
+            try {
+                const payload = scope === "ALL" ? {} : { type: scope };
+                const res = await callAPI('clearAllExercises', payload);
+                if (res.status) {
+                    showToast(`<i class='fas fa-trash-alt text-success me-1'></i> ${res.message}`);
+                    clearExercisesModalInstance.hide();
+                    loadAdminExercises(true);
+                } else {
+                    showToast("清空失敗: " + (res.error || "未知錯誤"));
+                }
+            } catch(e) {
+                showToast("網路異常，請稍後重試！");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-trash-alt me-1"></i>執行清空操作`;
+            }
+        }
+
+        function renderPagination(containerId, total, current, callback) {
+            const totalPages = Math.ceil(total / pageSize);
+            const container = document.getElementById(containerId);
+            if (totalPages <= 1) { container.innerHTML = ''; return; }
+            let html = `<button class="page-btn ${current === 1 ? 'disabled' : ''}" data-page="${current - 1}"><i class="fas fa-chevron-left"></i></button>`;
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= current - 2 && i <= current + 2)) {
+                    html += `<button class="page-btn ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
+                } else if (i === current - 3 || i === current + 3) html += `<span class="align-self-end text-muted fw-bold">...</span>`;
+            }
+            html += `<button class="page-btn ${current === totalPages ? 'disabled' : ''}" data-page="${current + 1}"><i class="fas fa-chevron-right"></i></button>`;
+            container.innerHTML = html;
+            container.querySelectorAll('.page-btn').forEach(b => {
+                b.addEventListener('click', () => { const p = parseInt(b.dataset.page); if (p >= 1 && p <= totalPages && p !== current) callback(p); });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('username').textContent = currentUser ? currentUser.name : "教師";
+            document.getElementById('userrole').textContent = currentUser ? currentUser.permission : "教師";
+            exerciseModal = new bootstrap.Modal(document.getElementById('exerciseModal'));
+            importExercisesModalInstance = new bootstrap.Modal(document.getElementById('importExercisesModal'));
+            clearExercisesModalInstance = new bootstrap.Modal(document.getElementById('clearExercisesModal'));
+            loadAdminExercises(false);
+        });
+    </script>
+</body>
+</html>

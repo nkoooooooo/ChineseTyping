@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文打字挑戰 - 聖公會蔡功譜中學</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+    <style>
+        :root { 
+            --font: "Noto Sans TC", sans-serif; 
+            --tkp-blue: #00479d;
+            --tkp-blue-light: #eff6ff;
+            --tkp-accent: #4f46e5;
+            --success: #10b981; 
+            --danger: #ef4444; 
+            --warning: #f59e0b;
+            --bg: #f8fafc; 
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --sidebar-w: 380px;
+            --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --shadow-premium: 0 20px 50px -12px rgba(0, 71, 157, 0.05), 0 8px 30px -8px rgba(0, 71, 157, 0.02);
+        }
+        body { background-color: var(--bg); font-family: var(--font); color: var(--text-main); transition: var(--transition-spring); }
+        
+        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-light); transition: var(--transition-spring); }
+        
+        body.zen-focus { background-color: #f1f5f9; }
+        body.zen-focus .glass-nav { opacity: 0.25; transform: translateY(-5px); }
+        body.zen-focus .stat-card { transform: scale(0.95); opacity: 0.5; }
+        body.zen-focus .btn-toggle { opacity: 0.2; }
+        
+        .user-pill { 
+            border: 1px solid var(--border-light); 
+            border-radius: 999px; 
+            background: var(--surface); 
+            padding: 0 16px; 
+            height: 38px; 
+            display: inline-flex; 
+            align-items: center; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02); 
+        }
+
+        .btn-header {
+            background-color: var(--tkp-blue); color: white !important; border: none; font-weight: 800;
+            border-radius: 999px; padding: 0 1.4rem; font-size: 0.88rem; display: inline-flex;
+            align-items: center; justify-content: center; transition: var(--transition-spring); text-decoration: none; height: 38px;
+        }
+        .btn-header:hover { background-color: #00367c; transform: scale(1.03); box-shadow: 0 4px 12px rgba(0, 71, 157, 0.2); }
+
+        .stat-card { background: white; border-radius: 20px; padding: 1.4rem; box-shadow: 0 4px 12px rgba(0,0,0,0.01); text-align: center; border: 1px solid #f1f5f9; transition: var(--transition-spring); }
+        .stat-val { font-size: 2rem; font-weight: 900; line-height: 1; margin-top: 0.5rem; }
+        
+        .workspace { background: white; border-radius: 30px; box-shadow: var(--shadow-premium); padding: 3rem; border: 2px solid transparent; transition: var(--transition-spring); }
+        .workspace.focused { border-color: rgba(0, 71, 157, 0.2) !important; box-shadow: 0 30px 60px -10px rgba(0, 71, 157, 0.12) !important; }
+        
+        .text-container { 
+            font-size: 2rem; line-height: 2.3; letter-spacing: 0.12em; 
+            display: flex; flex-wrap: wrap; align-content: flex-start; gap: 20px 18px; 
+            min-height: 280px; max-height: 48vh; overflow-y: auto; padding: 2rem; 
+            border-radius: 20px; background: #f8fafc;
+            user-select: none; -webkit-user-select: none;
+            scroll-behavior: smooth;
+        }
+        
+        /* 📱 跨端標準化觸控目標 (Apple HIG & WCAG: >= 44px) 與壓感互動機制 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        button, .btn, .symbol-btn, .btn-header, .btn-submit, .btn-reset-cloud {
+            min-height: 44px;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* 觸控壓感反饋 (Tactile Scale Feedback) */
+        button:active:not(:disabled),
+        .btn:active:not(:disabled),
+        .btn-submit:active:not(:disabled),
+        .btn-reset-cloud:active:not(:disabled) {
+            transform: scale(0.96) !important;
+        }
+
+        .symbol-btn:active {
+            transform: scale(0.88) !important;
+            background-color: #c7d2fe !important;
+            border-color: #6366f1 !important;
+        }
+
+        .character {
+            display: inline-flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding: 10px 14px 24px 14px; border-radius: 14px; transition: all 0.15s ease-in-out;
+            position: relative; color: #64748b; font-weight: 500; min-width: 62px; min-height: 82px; box-sizing: border-box;
+            border: 2px solid transparent;
+            touch-action: manipulation;
+        }
+        .character span { font-size: 2rem; font-weight: 800; line-height: 1.2; z-index: 2; }
+        .character sub { font-size: 0.78rem !important; color: #94a3b8; margin-top: 6px; letter-spacing: 0.05em; font-weight: 900; line-height: 1; z-index: 2; position: static !important; vertical-align: baseline !important; }
+
+        .character:not(.correct):not(.incorrect):hover {
+            background-color: #e2e8f0; transform: scale(1.15); color: var(--tkp-blue); z-index: 10;
+        }
+
+        .character.correct { color: var(--success) !important; background-color: #f0fdf4 !important; border-color: #bbf7d0 !important; }
+        .character.correct sub { color: #059669 !important; }
+
+        .character.incorrect { background-color: #fee2e2 !important; color: var(--danger) !important; border: 2px dashed var(--danger) !important; cursor: pointer; }
+        .character.incorrect sub { color: #b91c1c !important; }
+        .character.incorrect:hover { transform: scale(1.18) translateY(-2px); background-color: #fecaca !important; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.15); z-index: 5; }
+        .character.incorrect:active { transform: scale(1.12) translateY(-1px) !important; background-color: #fca5a5 !important; }
+
+        .character.active-char {
+            background-color: #e0e7ff !important; color: var(--tkp-blue) !important; border-color: #818cf8 !important;
+            transform: scale(1.12); z-index: 3; box-shadow: 0 8px 16px rgba(79, 70, 229, 0.1);
+        }
+        .character.active-char sub { color: #4f46e5 !important; }
+        .character.active-char::after { content: ''; position: absolute; bottom: 8px; left: 15%; width: 70%; height: 5px; background-color: var(--tkp-blue); border-radius: 4px; animation: blink 1s infinite; z-index: 1; }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+        .anim-shake { animation: shake 0.2s ease-in-out !important; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        #inputField { position: absolute; opacity: 0; pointer-events: none; }
+
+        .typing-overlay { cursor: text; border-radius: 20px; padding: 1.6rem; min-height: 64px; text-align: center; border: 2px dashed #cbd5e1; color: #94a3b8; font-weight: bold; font-size: 1.25rem; transition: var(--transition-spring); background: #f8fafc; margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; }
+        .typing-overlay:hover, body:has(#inputField:focus) .typing-overlay { background: #eff6ff; border-color: var(--tkp-blue); color: var(--tkp-blue); box-shadow: 0 4px 12px rgba(0, 71, 157, 0.04); }
+        .typing-overlay:active { transform: scale(0.98); }
+
+        .symbol-btn { font-size: 1.25rem; width: 48px; height: 48px; border-radius: 14px; background: white; border: 1px solid #e2e8f0; color: #475569; font-weight: bold; transition: var(--transition-spring); display: inline-flex; align-items: center; justify-content: center; margin: 0 4px; }
+        .symbol-btn:hover { background: #e0e7ff; border-color: var(--tkp-blue); color: var(--tkp-blue); transform: translateY(-3px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1); }
+
+        .btn-submit { font-size: 1.2rem; font-weight: 800; border-radius: 999px; padding: 1rem 3.5rem; min-height: 52px; background: var(--tkp-blue); border: none; transition: var(--transition-spring); box-shadow: 0 4px 14px rgba(0, 71, 157, 0.2); display: inline-flex; align-items: center; justify-content: center; }
+        .btn-submit:hover:not(:disabled) { transform: translateY(-3px); background: #00367c; box-shadow: 0 12px 30px rgba(0, 71, 157, 0.35); }
+
+        .btn-reset-cloud { font-size: 1.15rem; font-weight: 700; border-radius: 999px; padding: 0.9rem 2.2rem; min-height: 52px; transition: var(--transition-spring); display: inline-flex; align-items: center; justify-content: center; }
+
+        .pulse-btn { animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        .pulse-warning-btn { animation: pulseWarningGlow 2s infinite; }
+        @keyframes pulseWarningGlow { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
+
+        .sidebar { position: fixed; top: 0; right: calc(-1 * var(--sidebar-w)); width: var(--sidebar-w); height: 100vh; background: rgba(255,255,255,0.98); backdrop-filter: blur(20px); transition: right 0.4s ease; z-index: 1055; padding: 2.5rem; border-left: 1px solid rgba(0,0,0,0.1); box-shadow: -10px 0 30px rgba(0,0,0,0.08); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .sidebar.open { right: 0; }
+
+        /* 📱 iPad 側邊欄磨砂觸控遮罩 */
+        .sidebar-backdrop {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            z-index: 1052; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+
+        .btn-toggle { position: fixed; bottom: 30px; right: 30px; z-index: 1056; width: 60px; height: 60px; border-radius: 50%; background: var(--tkp-blue); color: white; border: none; font-size: 1.5rem; box-shadow: 0 10px 25px rgba(0, 71, 157, 0.3); transition: var(--transition-spring); display: inline-flex; align-items: center; justify-content: center; }
+        .btn-toggle:hover { transform: scale(1.12) rotate(-10deg); }
+        .btn-toggle:active { transform: scale(0.92) !important; }
+
+        /* 📱 iPad 與行動螢幕 RWD 動態優化 */
+        @media (max-width: 991.98px) {
+            .workspace { padding: 1.5rem; border-radius: 20px; }
+            .text-container { font-size: 1.6rem; padding: 1.2rem; min-height: 220px; max-height: 40vh; gap: 14px 12px; }
+            .character { min-width: 54px; min-height: 74px; padding: 8px 10px 20px 10px; }
+            .character span { font-size: 1.6rem; }
+            .character sub { font-size: 0.72rem !important; }
+            .stat-card { padding: 0.9rem; border-radius: 16px; }
+            .stat-val { font-size: 1.5rem; }
+            :root { --sidebar-w: 320px; }
+        }
+
+        /* 📱 鍵盤彈出高度保護 (適用於 iPad 橫向或鍵盤升起時) */
+        @media (max-height: 650px) {
+            .text-container { max-height: 32vh; min-height: 180px; }
+            .stat-card { padding: 0.5rem; }
+            .stat-val { font-size: 1.3rem; margin-top: 0.2rem; }
+            .workspace { padding: 1.2rem; }
+        }
+
+        footer { text-align: center; padding: 2rem 0; font-size: 0.82em; color: #64748b; font-weight: 600; line-height: 1.6; }
+    </style>
+    <script>
+        const SessionStorageUtil = {
+            _mem: {},
+            setItem: function(key, value) { 
+                try {
+                    const jsonStr = JSON.stringify(value);
+                    const encoded = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                        return String.fromCharCode(parseInt(p1, 16));
+                    }));
+                    if (window.sessionStorage) sessionStorage.setItem(key, encoded);
+                    this._mem[key] = value;
+                } catch(e) { this._mem[key] = value; }
+            },
+            getItem: function(key) { 
+                try {
+                    let raw = null;
+                    if (window.sessionStorage) raw = sessionStorage.getItem(key);
+                    if (!raw) return this._mem[key] || null;
+                    try {
+                        const decoded = decodeURIComponent(atob(raw).split("").map(function(c) {
+                            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+                        }).join(""));
+                        return JSON.parse(decoded);
+                    } catch(decodeErr) {
+                        return JSON.parse(raw);
+                    }
+                } catch(e) { return this._mem[key] || null; }
+            },
+            clear: function() {
+                try { if (window.sessionStorage) sessionStorage.clear(); } catch(e) {}
+                this._mem = {};
+            }
+        };
+
+        const SecureCache = {
+            set: function(key, value) {
+                const wrapper = { value: value, timestamp: Date.now() };
+                SessionStorageUtil.setItem(key, wrapper);
+            },
+            get: function(key, ttlMs) {
+                const wrapper = SessionStorageUtil.getItem(key);
+                if (!wrapper) return null;
+                if (wrapper && wrapper.timestamp && (Date.now() - wrapper.timestamp < ttlMs)) return wrapper.value;
+                return null; 
+            }
+        };
+
+        const currentUser = SessionStorageUtil.getItem('user'); 
+        if (!currentUser) window.location.replace('login.html');
+    </script>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar glass-nav sticky-top">
+        <div class="container-fluid px-4 py-2">
+            <a class="navbar-brand fw-900 d-flex align-items-center" href="index.html" style="text-decoration: none;">
+                <img src="img/tkp-logo.png" alt="Logo" class="me-2" style="height: 38px;" onerror="this.src='https://www.tkp.edu.hk/images/logo.png'">
+                <span style="color: var(--tkp-blue); font-weight: 900; font-size: 1.35rem;">聖公會蔡功譜中學</span>
+                <span class="text-muted ms-2 border-start ps-2" style="font-weight: 700; font-size: 1.25rem; border-color: var(--border-light) !important;">打字挑戰</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge rounded-pill px-3 d-inline-flex align-items-center justify-content-center" id="exerciseTypeBadge" style="height: 38px; font-size: 0.9rem; font-weight: 700;">練習</span>
+                <span class="badge bg-primary rounded-pill px-3 d-inline-flex align-items-center justify-content-center" id="exerciseMode" style="height: 38px; font-size: 0.9rem; font-weight: 700; background-color: var(--tkp-blue) !important;">速成模式</span>
+                <div class="form-check form-switch d-none d-md-flex align-items-center m-0" style="height: 38px;">
+                    <input class="form-check-input m-0" type="checkbox" id="audioToggle" checked style="cursor: pointer; transform: scale(1.15);">
+                    <label class="form-check-label small fw-bold text-muted ms-2" for="audioToggle"><i class="fas fa-volume-up me-1"></i>打字音效</label>
+                </div>
+                <div class="user-pill shadow-sm">
+                    <i class="fas fa-user-circle text-primary me-2 fs-5"></i>
+                    <div class="text-start lh-sm" style="font-size: 0.85rem;">
+                        <strong class="text-dark" id="username">載入中</strong>
+                        <span class="text-muted ms-2 ps-2 border-start small fw-bold" id="userrole">學生</span>
+                    </div>
+                </div>
+                <a href="index.html" class="btn-header"><i class="fas fa-arrow-left me-2"></i>返回大廳</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-4 max-w-4xl flex-grow-1">
+        <!-- ⏱️ 計時模式專用動態倒數膠囊 (向量圖標) -->
+        <div id="countdownBar" class="alert alert-warning border-0 rounded-4 p-3 mb-4 shadow-sm d-none align-items-center justify-content-between" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1px solid #fde68a !important;">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-warning text-dark p-2 rounded-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                        <path d="M12 3V1"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-0 text-dark">限時打字挑戰倒數中</h6>
+                    <small class="text-muted">請在時間結束前盡快敲擊，時間歸零將自動封存交卷！</small>
+                </div>
+            </div>
+            <div class="fs-2 fw-900 text-danger font-monospace px-3 py-1 bg-white rounded-3 shadow-sm border" id="countdownTimer">00:00</div>
+        </div>
+
+        <!-- 🔒 考試模式專用警示條 (向量圖標) -->
+        <div id="examWarningBar" class="alert alert-danger border-0 rounded-4 p-3 mb-4 shadow-sm d-none align-items-center justify-content-between" style="background-color: #fef2f2; border: 1px solid #fecaca !important;">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-danger text-white p-2 rounded-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <rect x="9" y="10" width="6" height="5" rx="1"></rect>
+                        <path d="M10 10V8a2 2 0 0 1 4 0v2"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-0 text-danger">正式考試考核進行中</h6>
+                    <small class="text-muted">本場次為考核評分，已啟用防作弊切換分頁監測，且不可使用錯字修正彈窗。</small>
+                </div>
+            </div>
+            <span class="badge bg-danger rounded-pill px-3 py-2 fw-bold" id="examCheatCountBadge"><i class="fas fa-shield-alt me-1"></i>監考中 (切換分頁: 0)</span>
+        </div>
+
+        <div class="row row-cols-2 row-cols-md-5 g-3 mb-4 text-center">
+            <div class="col">
+                <div class="stat-card">
+                    <div class="text-success small fw-bold"><i class="fas fa-check-circle me-1"></i>正確</div>
+                    <div class="stat-val text-success" id="correctCount">0</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-card">
+                    <div class="text-danger small fw-bold"><i class="fas fa-times-circle me-1"></i>錯誤</div>
+                    <div class="stat-val text-danger" id="incorrectCount">0</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-card">
+                    <div class="text-primary small fw-bold"><i class="fas fa-bullseye me-1"></i>準確</div>
+                    <div class="stat-val text-primary" id="accuracy">100%</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-card">
+                    <div class="text-info small fw-bold"><i class="fas fa-bolt me-1"></i>WPM</div>
+                    <div class="stat-val text-info" id="wpmDisplay">0</div>
+                </div>
+            </div>
+            <div class="col col-12 col-md">
+                <div class="stat-card">
+                    <div class="text-dark small fw-bold"><i class="fas fa-flag-checkered me-1"></i>進度</div>
+                    <div class="stat-val text-dark" style="font-size: 1.5rem; padding-top: 0.1rem;">
+                        <span id="currentWordCount">0</span><span class="text-muted mx-1">/</span><span class="text-muted" id="totalWordCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="workspace">
+            <div class="text-container shadow-inner" id="exerciseText"><div class="w-100 text-center py-5 text-primary"><div class="spinner-border mb-3"></div><div class="fw-bold">正在準備文章...</div></div></div>
+            
+            <div id="correctionTip" class="alert alert-warning d-none align-items-center rounded-3 border-0 py-2 px-3 mt-3 mb-0 shadow-sm" style="font-size: 0.95rem; color: #b45309; background-color: #fffbeb; border: 1px solid #fde68a !important;">
+                <i class="fas fa-lightbulb me-2 fs-5"></i>
+                <div class="flex-grow-1">發現錯字嗎？<strong>直接點擊上面紅色的錯字</strong>，即可精準修正，不需要按 Backspace 刪除重打喔！</div>
+            </div>
+
+            <div class="mt-4 d-flex align-items-center justify-content-center">
+                <span class="text-muted fw-bold me-3"><i class="fas fa-bolt text-warning me-1"></i> 快捷標點</span>
+                <div id="inputButtons">
+                    <button class="symbol-btn" data-symbol="，">，</button><button class="symbol-btn" data-symbol="。">。</button>
+                    <button class="symbol-btn" data-symbol="、">、</button><button class="symbol-btn" data-symbol="！">！</button>
+                    <button class="symbol-btn" data-symbol="：">：</button><button class="symbol-btn" data-symbol="「">「</button>
+                    <button class="symbol-btn" data-symbol="」">」</button><button class="symbol-btn" data-symbol="；">；</button>
+                </div>
+            </div>
+
+            <textarea id="inputField" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" disabled></textarea>
+            <div class="typing-overlay" id="overlayBtn"><i class="fas fa-mouse-pointer me-2"></i>點擊此處，開始專注打字</div>
+
+            <div class="text-center mt-5 d-flex justify-content-center flex-column flex-sm-row gap-3">
+                <button class="btn btn-outline-danger btn-reset-cloud" id="resetBtn" onclick="reloadAuthoritativeCloudProgress()"><i class="fas fa-undo-alt me-2"></i>重載雲端原始進度</button>
+                <button class="btn btn-primary btn-submit text-white" id="submitBtn" disabled><i class="fas fa-cloud-upload-alt me-2"></i>儲存進度並暫存雲端</button>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="correctionModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px);">
+                <div class="modal-header bg-light border-0 py-3 px-4">
+                    <h6 class="modal-title fw-900 text-primary mb-0"><i class="fas fa-magic me-2"></i>精準錯字修正</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-4">
+                        <span class="text-muted small fw-bold d-block mb-1">文章目標字元</span>
+                        <span class="fs-1 fw-900 text-dark" id="correctWordTarget">肇</span>
+                        <span class="badge bg-light border text-primary rounded-pill d-block mx-auto mt-2" style="max-width: fit-content; font-size: 0.8rem;" id="correctWordKey">字根</span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="correctedInput" class="form-label text-muted small fw-bold">請輸入正確字元以更正</label>
+                        <input type="text" id="correctedInput" class="form-control form-control-lg text-center fw-bold border-2" style="border-color: #cbd5e1; border-radius: 14px;" maxlength="1" placeholder="輸入修正字" autocomplete="off" autofocus>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100 rounded-pill fw-bold py-2 mt-2" id="confirmCorrectionBtn"><i class="fas fa-check me-1"></i>確認更正</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-900 text-primary mb-0"><i class="fas fa-book-open me-2"></i>輔助字根表</h4>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 36px; height: 36px;" onclick="toggleSidebar(false)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <img src="img/key_table.png" alt="字根表" class="img-fluid rounded-4 shadow-sm border" onerror="this.src='https://www.tkp.edu.hk/images/logo.png'">
+    </aside>
+    <button class="btn-toggle" id="btnToggle" title="展開字根表"><i class="fas fa-keyboard"></i></button>
+
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-4" style="z-index: 1060;">
+        <div id="sysToast" class="toast align-items-center text-white border-0 shadow-lg" style="border-radius: 12px; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);" role="alert">
+            <div class="d-flex p-2 justify-content-center"><div class="toast-body fw-bold fs-6" id="sysToastBody"></div></div>
+        </div>
+    </div>
+
+    <footer class="mt-auto">
+        Copyright © 2026 S.K.H. Tsoi Kung Po Secondary School. All rights reserved.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/pyshengdiao.js"></script>
+    <script>
+        (function () {
+            "use strict";
+            const API_URL = "https://tkp-typing-api.tvbar.workers.dev/"; 
+
+            const state = {
+                user: currentUser,
+                exerciseId: null,
+                currentEx: null,
+                correct: 0,
+                incorrect: 0,
+                total: 0,
+                prevLen: 0,
+                startTime: null,
+                previousSpentSeconds: 0,
+                currentTotalSpentSeconds: 0,
+                typosMap: {},
+                charNodes: [],
+                alignedRoots: [],
+                isDraftSaving: false,
+                lastKeystrokeTime: 0,
+                lastActiveTimestamp: 0,
+                hasCelebrated: false,
+                tabSwitchCount: 0,
+                remainingSeconds: 0,
+                timerInterval: null,
+                isExam: false,
+                isTimed: false
+            };
+
+            const dom = {
+                text: document.getElementById('exerciseText'),
+                input: document.getElementById('inputField'),
+                btn: document.getElementById('submitBtn'),
+                mode: document.getElementById('exerciseMode'),
+                typeBadge: document.getElementById('exerciseTypeBadge'),
+                countdownBar: document.getElementById('countdownBar'),
+                countdownTimer: document.getElementById('countdownTimer'),
+                examBar: document.getElementById('examWarningBar'),
+                examBadge: document.getElementById('examCheatCountBadge'),
+                overlay: document.getElementById('overlayBtn'),
+                tip: document.getElementById('correctionTip')
+            };
+            
+            let correctionIdx = null;
+            let cModalInstance = null;
+            let isComposing = false; 
+            let localSaveTimeout = null; 
+
+            const AudioEngine = {
+                ctx: null,
+                init() {
+                    if (!this.ctx) {
+                        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                },
+                playClick(isCorrect = true) {
+                    if (!document.getElementById('audioToggle').checked) return;
+                    try {
+                        this.init();
+                        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+
+                        const now = this.ctx.currentTime;
+                        if (isCorrect) {
+                            osc.type = 'sine'; 
+                            osc.frequency.setValueAtTime(950, now);
+                            osc.frequency.exponentialRampToValueAtTime(400, now + 0.04);
+                            gain.gain.setValueAtTime(0.04, now);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                            osc.start(now);
+                            osc.stop(now + 0.04);
+                        } else {
+                            osc.type = 'triangle'; 
+                            osc.frequency.setValueAtTime(180, now);
+                            osc.frequency.linearRampToValueAtTime(70, now + 0.1);
+                            gain.gain.setValueAtTime(0.08, now);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                            osc.start(now);
+                            osc.stop(now + 0.1);
+                        }
+                    } catch(e) {}
+                }
+            };
+
+            // 🎯 核心演算法：字根/拼音與文章自動智慧對齊器 (徹底免疫標點符號位移，支援一般打字免提示，拼音自癒補齊)
+            function getAlignedRoots(text1, text2Raw, mode) {
+                if (!text1) return [];
+                if (mode === "一般打字") return new Array(text1.length).fill("");
+                const chars = text1.split("");
+                const isPunc = (c) => /[，。、！：；「」？_,\-‐—～()（）《》〈〉［］【】\s\r\n\t]/i.test(c);
+
+                // 若為拼音模式且題目未儲存拆碼，自動調用 PinyinHelper 動態補齊
+                if (mode === "拼音模式" && (!text2Raw || !text2Raw.trim()) && typeof PinyinHelper !== "undefined") {
+                    return chars.map(c => isPunc(c) ? "" : (PinyinHelper.getPinyin(c) || c));
+                }
+
+                if (!text2Raw) return new Array(text1.length).fill("");
+                const tokens = text2Raw.trim().split(/\s+/).filter(Boolean);
+                const nonPuncCount = chars.filter(c => !isPunc(c)).length;
+
+                // 若儲存的 token 數恰等於總字數 (已含標點佔位)
+                if (tokens.length === chars.length) {
+                    return tokens.map((tok, i) => isPunc(chars[i]) ? "" : (tok === "符號" ? "" : tok));
+                }
+
+                // 若儲存的 token 數為非標點字數 (逐字對齊漢字)
+                let ptr = 0;
+                return chars.map(c => isPunc(c) ? "" : (tokens[ptr++] || ""));
+            }
+
+            // 🎉 輕量化原生粒子慶祝特效 (無第三方依賴，離線可用)
+            function triggerConfetti() {
+                if (state.hasCelebrated) return;
+                state.hasCelebrated = true;
+
+                const canvas = document.createElement('canvas');
+                canvas.style.position = 'fixed';
+                canvas.style.top = '0';
+                canvas.style.left = '0';
+                canvas.style.width = '100vw';
+                canvas.style.height = '100vh';
+                canvas.style.pointerEvents = 'none';
+                canvas.style.zIndex = '99999';
+                document.body.appendChild(canvas);
+
+                const ctx = canvas.getContext('2d');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                const particles = [];
+                const colors = ['#00479d', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#ec4899'];
+
+                for (let i = 0; i < 90; i++) {
+                    particles.push({
+                        x: canvas.width / 2,
+                        y: canvas.height * 0.45,
+                        r: Math.random() * 6 + 3,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        vx: (Math.random() - 0.5) * 14,
+                        vy: (Math.random() - 0.7) * 16,
+                        gravity: 0.35,
+                        opacity: 1
+                    });
+                }
+
+                let frameCount = 0;
+                function anim() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    let alive = false;
+                    particles.forEach(p => {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += p.gravity;
+                        p.opacity -= 0.012;
+                        if (p.opacity > 0) {
+                            alive = true;
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                            ctx.fillStyle = p.color;
+                            ctx.globalAlpha = Math.max(0, p.opacity);
+                            ctx.fill();
+                        }
+                    });
+                    frameCount++;
+                    if (alive && frameCount < 120) {
+                        requestAnimationFrame(anim);
+                    } else {
+                        canvas.remove();
+                    }
+                }
+                requestAnimationFrame(anim);
+            }
+
+            function showToast(msg) {
+                const toastEl = document.getElementById('sysToast'); 
+                document.getElementById('sysToastBody').innerHTML = msg;
+                new bootstrap.Toast(toastEl, { delay: 2500 }).show();
+            }
+
+            async function callAPI(action, payload = {}, retryCount = 2) { 
+                const emailAuth = state.user ? state.user.email : "";
+                for (let i = 0; i <= retryCount; i++) {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000);
+                    try {
+                        const res = await fetch(API_URL, { 
+                            method: "POST", 
+                            headers: { "Content-Type": "application/json", "Authorization": emailAuth }, 
+                            signal: controller.signal,
+                            body: JSON.stringify({ action, payload }) 
+                        });
+                        clearTimeout(timeoutId);
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        return await res.json();
+                    } catch(err) {
+                        clearTimeout(timeoutId);
+                        if (i === retryCount) throw err;
+                        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+                    }
+                }
+            }
+
+            async function initPage() {
+                document.getElementById('username').textContent = state.user.name;
+                document.getElementById('userrole').textContent = state.user.permission;
+
+                state.exerciseId = new URLSearchParams(window.location.search).get("id");
+                if (!state.exerciseId) return dom.text.innerHTML = "<h4 class='text-danger m-auto fw-bold'>找不到該練習任務</h4>";
+                
+                let exData = SecureCache.get("exercises", 24 * 60 * 60 * 1000) || [];
+                state.currentEx = exData.find(e => String(e.id) === String(state.exerciseId));
+                
+                if (!state.currentEx) { 
+                    try { 
+                        const res = await callAPI('getExerciseById', { id: state.exerciseId }); 
+                        if(res.status) state.currentEx = res.data; 
+                    } catch(e){} 
+                }
+                if (!state.currentEx) return dom.text.innerHTML = "<h4 class='text-danger m-auto fw-bold'>該題目不存在或尚未開放</h4>";
+
+                // 🌟 打字模式與教材分類標準化適配 (速成模式/拼音模式/一般打字；練習/考試/計時/小測)
+                const rawMode = String(state.currentEx.mode || "");
+                const stdMode = rawMode.includes("拼音") ? "拼音模式" : (rawMode.includes("速成") || rawMode.includes("倉頡") ? "速成模式" : "一般打字");
+
+                const rawType = String(state.currentEx.type || "");
+                const stdType = rawType.includes("考試") ? "考試" : (rawType.includes("計時") ? "計時" : (rawType.includes("小測") ? "小測" : "練習"));
+
+                state.currentEx.mode = stdMode;
+                state.currentEx.type = stdType;
+                dom.mode.textContent = stdMode;
+
+                // 設置分類 Badge 與主題專屬樣式
+                if (dom.typeBadge) {
+                    dom.typeBadge.textContent = stdType;
+                    if (stdType === "考試") {
+                        dom.typeBadge.className = "badge bg-danger rounded-pill px-3 d-inline-flex align-items-center justify-content-center text-white";
+                        dom.examBar.classList.remove('d-none');
+                        dom.examBar.classList.add('d-flex');
+                        state.isExam = true;
+                        setupExamAntiCheat();
+                    } else if (stdType === "計時") {
+                        dom.typeBadge.className = "badge bg-warning text-dark rounded-pill px-3 d-inline-flex align-items-center justify-content-center fw-bold";
+                        dom.countdownBar.classList.remove('d-none');
+                        dom.countdownBar.classList.add('d-flex');
+                        state.isTimed = true;
+                    } else if (stdType === "小測") {
+                        dom.typeBadge.className = "badge bg-info text-white rounded-pill px-3 d-inline-flex align-items-center justify-content-center";
+                    } else {
+                        dom.typeBadge.className = "badge bg-success text-white rounded-pill px-3 d-inline-flex align-items-center justify-content-center";
+                    }
+                }
+
+                const t1 = state.currentEx.text1 || "";
+                state.total = t1.length;
+
+                // 🌟 智慧字根/拼音對齊引擎：支援速成、拼音，一般打字則免提示
+                state.alignedRoots = getAlignedRoots(t1, state.currentEx.text2 || "", stdMode);
+
+                const totalWordEl = document.getElementById('totalWordCount');
+                if (totalWordEl) totalWordEl.textContent = state.total;
+                dom.input.maxLength = state.total;
+
+                dom.text.innerHTML = t1.split("").map((c, i) => `<div class="character" id="char-${i}" data-idx="${i}"><span>${c}</span><sub>${state.alignedRoots[i]||""}</sub></div>`).join("");
+                state.charNodes = Array.from(dom.text.querySelectorAll('.character'));
+
+                const dashboardData = SecureCache.get('dashboard_data', 24 * 60 * 60 * 1000);
+                const recData = dashboardData ? (dashboardData.records || []) : [];
+                const record = [...recData].reverse().find(r => String(r.id) === String(state.exerciseId));
+
+                let isCompleted = false;
+                if (record && record.text) {
+                    dom.input.value = record.text;
+                    state.prevLen = record.text.length;
+                    state.previousSpentSeconds = parseInt(record.spent_seconds || 0);
+                    state.currentTotalSpentSeconds = parseInt(record.spent_seconds || 0);
+                    if (parseInt(record.correct) >= state.total && state.total > 0) { isCompleted = true; }
+                }
+
+                const draftKey = `draft_${state.user.email}_${state.exerciseId}`;
+                const draftSecsKey = `draft_secs_${state.user.email}_${state.exerciseId}`;
+                const localDraft = localStorage.getItem(draftKey);
+                const localDraftSecs = localStorage.getItem(draftSecsKey);
+
+                if (!isCompleted && localDraft && localDraft.length > state.prevLen) {
+                    dom.input.value = localDraft;
+                    state.prevLen = localDraft.length;
+                    if (localDraftSecs) {
+                        state.previousSpentSeconds = parseInt(localDraftSecs, 10);
+                        state.currentTotalSpentSeconds = parseInt(localDraftSecs, 10);
+                    }
+                    showToast("<i class='fas fa-info-circle me-1'></i>已自動還原你上次的打字儲存進度！");
+                }
+
+                if (isCompleted) {
+                    dom.input.disabled = true; dom.btn.disabled = true;
+                    dom.btn.className = "btn btn-success btn-submit text-white";
+                    dom.btn.innerHTML = "<i class='fas fa-check-double me-2'></i>此任務已完美達成";
+                    dom.overlay.innerHTML = "<i class='fas fa-award text-warning fs-4 me-2 align-middle'></i><span class='text-success fw-bold'>太棒了！你已完美達成此項練習！</span>";
+                    dom.overlay.style.background = "#f0fdf4"; dom.overlay.style.borderColor = "#86efac"; dom.overlay.style.cursor = "default";
+
+                    const resetBtn = document.getElementById('resetBtn');
+                    if (resetBtn) resetBtn.classList.add('d-none');
+                } else {
+                    dom.input.disabled = false; dom.btn.disabled = false;
+                    dom.overlay.addEventListener('click', () => { dom.input.focus(); });
+
+                    const resetBtn = document.getElementById('resetBtn');
+                    if (resetBtn) resetBtn.classList.remove('d-none');
+
+                    if (state.isTimed) {
+                        setupTimedChallenge();
+                    }
+
+                    dom.input.addEventListener('focus', () => {
+                        document.body.classList.add('zen-focus');
+                        document.querySelector('.workspace').classList.add('focused');
+                        dom.overlay.innerHTML = "<i class='fas fa-keyboard me-2 text-primary'></i>正在打字中... 眼睛請注視中文字卡";
+                    });
+                    dom.input.addEventListener('blur', () => {
+                        document.body.classList.remove('zen-focus');
+                        document.querySelector('.workspace').classList.remove('focused');
+                        dom.overlay.innerHTML = "<i class='fas fa-mouse-pointer me-2'></i>點擊此處，繼續專注打字";
+                    });
+                }
+
+                handleInput();
+                if(!isCompleted) dom.input.focus();
+            }
+
+            // 🛡️ 考試專用：切換分頁作弊監聽防護
+            function setupExamAntiCheat() {
+                window.addEventListener('blur', () => {
+                    if (dom.input.disabled) return;
+                    state.tabSwitchCount++;
+                    if (dom.examBadge) {
+                        dom.examBadge.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i>監考中 (切換分頁: ${state.tabSwitchCount})`;
+                    }
+                    showToast(`<i class="fas fa-exclamation-triangle text-danger me-1"></i> 【考試警告】切換分頁已被記錄！(累計 ${state.tabSwitchCount} 次)`);
+                });
+            }
+
+            // ⏱️ 計時專用：限時挑戰動態倒數引擎 (優先讀取教師自定義秒數)
+            function setupTimedChallenge() {
+                const customSec = parseInt(state.currentEx.duration, 10) || 0;
+                const allocated = customSec > 0 ? customSec : Math.max(45, Math.min(300, Math.round(state.total * 2.2)));
+                state.allocatedSeconds = allocated;
+                state.remainingSeconds = allocated;
+                updateCountdownDisplay();
+
+                state.timerInterval = setInterval(() => {
+                    if (dom.input.disabled) {
+                        clearInterval(state.timerInterval);
+                        return;
+                    }
+                    state.remainingSeconds--;
+                    updateCountdownDisplay();
+
+                    if (state.remainingSeconds <= 10 && state.remainingSeconds > 0) {
+                        dom.countdownTimer.classList.add('text-danger', 'anim-shake');
+                    }
+                    if (state.remainingSeconds <= 0) {
+                        clearInterval(state.timerInterval);
+                        dom.countdownTimer.textContent = "00:00";
+                        dom.input.disabled = true;
+                        showToast("<i class='fas fa-stopwatch text-warning me-1'></i> 【計時結束】挑戰時間到！系統正在為你自動交卷...");
+                        saveProgress(2);
+                    }
+                }, 1000);
+            }
+
+            function updateCountdownDisplay() {
+                const m = String(Math.floor(Math.max(0, state.remainingSeconds) / 60)).padStart(2, '0');
+                const s = String(Math.max(0, state.remainingSeconds) % 60).padStart(2, '0');
+                if (dom.countdownTimer) dom.countdownTimer.textContent = `${m}:${s}`;
+            }
+
+            function handleInput() {
+                if (isComposing) return; 
+
+                let val = dom.input.value;
+                if (val.length > state.total) {
+                    val = val.slice(0, state.total);
+                    dom.input.value = val;
+                }
+
+                const inputsLen = val.length;
+                const prevLen = state.prevLen;
+
+                // 🌟 檢查單次輸入增量：放寬至 8 字以容許輸入法詞組聯想輸入，大於 8 字判定為異常貼上
+                if (inputsLen - prevLen > 8) {
+                    dom.input.value = val.slice(0, prevLen);
+                    return showToast("<i class='fas fa-ban me-1 text-danger'></i> 系統偵測到貼上/拖放作弊，已強制還原！");
+                }
+
+                const nowTimestamp = Date.now();
+                if (inputsLen > prevLen) {
+                    const timeDiff = nowTimestamp - state.lastKeystrokeTime;
+                    if (timeDiff < 15 && state.lastKeystrokeTime !== 0 && (inputsLen - prevLen > 2)) {
+                        dom.input.value = val.slice(0, prevLen);
+                        return showToast("<i class='fas fa-shield-alt text-danger me-1'></i> 系統判定擊鍵頻率異常，請勿使用外掛！");
+                    }
+                    state.lastKeystrokeTime = nowTimestamp;
+                }
+
+                if (!state.lastActiveTimestamp) {
+                    state.lastActiveTimestamp = nowTimestamp;
+                }
+
+                // 🌟 智慧活躍時間累加演算法：打字間隔小於 6 秒計入活躍時間；超過 6 秒則視為自然閱讀停頓，不盲目膨脹用時
+                if (inputsLen > prevLen) {
+                    const gap = (nowTimestamp - state.lastActiveTimestamp) / 1000;
+                    if (gap > 0 && gap < 6) {
+                        state.previousSpentSeconds += gap;
+                    } else if (gap >= 6) {
+                        state.previousSpentSeconds += 1.5; // 自然按鍵預備秒數補償
+                    }
+                    state.lastActiveTimestamp = nowTimestamp;
+                }
+
+                let totalElapsedSeconds = Math.max(1, Math.round(state.previousSpentSeconds));
+
+                if (!dom.input.disabled) {
+                    clearTimeout(localSaveTimeout);
+                    localSaveTimeout = setTimeout(() => {
+                        localStorage.setItem(`draft_${state.user.email}_${state.exerciseId}`, val); 
+                        localStorage.setItem(`draft_secs_${state.user.email}_${state.exerciseId}`, Math.round(totalElapsedSeconds)); 
+                    }, 500);
+                }
+
+                const inputs = val.split(""); 
+                const targets = state.currentEx.text1.split("");
+                let c = 0, ic = 0;
+                
+                if (inputsLen > prevLen) {
+                    const lastTypedIdx = inputsLen - 1;
+                    const charDom = state.charNodes[lastTypedIdx];
+
+                    if (inputs[lastTypedIdx] === targets[lastTypedIdx]) {
+                        AudioEngine.playClick(true);
+                    } else {
+                        AudioEngine.playClick(false);
+                        const wrongChar = targets[lastTypedIdx];
+                        state.typosMap[wrongChar] = (state.typosMap[wrongChar] || 0) + 1;
+
+                        if (charDom) {
+                            charDom.classList.add('anim-shake');
+                            charDom.addEventListener('animationend', () => {
+                                charDom.classList.remove('anim-shake');
+                            }, { once: true });
+                        }
+                    }
+                }
+
+                const totalNodes = state.charNodes.length;
+                for (let i = 0; i < totalNodes; i++) {
+                    const el = state.charNodes[i];
+                    if (!el) continue;
+
+                    el.className = 'character'; 
+                    el.removeAttribute('title');
+
+                    if (i < inputsLen) {
+                        if (inputs[i] === targets[i]) {
+                            el.classList.add('correct');
+                            c++;
+                        } else {
+                            el.classList.add('incorrect');
+                            el.setAttribute('title', '點擊可精準修正此錯字');
+                            ic++;
+                        }
+                    } else if (i === inputsLen && !dom.input.disabled) {
+                        el.classList.add('active-char');
+                    }
+                }
+
+                if (inputsLen > state.total) ic += (inputsLen - state.total);
+                state.correct = c; state.incorrect = ic; state.prevLen = inputsLen;
+
+                document.getElementById('correctCount').textContent = c;
+                document.getElementById('incorrectCount').textContent = ic;
+                document.getElementById('currentWordCount').textContent = inputsLen;
+                
+                const acc = inputsLen > 0 ? ((c / inputsLen) * 100).toFixed(1) : "100.0"; 
+                document.getElementById('accuracy').textContent = acc + "%";
+
+                let wpm = 0;
+                if (totalElapsedSeconds > 0.5) {
+                    wpm = Math.round((c / totalElapsedSeconds) * 60);
+                }
+                document.getElementById('wpmDisplay').textContent = wpm;
+                state.currentTotalSpentSeconds = Math.round(totalElapsedSeconds);
+
+                if (ic > 0 && !dom.input.disabled) {
+                    dom.tip.classList.remove('d-none'); dom.tip.classList.add('d-flex');
+                } else {
+                    dom.tip.classList.add('d-none'); dom.tip.classList.remove('d-flex');
+                }
+
+                if (!dom.input.disabled) {
+                    if(inputsLen >= state.total) {
+                        if (ic === 0) {
+                            triggerConfetti();
+                            dom.btn.className = "btn btn-submit text-white pulse-btn";
+                            dom.btn.style.background = "var(--success)";
+                            dom.btn.innerHTML = "<i class='fas fa-check-double me-2'></i> 完美達成！立即上傳成績";
+                        } else {
+                            dom.btn.className = "btn btn-submit text-white pulse-warning-btn";
+                            dom.btn.style.background = "#f59e0b"; 
+                            dom.btn.innerHTML = "<i class='fas fa-exclamation-triangle me-2'></i> 含有錯字，點選上方錯字修正後提交";
+                        }
+                    } else {
+                        dom.btn.className = "btn btn-submit text-white";
+                        dom.btn.style.background = "var(--tkp-blue)"; 
+                        dom.btn.innerHTML = "<i class='fas fa-cloud-upload-alt me-2'></i> 儲存進度並暫存雲端";
+                    }
+                }
+
+                const activeNode = state.charNodes[inputsLen];
+                if (activeNode && !dom.input.disabled) {
+                    const rect = activeNode.getBoundingClientRect();
+                    const containerRect = dom.text.getBoundingClientRect();
+                    if (rect.bottom > containerRect.bottom || rect.top < containerRect.top) {
+                        activeNode.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                    }
+                }
+            }
+
+            function enforceCursorLimits() {
+                if (isComposing) return; 
+                const len = dom.input.value.length;
+                dom.input.setSelectionRange(len, len);
+            }
+
+            function openCorrectionModal(idx) {
+                if (state.isExam) {
+                    return showToast("<i class='fas fa-user-lock text-danger me-1'></i> 【正式考試】考試模式下不開放直接彈窗改字，請以當前輸入為準！");
+                }
+
+                correctionIdx = idx;
+                const targetChar = state.currentEx.text1[idx];
+                const modeLabel = state.currentEx.mode === "拼音模式" ? "拼音提示" : "字根提示";
+                const targetKey = (state.alignedRoots && state.alignedRoots[idx]) || (state.currentEx.mode === "一般打字" ? "一般打字免字根" : "無對應拆碼");
+
+                document.getElementById('correctWordTarget').textContent = targetChar;
+                document.getElementById('correctWordKey').textContent = `${modeLabel}: ${targetKey}`;
+                
+                const correctedInput = document.getElementById('correctedInput');
+                correctedInput.value = "";
+                
+                if (!cModalInstance) { cModalInstance = new bootstrap.Modal(document.getElementById('correctionModal')); }
+                cModalInstance.show();
+
+                document.getElementById('correctionModal').addEventListener('shown.bs.modal', () => { correctedInput.focus(); }, { once: true });
+            }
+
+            function commitCorrection() {
+                const correctedInput = document.getElementById('correctedInput');
+                const newVal = correctedInput.value.trim();
+                if (newVal.length === 0) return showToast("請輸入更正後的漢字！");
+                
+                const currentTextArray = dom.input.value.split("");
+                currentTextArray[correctionIdx] = newVal;
+                dom.input.value = currentTextArray.join("");
+                
+                cModalInstance.hide();
+                handleInput();
+                showToast("<i class='fas fa-magic text-success me-1'></i>錯字修正成功！");
+            }
+
+            function updateOptimisticDashboardCache() {
+                let cachedDashboard = SecureCache.get('dashboard_data', 24 * 60 * 60 * 1000); 
+                if (!cachedDashboard) return;
+
+                if (!cachedDashboard.records) cachedDashboard.records = [];
+                
+                const existingIdx = cachedDashboard.records.findIndex(r => String(r.id) === String(state.exerciseId));
+                let prevCorrect = 0;
+                if (existingIdx > -1) {
+                    prevCorrect = parseInt(cachedDashboard.records[existingIdx].correct || 0);
+                }
+
+                const newCorrect = state.correct;
+                const newWPM = parseInt(document.getElementById('wpmDisplay').textContent || 0);
+
+                const newRecord = {
+                    id: state.exerciseId,
+                    title: state.currentEx.title,
+                    text: dom.input.value,
+                    correct: newCorrect,
+                    progress: Math.min(100, Math.round((dom.input.value.length / state.total) * 100)),
+                    spent_seconds: state.currentTotalSpentSeconds,
+                    accuracy: document.getElementById('accuracy').textContent.replace('%',''),
+                    wpm: String(newWPM),
+                    time: new Date().toISOString()
+                };
+
+                if (existingIdx > -1) {
+                    cachedDashboard.records[existingIdx] = newRecord;
+                } else {
+                    cachedDashboard.records.push(newRecord);
+                }
+
+                if (cachedDashboard.rankingVolume) {
+                    let myVolRank = cachedDashboard.rankingVolume.find(r => r.email === state.user.email);
+                    const diffCorrect = Math.max(0, newCorrect - prevCorrect);
+
+                    if (myVolRank) {
+                        myVolRank.typingVolume = (parseInt(myVolRank.typingVolume || 0) + diffCorrect);
+                        myVolRank.time = new Date().toISOString(); 
+                    } else {
+                        cachedDashboard.rankingVolume.push({
+                            email: state.user.email,
+                            name: state.user.name,
+                            class: state.user.class || "1A",
+                            typingVolume: newCorrect,
+                            time: new Date().toISOString()
+                        });
+                    }
+                }
+
+                if (cachedDashboard.rankingSpeed) {
+                    let mySpeedRank = cachedDashboard.rankingSpeed.find(r => r.email === state.user.email);
+                    if (mySpeedRank) {
+                        mySpeedRank.score = Math.max(parseInt(mySpeedRank.score || 0), newWPM);
+                        mySpeedRank.time = new Date().toISOString();
+                    } else {
+                        cachedDashboard.rankingSpeed.push({
+                            email: state.user.email,
+                            name: state.user.name,
+                            class: state.user.class || "1A",
+                            score: newWPM,
+                            time: new Date().toISOString()
+                        });
+                    }
+                }
+
+                SecureCache.set('dashboard_data', cachedDashboard);
+            }
+
+            window.reloadAuthoritativeCloudProgress = async function() {
+                if (!confirm("【安全重設確認】\n確定要重新載入雲端進度嗎？這會覆蓋現有本地草稿！")) return;
+
+                const resetBtn = document.getElementById('resetBtn');
+                const origHtml = resetBtn.innerHTML;
+                resetBtn.disabled = true;
+                resetBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>雲端讀取中...`;
+
+                try {
+                    const res = await callAPI('getRecords', { email: state.user.email });
+                    if (res.status) {
+                        const freshRecords = res.data || [];
+
+                        let cachedDashboard = SecureCache.get('dashboard_data', 24 * 60 * 60 * 1000) || {};
+                        cachedDashboard.records = freshRecords;
+                        SecureCache.set('dashboard_data', cachedDashboard);
+
+                        const draftKey = `draft_${state.user.email}_${state.exerciseId}`;
+                        const draftSecsKey = `draft_secs_${state.user.email}_${state.exerciseId}`;
+                        localStorage.removeItem(draftKey);
+                        localStorage.removeItem(draftSecsKey);
+
+                        state.startTime = null;
+                        state.previousSpentSeconds = 0;
+                        state.currentTotalSpentSeconds = 0;
+                        state.typosMap = {};
+                        dom.input.value = "";
+
+                        let isCompletedNow = false;
+                        const record = freshRecords.find(r => String(r.id) === String(state.exerciseId));
+                        if (record && record.text) {
+                            dom.input.value = record.text;
+                            state.prevLen = record.text.length;
+                            state.previousSpentSeconds = parseInt(record.spent_seconds || 0);
+                            state.currentTotalSpentSeconds = parseInt(record.spent_seconds || 0);
+                            if (parseInt(record.correct) >= state.total && state.total > 0) { isCompletedNow = true; }
+                            showToast("雲端進度同步完成！");
+                        } else {
+                            state.prevLen = 0;
+                            showToast("進度已重設為全新空白狀態！");
+                        }
+
+                        if (isCompletedNow) {
+                            dom.input.disabled = true;
+                            dom.btn.disabled = true;
+                            dom.btn.className = "btn btn-success btn-submit text-white";
+                            dom.btn.innerHTML = "<i class='fas fa-check-double me-2'></i>此任務已完美達成";
+                            dom.overlay.innerHTML = "<i class='fas fa-award text-warning fs-4 me-2 align-middle'></i><span class='text-success fw-bold'>太棒了！你已完美達成此項練習！</span>";
+                            dom.overlay.style.background = "#f0fdf4"; dom.overlay.style.borderColor = "#86efac"; dom.overlay.style.cursor = "default";
+                            
+                            // 🌟 雲端重載若完成，同步隱藏重載按鈕
+                            if (resetBtn) resetBtn.classList.add('d-none');
+                        } else {
+                            dom.input.disabled = false;
+                            dom.btn.disabled = false;
+                            dom.btn.className = "btn btn-submit text-white";
+                            dom.btn.style.background = "var(--tkp-blue)";
+                            dom.btn.innerHTML = "<i class='fas fa-cloud-upload-alt me-2'></i> 儲存進度並暫存雲端";
+
+                            dom.overlay.innerHTML = "<i class='fas fa-mouse-pointer me-2'></i>點擊此處，開始專注打字";
+                            dom.overlay.style.background = "#f8fafc";
+                            dom.overlay.style.borderColor = "#cbd5e1";
+                            dom.overlay.style.cursor = "text";
+                            
+                            // 🌟 雲端重載未完成，則顯示重設按鈕
+                            if (resetBtn) resetBtn.classList.remove('d-none');
+                        }
+
+                        handleInput();
+                        if (!isCompletedNow) dom.input.focus();
+                    } else {
+                        showToast("讀取雲端失敗！");
+                    }
+                } catch(e) {
+                    showToast("伺服器連線超時，請檢查網絡！");
+                } finally {
+                    resetBtn.disabled = false;
+                    resetBtn.innerHTML = origHtml;
+                }
+            }
+
+            async function saveProgress(retryCount = 3) {
+                if (state.timerInterval) clearInterval(state.timerInterval);
+                if (state.tabSwitchCount > 0) {
+                    state.typosMap["_cheat_switch_tabs"] = state.tabSwitchCount;
+                }
+
+                dom.btn.disabled = true; dom.input.disabled = true;
+                const originalHtml = dom.btn.innerHTML;
+                const originalBg = dom.btn.style.background;
+                dom.btn.style.background = "#0ea5e9";
+                dom.btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>同步中... (重試 ${retryCount})`; 
+                
+                try {
+                    const res = await callAPI('submitExercise', { 
+                        email: state.user.email, name: state.user.name, class: state.user.class, cnum: state.user.cnum, 
+                        id: state.exerciseId, title: state.currentEx.title, content: dom.input.value, 
+                        total: state.total, correctCount: state.correct, incorrectCount: state.incorrect, 
+                        accuracy: document.getElementById('accuracy').textContent.replace('%',''),
+                        wpm: document.getElementById('wpmDisplay').textContent,
+                        spent_seconds: state.currentTotalSpentSeconds, 
+                        typos: JSON.stringify(state.typosMap)
+                    });
+                    
+                    if (res.status) {
+                        localStorage.removeItem(`draft_${state.user.email}_${state.exerciseId}`);
+                        localStorage.removeItem(`draft_secs_${state.user.email}_${state.exerciseId}`);
+                        
+                        updateOptimisticDashboardCache();
+                        sessionStorage.setItem('bypass_dashboard_cache', 'true');
+
+                        dom.btn.style.background = "var(--success)";
+                        dom.btn.innerHTML = `<i class='fas fa-check-circle me-2'></i> 儲存成功，正返回大廳...`;
+                        setTimeout(() => window.location.replace("index.html"), 1200);
+                    } else {
+                        throw new Error(res.error);
+                    }
+                } catch(e) { 
+                    if (retryCount > 0) {
+                        setTimeout(() => saveProgress(retryCount - 1), 1500);
+                        return;
+                    }
+                    dom.btn.disabled = false; dom.input.disabled = false; 
+                    dom.btn.style.background = originalBg; dom.btn.innerHTML = originalHtml;
+                    showToast("雲端連線失敗，已自動備份在本地！");
+                    handleInput(); 
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                initPage(); 
+
+                dom.input.addEventListener("compositionstart", () => { isComposing = true; });
+                dom.input.addEventListener("compositionend", () => {
+                    isComposing = false;
+                    setTimeout(handleInput, 0); 
+                });
+
+                dom.input.addEventListener("input", handleInput);
+                
+                ["paste", "cut", "drop", "dragstart"].forEach(e => dom.input.addEventListener(e, ev => ev.preventDefault()));
+                ["click", "focus", "select", "keyup"].forEach(evt => { dom.input.addEventListener(evt, enforceCursorLimits); });
+
+                dom.input.addEventListener('keydown', (e) => {
+                    const blockedKeys = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown", "Tab"];
+                    if (blockedKeys.includes(e.key)) { e.preventDefault(); }
+                    enforceCursorLimits();
+                });
+
+                dom.text.addEventListener('click', (e) => {
+                    const charEl = e.target.closest('.character.incorrect');
+                    if (charEl && !dom.input.disabled) {
+                        const idx = parseInt(charEl.dataset.idx, 10);
+                        openCorrectionModal(idx);
+                    }
+                });
+
+                document.getElementById('confirmCorrectionBtn').addEventListener('commit', commitCorrection);
+                document.getElementById('confirmCorrectionBtn').addEventListener('click', commitCorrection);
+                document.getElementById('correctedInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commitCorrection(); } });
+                document.getElementById('correctionModal').addEventListener('hidden.bs.modal', () => { dom.input.focus(); enforceCursorLimits(); });
+                dom.btn.addEventListener('click', () => saveProgress(3));
+
+                window.toggleSidebar = function(forceState) {
+                    const sb = document.getElementById('sidebar');
+                    const bd = document.getElementById('sidebarBackdrop');
+                    if (!sb || !bd) return;
+                    const willOpen = typeof forceState === 'boolean' ? forceState : !sb.classList.contains('open');
+                    if (willOpen) {
+                        sb.classList.add('open');
+                        bd.classList.add('show');
+                    } else {
+                        sb.classList.remove('open');
+                        bd.classList.remove('show');
+                    }
+                };
+
+                document.getElementById('btnToggle').addEventListener('click', () => toggleSidebar());
+                document.getElementById('sidebarBackdrop').addEventListener('click', () => toggleSidebar(false));
+
+                document.getElementById('inputButtons').addEventListener('click', e => {
+                    if (dom.input.disabled) return;
+                    if (e.target.dataset.symbol) {
+                        const s = dom.input.selectionStart, v = dom.input.value;
+                        dom.input.value = v.slice(0, s) + e.target.dataset.symbol + v.slice(dom.input.selectionEnd);
+                        dom.input.setSelectionRange(s + 1, s + 1);
+                        dom.input.focus();
+                        AudioEngine.playClick(true);
+                        handleInput();
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

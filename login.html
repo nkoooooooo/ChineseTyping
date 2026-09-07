@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入 - 聖公會蔡功譜中學 中文打字平台</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+    <style>
+        :root { 
+            --font-family-base: "Noto Sans TC", sans-serif; 
+            --primary-color: #00479d; /* 蔡功譜官方深藍 */
+            --primary-light: #eff6ff;
+            --text-dark: #1e293b;
+        }
+        body { 
+            font-family: var(--font-family-base); 
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            position: relative; 
+            margin: 0; 
+        }
+
+        /* 啟用 GPU 硬體加速的流暢極光背景氣泡 */
+        .bg-shape { 
+            position: absolute; 
+            border-radius: 50%; 
+            filter: blur(70px); 
+            z-index: 0; 
+            opacity: 0.35; 
+            animation: float 12s infinite ease-in-out; 
+            will-change: transform;
+            transform: translate3d(0, 0, 0);
+        }
+        .shape-1 { width: 450px; height: 450px; background: #3b82f6; top: -120px; left: -120px; }
+        .shape-2 { width: 350px; height: 350px; background: #4f46e5; bottom: -80px; right: -80px; animation-delay: -6s; }
+        
+        @keyframes float { 
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 
+            50% { transform: translate3d(0, 30px, 0) scale(1.05); } 
+        }
+        
+        .login-card { 
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.6); 
+            border-radius: 28px; 
+            box-shadow: 0 25px 60px -15px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5); 
+            padding: 3rem 2.5rem; 
+            width: 100%; 
+            max-width: 480px; 
+            z-index: 1; 
+            position: relative; 
+            text-align: center; 
+            transition: transform 0.3s ease;
+        }
+
+        .school-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        .school-logo { 
+            width: 58px; 
+            height: 58px; 
+            object-fit: contain;
+            filter: drop-shadow(0 3px 6px rgba(0, 71, 157, 0.15)); 
+        }
+        .school-text {
+            border-left: 2px solid #cbd5e1;
+            padding-left: 14px;
+        }
+        .school-zh {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+        .school-en {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+            line-height: 1.4;
+            margin-top: 2px;
+        }
+
+        .divider {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(to right, rgba(0,0,0,0), #cbd5e1 20%, #cbd5e1 80%, rgba(0,0,0,0));
+            margin: 1.8rem 0;
+        }
+        
+        .brand-title { 
+            color: var(--text-dark); 
+            font-weight: 950; 
+            font-size: 2.1rem; 
+            margin-bottom: 0.6rem;
+            letter-spacing: 1.5px;
+            background: linear-gradient(135deg, #1e40af 0%, #4f46e5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .welcome-text {
+            font-weight: 700;
+            color: #475569;
+            font-size: 1rem;
+        }
+
+        .domain-alert {
+            background-color: var(--primary-light);
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            font-size: 0.88rem;
+            font-weight: 700;
+            padding: 0.6rem 1.2rem;
+            border-radius: 99px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.05);
+        }
+        
+        .google-btn-wrapper { 
+            min-height: 52px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            margin-top: 1.8rem; 
+            transition: all 0.3s;
+        }
+        .google-btn-wrapper:hover {
+            transform: translateY(-2px);
+        }
+
+        .loading-icon { display: none; color: var(--primary-color); }
+        .login-message { color: #ef4444; font-size: 0.9rem; font-weight: 700; margin-top: 1.2rem; min-height: 24px; }
+        
+        footer { 
+            position: absolute; 
+            bottom: 15px; 
+            width: 100%; 
+            text-align: center; 
+            font-size: 0.82em; 
+            color: #64748b; 
+            z-index: 1; 
+            font-weight: 600; 
+            line-height: 1.6;
+        }
+
+        /* 📱 跨端標準化觸控目標 (Apple HIG & WCAG: >= 44px) 與壓感互動機制 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        button, .btn {
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+        button:active, .btn:active {
+            transform: scale(0.97) !important;
+        }
+
+        @media (max-width: 480px) {
+            .login-card { padding: 2.5rem 1.5rem; margin: 15px; }
+            .school-zh { font-size: 1.15rem; }
+            .school-en { font-size: 0.6rem; }
+            .brand-title { font-size: 1.8rem; }
+            .domain-alert { font-size: 0.8rem; padding: 0.5rem 1rem; }
+        }
+    </style>
+    
+    <script>
+        // 🔒 統一的全平台、高相容 UTF-8 安全 SessionStorage 封裝
+        const SessionStorageUtil = {
+            _mem: {},
+            setItem: function(key, value) { 
+                try {
+                    const jsonStr = JSON.stringify(value);
+                    const encoded = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                        return String.fromCharCode(parseInt(p1, 16));
+                    }));
+                    if (window.sessionStorage) sessionStorage.setItem(key, encoded);
+                    this._mem[key] = value;
+                } catch(e) { this._mem[key] = value; }
+            },
+            getItem: function(key) { 
+                try {
+                    let raw = null;
+                    if (window.sessionStorage) raw = sessionStorage.getItem(key);
+                    if (!raw) return this._mem[key] || null;
+                    try {
+                        const decoded = decodeURIComponent(atob(raw).split("").map(function(c) {
+                            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+                        }).join(""));
+                        return JSON.parse(decoded);
+                    } catch(decodeErr) {
+                        return JSON.parse(raw);
+                    }
+                } catch(e) { return this._mem[key] || null; }
+            },
+            clear: function() {
+                try { if (window.sessionStorage) sessionStorage.clear(); } catch(e) {}
+                this._mem = {};
+            }
+        };
+
+        if (SessionStorageUtil.getItem('user')) {
+            window.location.replace('index.html');
+        }
+    </script>
+</head>
+<body>
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    
+    <div class="login-card shadow-lg">
+        <div class="school-header">
+            <img src="img/tkp-logo.png" alt="SKHTKPSS Logo" class="school-logo me-3" onerror="this.onerror=null; this.src='https://www.tkp.edu.hk/images/logo.png';">
+            <div class="school-text text-start">
+                <div class="school-zh">聖公會蔡功譜中學</div>
+                <div class="school-en">S.K.H. Tsoi Kung Po Secondary School</div>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <h1 class="brand-title">中文打字平台</h1>
+        <p class="welcome-text mb-3 d-flex align-items-center justify-content-center gap-2">
+            <span>歡迎使用蔡功譜中文打字挑戰系統</span>
+            <span class="inline-svg-icon text-primary" title="啟航">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                    <path d="M13.13 2.5a.75.75 0 0 0-1.26 0C10.74 4.54 8.78 8.44 9.17 12.35l-3.32 3.32a.75.75 0 0 0 .1 1.15l2.4 1.6-1.5 2.25a.75.75 0 0 0 1.04 1.04l2.25-1.5 1.6 2.4a.75.75 0 0 0 1.15.1l3.32-3.32c3.91.39 7.81-1.57 9.85-2.7a.75.75 0 0 0 0-1.26C21.75 13.06 17.5 9 13.13 2.5zM15 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+                </svg>
+            </span>
+        </p>
+        
+        <div class="domain-alert mb-2">
+            <i class="fab fa-google text-primary"></i>
+            <span>請使用學校 Google 帳戶 <strong class="text-decoration-underline">(@tkp.edu.hk)</strong> 登入</span>
+        </div>
+        
+        <div class="google-btn-wrapper" id="google-btn-wrapper"></div>
+
+        <div id="loading-icon" class="loading-icon mt-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <div class="mt-2 fw-bold text-primary">正在安全驗證帳戶身份...</div>
+        </div>
+
+        <div id="login-message" class="login-message"></div>
+
+        <div class="mt-4 pt-3 border-top text-muted small">
+            <i class="fas fa-shield-alt text-primary me-1"></i>
+            <span>本系統已啟用 SSO 統一身份認證防護，登入即代表同意校園資訊安全守則。</span>
+        </div>
+    </div>
+
+    <footer>
+        Copyright © 2026 S.K.H. Tsoi Kung Po Secondary School. All rights reserved.
+    </footer>
+
+    <script>
+        const API_URL = "https://tkp-typing-api.tvbar.workers.dev/"; 
+
+        function onGoogleLibraryLoad() {
+            try {
+                google.accounts.id.initialize({
+                    client_id: "207480084362-mc0she8jhrhd2bu01ifg8quo1ujksup6.apps.googleusercontent.com",
+                    callback: handleLogin,
+                    auto_select: false
+                });
+                const wrapper = document.getElementById('google-btn-wrapper');
+                google.accounts.id.renderButton(wrapper, { 
+                    type: 'standard', 
+                    theme: 'filled_blue', 
+                    size: 'large', 
+                    text: 'signin_with', 
+                    width: 280 
+                });
+            } catch (err) {
+                document.getElementById('login-message').innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Google 服務初始化失敗，請重新載入頁面或聯絡校方管理員。';
+            }
+        }
+
+        function handleLogin(response) {
+            const wrapper = document.getElementById('google-btn-wrapper');
+            const loading = document.getElementById('loading-icon');
+            const msg = document.getElementById('login-message');
+
+            try {
+                const profile = parseJwt(response.credential);
+                
+                if (!profile.email.endsWith('@tkp.edu.hk')) {
+                    msg.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> 安全警告：只限蔡功譜學校網域 @tkp.edu.hk 電郵登入！';
+                    return;
+                }
+
+                wrapper.style.display = 'none';
+                loading.style.display = 'block';
+                msg.textContent = '';
+
+                fetch(API_URL, {
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json;charset=utf-8" },
+                    body: JSON.stringify({ action: "login", payload: { email: profile.email } })
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error("後端拒絕連線");
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.status) {
+                        SessionStorageUtil.setItem('user', data.profile);
+                        window.location.replace("index.html");
+                    } else {
+                        msg.innerHTML = `<i class="fas fa-times-circle me-1"></i> ${data.error || '驗證失敗，請聯絡校內資訊科教師。'}`;
+                        wrapper.style.display = 'flex'; 
+                        loading.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    msg.innerHTML = '<i class="fas fa-wifi me-1"></i> 打字平台連線異常，請檢查您的校園網路或 Wi-Fi 連線！';
+                    wrapper.style.display = 'flex'; 
+                    loading.style.display = 'none';
+                });
+            } catch (err) {
+                msg.textContent = '登入解析出錯，請重試！';
+            }
+        }
+
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+        }
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="onGoogleLibraryLoad()"></script>
+</body>
+</html>

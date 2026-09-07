@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學員管理中心 - 聖公會蔡功譜中學</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link class="js-fa-link" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+    <style>
+        :root { 
+            --font: "Noto Sans TC", sans-serif; 
+            --tkp-blue: #00479d; --tkp-blue-light: #eff6ff; --tkp-accent: #4f46e5;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --bg: #f8fafc; --surface: #ffffff; --text-main: #1e293b; --text-muted: #64748b; --border-light: #e2e8f0;
+            --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --shadow-premium: 0 10px 30px -5px rgba(0, 71, 157, 0.05), 0 4px 12px -2px rgba(0, 71, 157, 0.02);
+            --shadow-hover: 0 20px 40px -5px rgba(0, 71, 157, 0.12), 0 8px 20px -4px rgba(0, 71, 157, 0.05);
+        }
+        body { background-color: var(--bg); font-family: var(--font); color: var(--text-main); -webkit-font-smoothing: antialiased; }
+        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-light); }
+        .user-pill { border: 1px solid var(--border-light); border-radius: 999px; background: var(--surface); padding: 0 16px; height: 38px; display: inline-flex; align-items: center; }
+        .btn-header { background-color: var(--tkp-blue); color: white !important; border: none; font-weight: 800; border-radius: 999px; padding: 0 1.4rem; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; height: 38px; }
+        .admin-card { background: white; border-radius: 24px; border: 1px solid rgba(226, 232, 240, 0.8); padding: 2.2rem; margin-bottom: 2rem; box-shadow: var(--shadow-premium); transition: var(--transition-spring); }
+        .admin-card:hover { box-shadow: var(--shadow-hover); }
+        .sub-nav .nav-link { color: #64748b; font-weight: 700; border-radius: 12px; margin-right: 8px; transition: var(--transition-spring); padding: 0.6rem 1.2rem; }
+        .sub-nav .nav-link:hover { background-color: #f1f5f9; color: var(--tkp-blue); }
+        .sub-nav .nav-link.active { background-color: var(--tkp-blue) !important; color: white !important; box-shadow: 0 4px 12px rgba(0, 71, 157, 0.2); }
+        
+        .table-inline-input {
+            border: 1px solid transparent; background: transparent; border-radius: 8px;
+            padding: 6px 12px; font-weight: 700; color: var(--text-main); transition: var(--transition-spring); width: 100%;
+        }
+        .table-inline-input:hover { border-color: #cbd5e1; background: #fff; }
+        .table-inline-input:focus { border-color: var(--tkp-blue); background: #fff; outline: none; box-shadow: 0 0 0 4px rgba(0, 71, 157, 0.12); }
+        
+        .table-inline-select {
+            border: 1px solid transparent; background: transparent; border-radius: 8px;
+            padding: 6px 12px; font-weight: 700; color: var(--text-main); transition: var(--transition-spring); cursor: pointer;
+        }
+        .table-inline-select:hover { border-color: #cbd5e1; background: #fff; }
+        .table-inline-select:focus { border-color: var(--tkp-blue); background: #fff; outline: none; }
+
+        .row-save-indicator { width: 36px; text-align: center; font-size: 1.15rem; font-weight: bold; }
+        
+        /* 懸浮磨砂玻璃批次控制列 */
+        .batch-bar { 
+            position: fixed; bottom: 30px; left: 50%; transform: translate3d(-50%, 150%, 0); 
+            background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 24px; 
+            padding: 16px 32px; display: flex; align-items: center; gap: 18px; 
+            box-shadow: 0 25px 60px -10px rgba(0,0,0,0.4); z-index: 1040; color: white;
+            border: 1px solid rgba(255,255,255,0.15); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .batch-bar.show { transform: translate3d(-50%, 0, 0); }
+        .batch-bar select { background: #1e293b; border: 1px solid #475569; color: white; border-radius: 12px; padding: 8px 16px; font-weight: 700; font-size: 0.88rem; transition: var(--transition-spring); }
+        .batch-bar select:focus { outline: none; border-color: #3b82f6; }
+        
+        .preview-row-err { background-color: #fef2f2 !important; border-left: 5px solid var(--danger) !important; }
+        .preview-row-ok { border-left: 5px solid var(--success) !important; }
+        .err-badge { background-color: var(--danger); color: white; font-size: 0.72rem; padding: 3px 10px; border-radius: 99px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+        
+        .typo-capsule { background: #fffbeb; border: 1px solid #fde68a; color: #b45309; font-weight: bold; border-radius: 10px; padding: 6px 12px; display: inline-flex; align-items: center; margin: 4px; transition: var(--transition-spring); }
+        .typo-capsule:hover { transform: scale(1.08); box-shadow: 0 4px 10px rgba(180, 83, 9, 0.08); }
+        
+        .pagination-container { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+        .page-btn { border: 1px solid #cbd5e1; background: white; border-radius: 10px; padding: 6px 14px; font-weight: bold; color: #475569; transition: var(--transition-spring); }
+        .page-btn:hover:not(.disabled) { background: #f1f5f9; cursor: pointer; }
+        .page-btn.active { background: var(--tkp-blue); color: white; border-color: var(--tkp-blue); box-shadow: 0 4px 10px rgba(0, 71, 157, 0.2); }
+        .page-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* 📱 跨端標準化觸控目標 (Apple HIG & WCAG: >= 44px) 與壓感互動機制 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        button, .btn, .page-btn, .table-inline-input, .table-inline-select, .form-control, .form-select {
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        button:active:not(:disabled),
+        .btn:active:not(:disabled),
+        .page-btn:active {
+            transform: scale(0.96) !important;
+        }
+
+        /* 📱 iPad 平板專屬響應式優化 */
+        @media (max-width: 991.98px) {
+            .admin-card { padding: 1.4rem; border-radius: 20px; }
+            .batch-bar { width: 94%; padding: 12px 18px; flex-wrap: wrap; justify-content: center; bottom: 15px; }
+            .table-responsive { max-height: 55vh; }
+        }
+
+        footer { text-align: center; padding: 2rem 0; font-size: 0.82em; color: #64748b; font-weight: 600; }
+    </style>
+    <script>
+        const SessionStorageUtil = {
+            _mem: {},
+            setItem: function(key, value) { 
+                try {
+                    const jsonStr = JSON.stringify(value);
+                    const encoded = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                        return String.fromCharCode(parseInt(p1, 16));
+                    }));
+                    if (window.sessionStorage) sessionStorage.setItem(key, encoded);
+                    this._mem[key] = value;
+                } catch(e) { this._mem[key] = value; }
+            },
+            getItem: function(key) { 
+                try {
+                    let raw = null;
+                    if (window.sessionStorage) raw = sessionStorage.getItem(key);
+                    if (!raw) return this._mem[key] || null;
+                    try {
+                        const decoded = decodeURIComponent(atob(raw).split("").map(function(c) {
+                            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+                        }).join(""));
+                        return JSON.parse(decoded);
+                    } catch(decodeErr) {
+                        return JSON.parse(raw);
+                    }
+                } catch(e) { return this._mem[key] || null; }
+            },
+            clear: function() {
+                try { if (window.sessionStorage) sessionStorage.clear(); } catch(e) {}
+                this._mem = {};
+            }
+        };
+
+        const SecureCache = {
+            set: function(key, value) {
+                const wrapper = { value: value, timestamp: Date.now() };
+                SessionStorageUtil.setItem(key, wrapper);
+            },
+            get: function(key, ttlMs) {
+                const wrapper = SessionStorageUtil.getItem(key);
+                if (!wrapper) return null;
+                if (wrapper && wrapper.timestamp && (Date.now() - wrapper.timestamp < ttlMs)) return wrapper.value;
+                return null;
+            }
+        };
+
+        const currentUser = SessionStorageUtil.getItem('user');
+        if (!currentUser || (currentUser.permission !== '教師' && currentUser.permission !== '管理員')) {
+            window.location.replace('index.html');
+        }
+    </script>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar glass-nav sticky-top">
+        <div class="container-fluid px-4 py-2">
+            <a class="navbar-brand fw-900 d-flex align-items-center" href="index.html" style="text-decoration: none;">
+                <img src="img/tkp-logo.png" alt="Logo" class="me-2" style="height: 38px;" onerror="this.src='https://www.tkp.edu.hk/images/logo.png'">
+                <span style="color: var(--tkp-blue); font-weight: 900; font-size: 1.35rem;">聖公會蔡功譜中學</span>
+                <span class="text-muted ms-2 border-start ps-2" style="font-weight: 700; font-size: 1.25rem; border-color: var(--border-light) !important;">學員管理中心</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <div class="user-pill shadow-sm">
+                    <i class="fas fa-user-circle text-primary me-2 fs-5"></i>
+                    <div class="text-start lh-sm" style="font-size: 0.85rem;">
+                        <strong class="text-dark" id="username">載入中...</strong>
+                        <span class="text-muted ms-2 ps-2 border-start small fw-bold" id="userrole">教師</span>
+                    </div>
+                </div>
+                <a href="index.html" class="btn-header"><i class="fas fa-arrow-left me-2"></i>返回大廳</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5 flex-grow-1">
+        <ul class="nav nav-pills sub-nav mb-4 bg-white p-2 rounded-4 border shadow-sm" id="adminModuleNav">
+            <li class="nav-item"><a class="nav-link" href="admin.html"><i class="fas fa-chart-line me-2"></i>數據戰情室 (Dashboard)</a></li>
+            <li class="nav-item"><a class="nav-link active" href="student.html"><i class="fas fa-users-cog me-2"></i>學生帳戶與權限中心</a></li>
+            <li class="nav-item"><a class="nav-link" href="question.html"><i class="fas fa-book-open me-2"></i>課程教材與題庫 Studio</a></li>
+        </ul>
+
+        <div class="admin-card shadow-sm">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                <h4 class="fw-900 mb-0 text-dark"><i class="fas fa-user-graduate text-primary me-2"></i>學員檔案庫即時編輯中心</h4>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-success rounded-pill btn-sm fw-bold px-3 py-2" onclick="openAddStudentModal()"><i class="fas fa-user-plus me-1"></i>新增單筆學員</button>
+                    <button class="btn btn-primary rounded-pill btn-sm fw-bold px-3 py-2" onclick="openBulkImportModal()"><i class="fas fa-file-import me-1"></i>批次導入學員名冊</button>
+                    <button class="btn btn-outline-primary rounded-pill btn-sm fw-bold px-3 py-2" onclick="exportStudentsCSV()"><i class="fas fa-file-csv me-1"></i>匯出學員名冊</button>
+                    <button class="btn btn-outline-danger rounded-pill btn-sm fw-bold px-3 py-2" onclick="promptClearStudents()"><i class="fas fa-user-slash me-1"></i>一鍵清空學生</button>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4 bg-light p-3 rounded-4 border">
+                <div class="col-12 col-md-4">
+                    <label class="form-label text-muted small fw-bold"><i class="fas fa-search me-1"></i>全局模糊搜尋 (隨打隨搜)</label>
+                    <input type="text" id="userGlobalSearch" class="form-control form-control-sm rounded-3" style="height: 38px;" placeholder="關鍵字：鄭雅婷、s25006、1A" onkeyup="filterUsersCross()">
+                </div>
+                <div class="col-4 col-md-2">
+                    <label class="form-label text-muted small fw-bold">班級篩選</label>
+                    <select id="userClassFilter" class="form-select form-select-sm rounded-3" style="height: 38px;" onchange="filterUsersCross()">
+                        <option value="">所有班級</option>
+                        <option value="1A">1A</option><option value="1B">1B</option><option value="1C">1C</option><option value="1D">1D</option>
+                        <option value="2A">2A</option><option value="2B">2B</option><option value="2C">2C</option><option value="2D">2D</option>
+                        <option value="3A">3A</option><option value="3B">3B</option><option value="3C">3C</option><option value="3D">3D</option>
+                    </select>
+                </div>
+                <div class="col-4 col-md-3">
+                    <label class="form-label text-muted small fw-bold">角色權限</label>
+                    <select id="userRoleFilter" class="form-select form-select-sm rounded-3" style="height: 38px;" onchange="filterUsersCross()">
+                        <option value="">所有權限</option>
+                        <option value="學生">學生</option>
+                        <option value="教師">教師</option>
+                    </select>
+                </div>
+                <div class="col-4 col-md-3">
+                    <label class="form-label text-muted small fw-bold">帳號狀態</label>
+                    <select id="userStatusFilter" class="form-select form-select-sm rounded-3" style="height: 38px;" onchange="filterUsersCross()">
+                        <option value="">所有狀態</option>
+                        <option value="1">正常啟用</option>
+                        <option value="0">已停權</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover border-top align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="40"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" style="transform: scale(1.2); cursor: pointer;"></th>
+                            <th width="50">狀態</th>
+                            <th>學員電郵 (不可更變)</th>
+                            <th width="150">中文姓名</th>
+                            <th width="100">班級</th>
+                            <th width="100">座號</th>
+                            <th width="110">權限</th>
+                            <th width="110">狀態</th>
+                            <th class="text-center" width="130">個人診斷</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr><td colspan="9" class="text-center py-5"><div class="spinner-border text-primary spinner-border-sm me-2"></div>正在加載學員檔案...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-container" id="usersPagination"></div>
+        </div>
+    </div>
+
+    <!-- 批量修改懸浮控制中心 -->
+    <div class="batch-bar shadow-lg" id="batchActionBar">
+        <span class="fw-bold"><i class="fas fa-check-square text-success me-1 fs-5"></i>已選取 <span id="batchCount" class="text-warning">0</span> 名學員</span>
+        <div class="vr bg-secondary" style="height: 24px; opacity: 0.5;"></div>
+        
+        <select id="batchClassSelect">
+            <option value="">批量修改班別...</option>
+            <option value="1A">1A</option><option value="1B">1B</option><option value="1C">1C</option><option value="1D">1D</option>
+            <option value="2A">2A</option><option value="2B">2B</option><option value="2C">2C</option><option value="2D">2D</option>
+            <option value="3A">3A</option><option value="3B">3B</option><option value="3C">3C</option><option value="3D">3D</option>
+        </select>
+        <select id="batchPermissionSelect">
+            <option value="">批量修改權限...</option>
+            <option value="學生">學生</option>
+            <option value="教師">教師</option>
+        </select>
+        
+        <button class="btn btn-primary btn-sm rounded-pill px-3 fw-bold" onclick="applyBatchModification()"><i class="fas fa-save me-1"></i>儲存變更</button>
+        <div class="vr bg-secondary" style="height: 24px; opacity: 0.5;"></div>
+        
+        <button class="btn btn-warning btn-sm rounded-pill px-3 fw-bold text-dark" onclick="applyBatchStatus(0)"><i class="fas fa-ban me-1"></i>批量停用</button>
+        <button class="btn btn-success btn-sm rounded-pill px-3 fw-bold" onclick="applyBatchStatus(1)"><i class="fas fa-check me-1"></i>批量啟用</button>
+        <button class="btn btn-danger btn-sm rounded-pill px-3 fw-bold" onclick="applyBatchDelete()"><i class="fas fa-trash-alt me-1"></i>永久刪除帳號</button>
+    </div>
+
+    <!-- 👤 手動新增單筆學員 Modal -->
+    <div class="modal fade" id="addStudentModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 28px;">
+                <div class="modal-header bg-light border-0 py-3 px-4">
+                    <h5 class="modal-title fw-900 text-primary mb-0"><i class="fas fa-user-plus me-2"></i>新增單筆學員檔案</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="addStudentForm">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">學校電郵 (@tkp.edu.hk)</label>
+                            <input type="email" id="new-user-email" class="form-control form-control-sm font-monospace" required placeholder="如: s25006@tkp.edu.hk">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">中文姓名</label>
+                            <input type="text" id="new-user-name" class="form-control form-control-sm" required placeholder="如: 陳小明">
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label text-muted small fw-bold">所屬班級</label>
+                                <select id="new-user-class" class="form-select form-select-sm">
+                                    <option value="1A">1A</option><option value="1B">1B</option><option value="1C">1C</option><option value="1D">1D</option>
+                                    <option value="2A">2A</option><option value="2B">2B</option><option value="2C">2C</option><option value="2D">2D</option>
+                                    <option value="3A">3A</option><option value="3B">3B</option><option value="3C">3C</option><option value="3D">3D</option>
+                                    <option value="4A">4A</option><option value="4B">4B</option><option value="5A">5A</option><option value="6A">6A</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-muted small fw-bold">班內座號</label>
+                                <input type="number" id="new-user-cnum" class="form-control form-control-sm text-center" min="1" max="80" value="1" required>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label text-muted small fw-bold">身分權限</label>
+                                <select id="new-user-perm" class="form-select form-select-sm">
+                                    <option value="學生">學生</option>
+                                    <option value="教師">教師</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-muted small fw-bold">帳號狀態</label>
+                                <select id="new-user-status" class="form-select form-select-sm">
+                                    <option value="1">啟用</option>
+                                    <option value="0">停用</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0 p-4 bg-light" style="border-radius: 0 0 28px 28px;">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-5 fw-bold shadow" id="confirmAddStudentBtn" onclick="submitSingleStudent()"><i class="fas fa-check me-1"></i>確認建立學員</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚠️ 一鍵清空學生名冊 Modal -->
+    <div class="modal fade" id="clearStudentsModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 28px;">
+                <div class="modal-header bg-danger text-white border-0 py-3 px-4" style="border-radius: 28px 28px 0 0;">
+                    <h5 class="modal-title fw-900 mb-0"><i class="fas fa-user-slash me-2"></i>一鍵清空學生名冊</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-danger fw-bold mb-3">極度警告：這將會永久抹除學生名冊、作答進度與個人風雲榜累計字數！</p>
+                    <div class="form-check form-switch mb-3 p-3 bg-light rounded-3 border">
+                        <input class="form-check-input" type="checkbox" id="preserveTeachersCheck" checked style="transform: scale(1.2);">
+                        <label class="form-check-label fw-bold ms-2" for="preserveTeachersCheck">安全保留「教師與管理員帳號」（推薦勾選）</label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">安全防呆確認：請在下方輸入 <span class="text-danger fw-bold">確認清空學生</span></label>
+                        <input type="text" id="clearStudentConfirmInput" class="form-control form-control-sm text-center fw-bold" placeholder="請輸入：確認清空學生" onkeyup="checkClearStudentConfirmMatch()">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 bg-light" style="border-radius: 0 0 28px 28px;">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="confirmClearStudentsBtn" onclick="executeClearStudents()" disabled><i class="fas fa-trash-alt me-1"></i>執行清空學生</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Excel 批次導入與在線即時更正 Modal -->
+    <div class="modal fade" id="bulkImportModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 28px;">
+                <div class="modal-header bg-light border-0 py-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <h6 class="modal-title fw-900 text-success mb-0"><i class="fas fa-file-excel me-2"></i>批次導入學員名冊與錯誤在線校正</h6>
+                        <button type="button" class="btn btn-outline-success btn-sm rounded-pill fw-bold me-4" onclick="downloadStudentCsvTemplate()"><i class="fas fa-download me-1"></i>下載學員名冊 CSV 範本</button>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="max-height: 80vh; overflow-y: auto;">
+                    <div id="pasteStepPanel">
+                        <p class="text-muted small">請直接從 Excel 複製學生欄位並貼上，格式為：<strong>學校電郵,姓名,班別,座號,權限</strong> (每人一行)</p>
+                        <textarea id="bulkPasteArea" class="form-control font-monospace mb-3" style="border-radius: 14px;" rows="8" placeholder="範例：&#10;s25006@tkp.edu.hk,鄭雅婷,1A,1,學生&#10;s25045@tkp.edu.hk,許澄之,1A,2,學生"></textarea>
+                        <button class="btn btn-primary w-100 rounded-pill fw-bold py-2.5 fs-6" onclick="validateImportList()"><i class="fas fa-search me-1"></i>開始智能化名單預檢</button>
+                    </div>
+
+                    <div id="previewStepPanel" class="d-none mt-3">
+                        <div id="importValidationPanel" class="alert mb-3 py-2 px-3 small border-0 shadow-sm" style="border-radius: 12px;"></div>
+                        <div class="table-responsive" style="max-height: 40vh;">
+                            <table class="table table-sm table-bordered align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>郵箱 (雙擊可修改)</th>
+                                        <th>中文姓名</th>
+                                        <th>班級</th>
+                                        <th>座號</th>
+                                        <th>權限</th>
+                                        <th>狀態提示與在線更正</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="importPreviewTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-end mt-4">
+                            <button class="btn btn-secondary rounded-pill px-4 fw-bold" onclick="backToPasteStep()"><i class="fas fa-arrow-left me-1"></i>重新輸入</button>
+                            <button class="btn btn-success rounded-pill px-5 fw-bold" id="importSubmitBtn" onclick="submitImportedList()" disabled><i class="fas fa-cloud-upload-alt me-1"></i>確認校正並一鍵導入</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 學員學習檔案 Drill-down 診斷 Modal -->
+    <div class="modal fade" id="studentProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 28px;">
+                <div class="modal-header bg-light border-0 py-3 px-4">
+                    <h5 class="modal-title fw-900 text-primary mb-0"><i class="fas fa-id-card me-2"></i>學員打字歷程檔案</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-6 border-end">
+                            <h6 class="fw-bold text-muted mb-3"><i class="fas fa-user-graduate me-1 text-primary"></i>基本屬性與整體診斷</h6>
+                            <div class="d-flex align-items-center gap-3">
+                                <div>
+                                    <h4 class="fw-bold text-dark mb-1" id="diagName">鄭雅婷</h4>
+                                    <small class="text-secondary d-block font-monospace" id="diagEmail">s25006@tkp.edu.hk</small>
+                                    <span class="badge bg-primary-light text-primary mt-2 fw-bold" id="diagClassBadge">1A 班</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <h6 class="fw-bold text-muted mb-2"><i class="fas fa-fire me-1 text-danger"></i>常錯字按鍵盲區</h6>
+                            <div id="diagTypoHeatmap">尚無錯字記錄</div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="fw-bold text-dark mb-3"><i class="fas fa-history text-success me-1"></i>打字歷程成績牆</h6>
+                    <div class="table-responsive" style="max-height: 35vh;">
+                        <table class="table table-sm table-hover border">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>教材題目</th>
+                                    <th>進度</th>
+                                    <th>準確率</th>
+                                    <th>WPM</th>
+                                    <th>用時(秒)</th>
+                                    <th class="text-center" width="100">刪除紀錄</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentProfileRecordsBody">
+                                <tr><td colspan="6" class="text-center py-4 text-muted">無打字數據記錄</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-4" style="z-index: 1060;">
+        <div id="sysToast" class="toast align-items-center text-white border-0 shadow-lg" style="border-radius: 12px; background: rgba(0,0,0,0.85);" role="alert">
+            <div class="d-flex p-2 justify-content-center"><div class="toast-body fw-bold fs-6" id="sysToastBody"></div></div>
+        </div>
+    </div>
+
+    <footer>
+        Copyright © 2026 S.K.H. Tsoi Kung Po Secondary School. All rights reserved.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = "https://tkp-typing-api.tvbar.workers.dev/";
+        const CACHE_TTL_STUDENT = 10 * 60 * 1000; 
+
+        let allUsers = [], filteredUsers = [];
+        let importList = [];
+        let studentModalInstance = null;
+        let importModalInstance = null;
+        let addStudentModalInstance = null;
+        let clearStudentsModalInstance = null;
+        let userPage = 1;
+        const pageSize = 50;
+
+        const rowDebounceTimers = {};
+
+        function showToast(msg) {
+            const toastEl = document.getElementById('sysToast'); 
+            document.getElementById('sysToastBody').innerHTML = msg;
+            new bootstrap.Toast(toastEl, { delay: 2500 }).show();
+        }
+
+        async function callAPI(action, payload = {}) { 
+            return await fetch(API_URL, { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json", "Authorization": currentUser ? currentUser.email : "" }, 
+                body: JSON.stringify({ action, payload }) 
+            }).then(r => r.json()); 
+        }
+
+        async function loadAllUsers(force = false) {
+            let cached = SecureCache.get('admin_users', CACHE_TTL_STUDENT);
+            if (!force && cached) {
+                allUsers = cached; filterUsersCross(); return;
+            }
+            try {
+                const res = await callAPI('getAdminUsers');
+                if (res.status) {
+                    allUsers = res.data;
+                    SecureCache.set('admin_users', res.data);
+                    filterUsersCross();
+                }
+            } catch(e) { showToast("連線雲端異常，請稍後重試！"); }
+        }
+
+        function filterUsersCross() {
+            const globalKeyword = document.getElementById('userGlobalSearch').value.trim().toLowerCase();
+            const classVal = document.getElementById('userClassFilter').value;
+            const roleVal = document.getElementById('userRoleFilter').value;
+            const statusVal = document.getElementById('userStatusFilter').value;
+
+            filteredUsers = allUsers.filter(u => {
+                const fuzzyStr = `${u.email} ${u.name} ${u.class} ${u.cnum}`.toLowerCase();
+                const matchGlobal = globalKeyword === "" ? true : fuzzyStr.includes(globalKeyword);
+                const matchClass = classVal === "" ? true : u.class === classVal;
+                const matchRole = roleVal === "" ? true : u.permission === roleVal;
+                const matchStatus = statusVal === "" ? true : String(u.status) === statusVal;
+
+                return matchGlobal && matchClass && matchRole && matchStatus;
+            });
+
+            userPage = 1;
+            renderUsersTable();
+        }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = "";
+            document.getElementById('selectAllCheckbox').checked = false;
+            updateBatchBarVisibility();
+
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">無符合條件的學員檔案</td></tr>`;
+                document.getElementById('usersPagination').innerHTML = ''; return;
+            }
+
+            const paginated = filteredUsers.slice((userPage - 1) * pageSize, userPage * pageSize);
+            tbody.innerHTML = paginated.map(u => {
+                let cleanCnum = String(u.cnum).replace(/號/g, "").trim();
+                const base64Email = btoa(encodeURIComponent(u.email));
+
+                return `
+                <tr id="row-${base64Email}" class="${u.status === 0 ? 'table-danger opacity-75' : ''}">
+                    <td><input type="checkbox" class="user-item-checkbox" data-email="${u.email}" onchange="updateBatchBarVisibility()" style="transform: scale(1.2); cursor: pointer;"></td>
+                    <td><div class="row-save-indicator" id="save-ind-${base64Email}"></div></td>
+                    <td class="font-monospace text-secondary"><small>${u.email}</small></td>
+                    <td>
+                        <input type="text" class="table-inline-input inline-name" value="${u.name}" oninput="triggerAutosave('${u.email}')">
+                    </td>
+                    <td>
+                        <input type="text" class="table-inline-input inline-class text-center" value="${u.class}" oninput="triggerAutosave('${u.email}')">
+                    </td>
+                    <td>
+                        <input type="text" class="table-inline-input inline-cnum text-center" value="${cleanCnum}" oninput="triggerAutosave('${u.email}')">
+                    </td>
+                    <td>
+                        <select class="table-inline-select inline-permission" onchange="triggerAutosave('${u.email}')">
+                            <option value="學生" ${u.permission === '學生' ? 'selected' : ''}>學生</option>
+                            <option value="教師" ${u.permission === '教師' ? 'selected' : ''}>教師</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="table-inline-select inline-status" onchange="triggerAutosave('${u.email}')">
+                            <option value="1" ${u.status === 1 ? 'selected' : ''}>啟用</option>
+                            <option value="0" ${u.status === 0 ? 'selected' : ''}>停用</option>
+                        </select>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="openStudentProfile('${u.email}')"><i class="fas fa-stethoscope me-1"></i>診斷檔案</button>
+                    </td>
+                </tr>
+            `}).join("");
+
+            renderPagination('usersPagination', filteredUsers.length, userPage, p => { userPage = p; renderUsersTable(); });
+        }
+
+        function triggerAutosave(email) {
+            const base64Email = btoa(encodeURIComponent(email));
+            const indicator = document.getElementById(`save-ind-${base64Email}`);
+            if (indicator) {
+                indicator.innerHTML = `<i class="fas fa-pen text-muted" title="輸入中..."></i>`;
+            }
+
+            clearTimeout(rowDebounceTimers[email]);
+            rowDebounceTimers[email] = setTimeout(() => executeAutosave(email), 800);
+        }
+
+        async function executeAutosave(email) {
+            const base64Email = btoa(encodeURIComponent(email));
+            const row = document.getElementById(`row-${base64Email}`);
+            const indicator = document.getElementById(`save-ind-${base64Email}`);
+
+            if (!row || !indicator) return;
+
+            const name = row.querySelector('.inline-name').value.trim();
+            const cls = row.querySelector('.inline-class').value.trim();
+            let cnumRaw = row.querySelector('.inline-cnum').value.trim();
+            const perm = row.querySelector('.inline-permission').value;
+            const status = parseInt(row.querySelector('.inline-status').value, 10);
+
+            let cnum = parseInt(cnumRaw.replace(/號/g, ""), 10);
+            if (isNaN(cnum)) cnum = 1;
+
+            if (!name || !cls) {
+                indicator.innerHTML = `<i class="fas fa-times-circle text-danger" title="資料不可為空"></i>`;
+                return;
+            }
+
+            const cachedIdx = allUsers.findIndex(u => u.email === email);
+            if (cachedIdx > -1) {
+                const u = allUsers[cachedIdx];
+                if (u.name === name && u.class === cls && parseInt(u.cnum) === cnum && u.permission === perm && u.status === status) {
+                    indicator.innerHTML = "";
+                    return; 
+                }
+            }
+
+            indicator.innerHTML = `<span class="spinner-border spinner-border-sm text-primary" style="width: 1rem; height:1rem;"></span>`;
+
+            try {
+                const res = await callAPI('saveAdminUser', { email, name, class: cls, cnum, permission: perm, status });
+                if (res.status) {
+                    indicator.innerHTML = `<i class="fas fa-check-circle text-success" title="自動存檔成功"></i>`;
+                    
+                    if (cachedIdx > -1) {
+                        allUsers[cachedIdx] = { email, name, class: cls, cnum, permission: perm, status };
+                        SecureCache.set('admin_users', allUsers);
+                    }
+                    
+                    if (status === 0) {
+                        row.classList.add('table-danger', 'opacity-75');
+                    } else {
+                        row.classList.remove('table-danger', 'opacity-75');
+                    }
+
+                    setTimeout(() => { indicator.innerHTML = ""; }, 1500);
+                } else {
+                    indicator.innerHTML = `<i class="fas fa-exclamation-triangle text-danger" title="${res.error || '儲存失敗'}"></i>`;
+                }
+            } catch(e) {
+                indicator.innerHTML = `<i class="fas fa-wifi text-danger" title="網路通訊異常"></i>`;
+            }
+        }
+
+        function toggleSelectAll() {
+            const state = document.getElementById('selectAllCheckbox').checked;
+            document.querySelectorAll('.user-item-checkbox').forEach(cb => cb.checked = state);
+            updateBatchBarVisibility();
+        }
+
+        function updateBatchBarVisibility() {
+            const checkedBoxes = document.querySelectorAll('.user-item-checkbox:checked');
+            const bar = document.getElementById('batchActionBar');
+            if (checkedBoxes.length > 0) {
+                bar.classList.add('show');
+                document.getElementById('batchCount').textContent = checkedBoxes.length;
+            } else { bar.classList.remove('show'); }
+        }
+
+        async function applyBatchModification() {
+            const checkedBoxes = document.querySelectorAll('.user-item-checkbox:checked');
+            const targetEmails = Array.from(checkedBoxes).map(cb => cb.getAttribute('data-email'));
+            if (targetEmails.length === 0) return;
+
+            const cVal = document.getElementById('batchClassSelect').value;
+            const rVal = document.getElementById('batchPermissionSelect').value;
+
+            if (!cVal && !rVal) return showToast("請至少選擇一項批量修改的變更屬性！");
+
+            if (confirm(`確定要對選定的 ${targetEmails.length} 名學員進行批量修改屬性嗎？`)) {
+                try {
+                    const updates = targetEmails.map(async (email) => {
+                        const orig = allUsers.find(u => u.email === email);
+                        if (!orig) return;
+                        return callAPI('saveAdminUser', {
+                            email,
+                            name: orig.name,
+                            class: cVal || orig.class,
+                            cnum: orig.cnum,
+                            permission: rVal || orig.permission,
+                            status: orig.status
+                        });
+                    });
+                    await Promise.all(updates);
+                    showToast("<i class='fas fa-check-circle text-success me-1'></i> 批量修改屬性成功！");
+                    loadAllUsers(true);
+                } catch(e) { showToast("批次更新中途出錯！"); }
+            }
+        }
+
+        async function applyBatchStatus(statusValue) {
+            const checkedBoxes = document.querySelectorAll('.user-item-checkbox:checked');
+            const targetEmails = Array.from(checkedBoxes).map(cb => cb.getAttribute('data-email'));
+            if (targetEmails.length === 0) return;
+
+            const text = statusValue === 1 ? "一鍵批量啟用" : "一鍵批量停用";
+            if (confirm(`確定執行選定 ${targetEmails.length} 名學員的 [${text}] 嗎？`)) {
+                try {
+                    const updates = targetEmails.map(async (email) => {
+                        const orig = allUsers.find(u => u.email === email);
+                        if (!orig) return;
+                        return callAPI('saveAdminUser', {
+                            email, name: orig.name, class: orig.class, cnum: orig.cnum, permission: orig.permission, status: statusValue
+                        });
+                    });
+                    await Promise.all(updates);
+                    showToast(`<i class='fas fa-check text-success me-1'></i> 已將選定的 ${targetEmails.length} 名學員進行${text}`);
+                    loadAllUsers(true);
+                } catch(e) {}
+            }
+        }
+
+        async function applyBatchDelete() {
+            const checkedBoxes = document.querySelectorAll('.user-item-checkbox:checked');
+            const targetEmails = Array.from(checkedBoxes).map(cb => cb.getAttribute('data-email'));
+            if (targetEmails.length === 0) return;
+
+            if (confirm(`【超級永久刪除警告】\n您正準備永久刪除這 ${targetEmails.length} 名學員帳戶！\n這會將他們的雲端名冊、歷史打字紀錄與草稿全部抹除！此操作不可復原，確定要刪除嗎？`)) {
+                try {
+                    const deletes = targetEmails.map(email => callAPI('saveAdminUser', { email, name: "DELETE", status: -1 }));
+                    await Promise.all(deletes);
+                    showToast("<i class='fas fa-trash-alt text-success me-1'></i> 選定學員已被徹底自雲端名冊永久移除！");
+                    loadAllUsers(true);
+                } catch(e) { showToast("刪除連線中斷！"); }
+            }
+        }
+
+        function openBulkImportModal() {
+            document.getElementById('bulkPasteArea').value = "";
+            document.getElementById('pasteStepPanel').classList.remove('d-none');
+            document.getElementById('previewStepPanel').classList.add('d-none');
+            importModalInstance.show();
+        }
+
+        function validateImportList() {
+            const rawText = document.getElementById('bulkPasteArea').value.trim();
+            if (!rawText) return showToast("請貼上名冊內容！");
+
+            const lines = rawText.split('\n');
+            importList = [];
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@tkp\.edu\.hk$/i;
+            const existingEmails = new Set(allUsers.map(u => u.email));
+            const localImportEmails = new Set();
+
+            lines.forEach((line, i) => {
+                const l = line.trim(); if (!l) return;
+                const parts = l.split(',');
+                
+                const email = parts[0] ? parts[0].trim() : "";
+                const name = parts[1] ? parts[1].trim() : "";
+                const cls = parts[2] ? parts[2].trim() : "";
+                let cnumRaw = parts[3] ? parts[3].trim() : "";
+                const cnum = parseInt(cnumRaw.replace(/[^0-9]/g, ""), 10);
+                const perm = parts[4] ? parts[4].trim() : "學生";
+
+                let errorMsg = "";
+                if (!emailRegex.test(email)) errorMsg = "必須為學校@tkp.edu.hk郵箱";
+                else if (existingEmails.has(email)) errorMsg = "帳號已在學校名冊中";
+                else if (localImportEmails.has(email)) errorMsg = "名單中電郵有重複";
+                else if (!name) errorMsg = "姓名不得為空";
+                else if (isNaN(cnum) || cnum <= 0 || cnum > 100) errorMsg = "座號不合法";
+
+                localImportEmails.add(email);
+                importList.push({ idx: i, email, name, class: cls, cnum, permission: perm, error: errorMsg });
+            });
+
+            renderImportPreview();
+        }
+
+        function renderImportPreview() {
+            document.getElementById('pasteStepPanel').classList.add('d-none');
+            document.getElementById('previewStepPanel').classList.remove('d-none');
+
+            const tbody = document.getElementById('importPreviewTableBody');
+            tbody.innerHTML = importList.map(item => `
+                <tr id="prev-row-${item.idx}" class="${item.error ? 'preview-row-err' : 'preview-row-ok'}">
+                    <td><input type="text" class="form-control form-control-sm font-monospace" value="${item.email}" onchange="editPreviewField(${item.idx}, 'email', this.value)"></td>
+                    <td><input type="text" class="form-control form-control-sm font-bold" value="${item.name}" onchange="editPreviewField(${item.idx}, 'name', this.value)"></td>
+                    <td><input type="text" class="form-control form-control-sm text-center" value="${item.class}" onchange="editPreviewField(${item.idx}, 'class', this.value)"></td>
+                    <td><input type="number" class="form-control form-control-sm text-center" value="${item.cnum}" onchange="editPreviewField(${item.idx}, 'cnum', this.value)"></td>
+                    <td>
+                        <select class="form-select form-select-sm" onchange="editPreviewField(${item.idx}, 'permission', this.value)">
+                            <option value="學生" ${item.permission === '學生' ? 'selected' : ''}>學生</option>
+                            <option value="教師" ${item.permission === '教師' ? 'selected' : ''}>教師</option>
+                        </select>
+                    </td>
+                    <td>
+                        ${item.error ? `<span class="err-badge"><i class="fas fa-exclamation-triangle"></i> ${item.error}</span>` : `<span class="badge bg-success-light text-success fw-bold"><i class="fas fa-check"></i> 校驗通過</span>`}
+                    </td>
+                </tr>
+            `).join("");
+
+            const hasError = importList.some(item => item.error !== "");
+            const panel = document.getElementById('importValidationPanel');
+            const submitBtn = document.getElementById('importSubmitBtn');
+
+            if (hasError) {
+                panel.className = "alert alert-danger mb-3 py-2 px-3 small border-0 shadow-sm";
+                panel.innerHTML = `<h5><i class="fas fa-times-circle text-danger me-1"></i>名單內尚有部分格式錯誤，請在上方直接修改校正！</h5>`;
+                submitBtn.disabled = true;
+            } else {
+                panel.className = "alert alert-success mb-3 py-2 px-3 small border-0 shadow-sm";
+                panel.innerHTML = `<h5><i class="fas fa-check-circle text-success me-1"></i>預檢全部合規！共 ${importList.length} 名學員</h5>`;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function editPreviewField(idx, field, value) {
+            const item = importList.find(i => i.idx === idx);
+            if (!item) return;
+
+            item[field] = field === 'cnum' ? parseInt(value) : value;
+
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@tkp\.edu\.hk$/i;
+            const existingEmails = new Set(allUsers.map(u => u.email));
+            let countOfThisEmail = importList.filter(i => i.email === item.email).length;
+
+            let error = "";
+            if (!emailRegex.test(item.email)) error = "必須為學校@tkp.edu.hk郵箱";
+            else if (existingEmails.has(item.email)) error = "帳號已在學校名冊中";
+            else if (countOfThisEmail > 1) error = "名單中電郵有重複";
+            else if (!item.name) error = "姓名不得為空";
+            else if (isNaN(item.cnum) || item.cnum <= 0 || item.cnum > 100) error = "座號不合法";
+
+            item.error = error;
+            renderImportPreview();
+        }
+
+        function backToPasteStep() {
+            document.getElementById('pasteStepPanel').classList.remove('d-none');
+            document.getElementById('previewStepPanel').classList.add('d-none');
+        }
+
+        async function submitImportedList() {
+            const submitBtn = document.getElementById('importSubmitBtn');
+            submitBtn.disabled = true; submitBtn.innerHTML = "<span class='spinner-border spinner-border-sm me-2'></span>批量註冊中...";
+            try {
+                const cleanList = importList.map(item => ({
+                    email: item.email, name: item.name, class: item.class, cnum: item.cnum, permission: item.permission
+                }));
+                const res = await callAPI('bulkImportUsers', { users: cleanList });
+                if (res.status) {
+                    showToast(`<i class='fas fa-check-circle text-success me-1'></i> 批量導入成功！已成功註冊 ${cleanList.length} 名學員`);
+                    importModalInstance.hide();
+                    loadAllUsers(true);
+                } else { showToast(`上傳失敗: ${res.error}`); }
+            } catch(e) { showToast("網路通訊異常！"); }
+            finally { submitBtn.disabled = false; submitBtn.innerHTML = "<i class='fas fa-cloud-upload-alt me-1'></i>確認校正並一鍵導入"; }
+        }
+
+        async function openStudentProfile(email) {
+            const user = allUsers.find(u => u.email === email);
+            if (!user) return;
+
+            document.getElementById('diagName').textContent = user.name;
+            document.getElementById('diagEmail').textContent = user.email;
+            document.getElementById('diagClassBadge').textContent = `${user.class} 班`;
+
+            const tbody = document.getElementById('studentProfileRecordsBody');
+            const hContainer = document.getElementById('diagTypoHeatmap');
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border text-primary spinner-border-sm"></div> 正在讀取雲端歷程成績牆...</td></tr>`;
+            hContainer.innerHTML = "統計中...";
+
+            studentModalInstance.show();
+
+            try {
+                const [rRes, gRes] = await Promise.all([
+                    callAPI('getRecords', { email }),
+                    callAPI('getAdminGrades') 
+                ]);
+
+                if (rRes.status) {
+                    const records = rRes.data || [];
+                    const gradesMap = new Map((gRes.data || []).map(g => [String(g.id), g]));
+
+                    if (records.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">目前尚無打字歷程成績</td></tr>`;
+                    } else {
+                        tbody.innerHTML = records.map(r => {
+                            const gradeInfo = gradesMap.get(String(r.id)) || {};
+                            const typeLabel = gradeInfo.type || "練習";
+                            const modeLabel = gradeInfo.mode || "一般打字";
+
+                            let badgeTypeColor = "bg-success-subtle text-success border border-success-subtle";
+                            if (typeLabel === "考試") badgeTypeColor = "bg-danger text-white";
+                            else if (typeLabel === "計時") badgeTypeColor = "bg-warning text-dark";
+                            else if (typeLabel === "小測") badgeTypeColor = "bg-info text-white";
+
+                            return `
+                            <tr id="rec-row-${email}-${r.id}">
+                                <td>
+                                    <div class="fw-bold">${r.title || `教材#${r.id}`}</div>
+                                    <div class="mt-1 d-flex gap-1">
+                                        <span class="badge ${badgeTypeColor}" style="font-size:0.65rem;">${typeLabel}</span>
+                                        <span class="badge bg-secondary-subtle text-secondary border" style="font-size:0.65rem;">${modeLabel}</span>
+                                    </div>
+                                </td>
+                                <td>${r.progress || 0}%</td>
+                                <td><span class="badge bg-light text-primary border">${r.accuracy || 100}%</span></td>
+                                <td class="text-info fw-bold">${r.wpm || 0}</td>
+                                <td class="text-secondary">${r.spent_seconds || 0} 秒</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-danger py-1" onclick="deleteRecordInline('${email}', '${r.id}')"><i class="fas fa-trash-alt me-1"></i>刪除進度</button>
+                                </td>
+                            </tr>
+                        `}).join("");
+                    }
+                }
+
+                const personalGrades = (gRes.data || []).filter(g => g.email === email);
+                let typoMap = {};
+                personalGrades.forEach(g => {
+                    if (g.typos && g.typos.includes("{")) {
+                        try {
+                            const t = JSON.parse(g.typos);
+                            for (let char in t) typoMap[char] = (typoMap[char] || 0) + t[char];
+                        } catch(e) {}
+                    }
+                });
+                const sorted = Object.entries(typoMap).sort((a,b) => b[1]-a[1]).slice(0, 5);
+                if (sorted.length === 0) {
+                    hContainer.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-laugh-beam"></i> 打字優異，目前無明顯盲區</span>`;
+                } else {
+                    hContainer.innerHTML = sorted.map(([char, count]) => `
+                        <div class="typo-capsule">
+                            <span>${char}</span><sub>${count} 次錯</sub>
+                        </div>
+                    `).join("");
+                }
+
+            } catch(e) { tbody.innerHTML = `<tr><td colspan="6" class="text-danger text-center">加載失敗</td></tr>`; }
+        }
+
+        async function deleteRecordInline(email, id) {
+            if (confirm("【安全防護警告】\n您正準備永久刪除該生此教材的唯一打字進度！\n刪除後，學員該題目的歷史與草稿將被徹底清空，學生的狀態會退回為『未開始』。\n此操作不可復原，確定刪除嗎？")) {
+                try {
+                    const res = await callAPI('deleteRecord', { email, id });
+                    if (res.status) {
+                        showToast("<i class='fas fa-trash-alt text-success me-1'></i> 打字成績紀錄已成功重置與扣除！");
+                        openStudentProfile(email); 
+                        loadAllUsers(true);
+                    } else { showToast("刪除成績失敗！"); }
+                } catch(e) { showToast("網路連線超時！"); }
+            }
+        }
+
+        function renderPagination(containerId, total, current, callback) {
+            const totalPages = Math.ceil(total / pageSize);
+            const container = document.getElementById(containerId);
+            if (totalPages <= 1) { container.innerHTML = ''; return; }
+            let html = `<button class="page-btn ${current === 1 ? 'disabled' : ''}" data-page="${current - 1}"><i class="fas fa-chevron-left"></i></button>`;
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= current - 2 && i <= current + 2)) {
+                    html += `<button class="page-btn ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
+                } else if (i === current - 3 || i === current + 3) html += `<span class="align-self-end text-muted fw-bold">...</span>`;
+            }
+            html += `<button class="page-btn ${current === totalPages ? 'disabled' : ''}" data-page="${current + 1}"><i class="fas fa-chevron-right"></i></button>`;
+            container.innerHTML = html;
+            container.querySelectorAll('.page-btn').forEach(b => {
+                b.addEventListener('click', () => { const p = parseInt(b.dataset.page); if (p >= 1 && p <= totalPages && p !== current) callback(p); });
+            });
+        }
+
+        // 👤 手動新增單筆學員
+        function openAddStudentModal() {
+            document.getElementById('addStudentForm').reset();
+            document.getElementById('new-user-cnum').value = "1";
+            document.getElementById('new-user-perm').value = "學生";
+            document.getElementById('new-user-status').value = "1";
+            addStudentModalInstance.show();
+        }
+
+        async function submitSingleStudent() {
+            const email = document.getElementById('new-user-email').value.trim().toLowerCase();
+            const name = document.getElementById('new-user-name').value.trim();
+            const cls = document.getElementById('new-user-class').value;
+            const cnum = parseInt(document.getElementById('new-user-cnum').value, 10) || 1;
+            const perm = document.getElementById('new-user-perm').value;
+            const status = parseInt(document.getElementById('new-user-status').value, 10);
+
+            if (!email || !name) return showToast("電郵與中文姓名不得為空！");
+            if (!email.endsWith('@tkp.edu.hk')) return showToast("學員電郵必須為蔡功譜學校網域 @tkp.edu.hk！");
+
+            const btn = document.getElementById('confirmAddStudentBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>建立中...`;
+
+            try {
+                const res = await callAPI('saveAdminUser', {
+                    email, name, class: cls, cnum, permission: perm, status
+                });
+                if (res.status) {
+                    showToast("<i class='fas fa-check-circle text-success me-1'></i> 學員帳戶已成功建立並同步雲端！");
+                    addStudentModalInstance.hide();
+                    loadAllUsers(true);
+                } else {
+                    showToast("建立失敗: " + (res.error || "未知錯誤"));
+                }
+            } catch(e) {
+                showToast("連線伺服器異常！");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-check me-1"></i>確認建立學員`;
+            }
+        }
+
+        // 📊 匯出學員名冊 CSV
+        function exportStudentsCSV() {
+            if (allUsers.length === 0) return showToast("目前名冊無資料可供匯出！");
+
+            const escapeCSV = (val) => {
+                if (val === null || val === undefined) return '';
+                let str = String(val).trim();
+                if (str.startsWith('=') || str.startsWith('+') || str.startsWith('-') || str.startsWith('@')) str = "'" + str;
+                if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+                    return `"${str.replace(/"/g, '""')}"`;
+                }
+                return str;
+            };
+
+            let csv = "﻿";
+            csv += "學校電郵,中文姓名,班別,座號,身分權限,帳號狀態\n";
+
+            allUsers.forEach(u => {
+                csv += [
+                    escapeCSV(u.email),
+                    escapeCSV(u.name),
+                    escapeCSV(u.class),
+                    escapeCSV(u.cnum),
+                    escapeCSV(u.permission),
+                    escapeCSV(Number(u.status) === 1 ? "啟用" : "停用")
+                ].join(",") + "\n";
+            });
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `SKH_TKP_Students_Roster_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("<i class='fas fa-file-csv text-success me-1'></i> 學員名冊 CSV 已成功匯出！");
+        }
+
+        // 📥 下載學員 CSV 範本
+        function downloadStudentCsvTemplate() {
+            const template = "﻿學校電郵,中文姓名,班別,座號,身分權限\n" +
+                             "s25006@tkp.edu.hk,鄭雅婷,1A,1,學生\n" +
+                             "s25045@tkp.edu.hk,許澄之,1A,2,學生\n";
+            const blob = new Blob([template], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "SKH_TKP_Student_Roster_Template.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ⚠️ 一鍵清空學生名冊防呆
+        function promptClearStudents() {
+            document.getElementById('clearStudentConfirmInput').value = "";
+            document.getElementById('confirmClearStudentsBtn').disabled = true;
+            document.getElementById('preserveTeachersCheck').checked = true;
+            clearStudentsModalInstance.show();
+        }
+
+        function checkClearStudentConfirmMatch() {
+            const val = document.getElementById('clearStudentConfirmInput').value.trim();
+            document.getElementById('confirmClearStudentsBtn').disabled = (val !== "確認清空學生");
+        }
+
+        async function executeClearStudents() {
+            const preserve = document.getElementById('preserveTeachersCheck').checked;
+            const btn = document.getElementById('confirmClearStudentsBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>執行清空中...`;
+
+            try {
+                const res = await callAPI('clearAllStudents', { preserveTeachers: preserve });
+                if (res.status) {
+                    showToast(`<i class='fas fa-trash-alt text-success me-1'></i> ${res.message || '學生名冊已清空！'}`);
+                    clearStudentsModalInstance.hide();
+                    loadAllUsers(true);
+                } else {
+                    showToast("清空失敗: " + (res.error || "未知錯誤"));
+                }
+            } catch(e) {
+                showToast("連線伺服器異常！");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-trash-alt me-1"></i>執行清空學生`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('username').textContent = currentUser ? currentUser.name : "教師";
+            document.getElementById('userrole').textContent = currentUser ? currentUser.permission : "教師";
+
+            studentModalInstance = new bootstrap.Modal(document.getElementById('studentProfileModal'));
+            importModalInstance = new bootstrap.Modal(document.getElementById('bulkImportModal'));
+            addStudentModalInstance = new bootstrap.Modal(document.getElementById('addStudentModal'));
+            clearStudentsModalInstance = new bootstrap.Modal(document.getElementById('clearStudentsModal'));
+            loadAllUsers(false);
+        });
+    </script>
+</body>
+</html>

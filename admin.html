@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數據戰情室 - 聖公會蔡功譜中學</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+    <style>
+        :root { 
+            --font: "Noto Sans TC", sans-serif; 
+            --tkp-blue: #00479d;
+            --tkp-blue-light: #eff6ff;
+            --tkp-accent: #4f46e5;
+            --success: #10b981; 
+            --danger: #ef4444; 
+            --warning: #f59e0b;
+            --bg: #f8fafc; 
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --shadow-premium: 0 10px 30px -5px rgba(0, 71, 157, 0.05), 0 4px 12px -2px rgba(0, 71, 157, 0.02);
+            --shadow-hover: 0 20px 40px -5px rgba(0, 71, 157, 0.12), 0 8px 20px -4px rgba(0, 71, 157, 0.05);
+        }
+        
+        body { background-color: var(--bg); font-family: var(--font); color: var(--text-main); -webkit-font-smoothing: antialiased; }
+        .glass-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-light); }
+        
+        .user-pill { 
+            border: 1px solid var(--border-light); 
+            border-radius: 999px; 
+            background: var(--surface); 
+            padding: 0 18px; 
+            height: 38px; 
+            display: inline-flex; 
+            align-items: center; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02); 
+        }
+
+        .btn-header {
+            background-color: var(--tkp-blue); color: white !important; border: none; font-weight: 800;
+            border-radius: 999px; padding: 0 1.4rem; font-size: 0.88rem; display: inline-flex;
+            align-items: center; justify-content: center; transition: var(--transition-spring); text-decoration: none; height: 38px;
+        }
+        .btn-header:hover { background-color: #00367c; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 71, 157, 0.2); }
+
+        .admin-card { background: white; border-radius: 24px; box-shadow: var(--shadow-premium); border: 1px solid rgba(226, 232, 240, 0.8); padding: 2.2rem; margin-bottom: 2rem; transition: var(--transition-spring); }
+        .admin-card:hover { box-shadow: var(--shadow-hover); }
+
+        .sub-nav .nav-link { color: #64748b; font-weight: 700; border-radius: 14px; margin-right: 8px; transition: var(--transition-spring); border: 1px solid transparent; padding: 0.7rem 1.4rem; }
+        .sub-nav .nav-link:hover { background-color: #f1f5f9; color: var(--tkp-blue); }
+        .sub-nav .nav-link.active { background-color: var(--tkp-blue) !important; color: white !important; box-shadow: 0 8px 16px rgba(0, 71, 157, 0.15); }
+        
+        .table { vertical-align: middle; }
+        .table-responsive { max-height: 65vh; overflow-y: auto; border-radius: 16px; }
+
+        .hero-banner { 
+            background: linear-gradient(135deg, var(--tkp-blue) 0%, var(--tkp-accent) 100%); 
+            border-radius: 26px; padding: 2.5rem; color: white; box-shadow: 0 15px 35px -10px rgba(0, 71, 157, 0.3); position: relative; overflow: hidden; 
+        }
+        .hero-banner::after { content: ''; position: absolute; top: -50%; right: -10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); border-radius: 50%; }
+        
+        .kpi-card { 
+            background: var(--surface); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 22px; padding: 1.6rem; 
+            box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: space-between; transition: var(--transition-spring); cursor: pointer;
+        }
+        .kpi-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+        .kpi-icon { background: var(--tkp-blue-light); color: var(--tkp-blue); padding: 14px; border-radius: 18px; font-size: 1.5rem; transition: var(--transition-spring); }
+        .kpi-card:hover .kpi-icon { background: var(--tkp-blue); color: white; }
+        .kpi-val { font-size: 2rem; font-weight: 900; color: var(--text-main); letter-spacing: -0.5px; }
+
+        .pagination-container { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+        .page-btn { border: 1px solid #cbd5e1; background: white; border-radius: 10px; padding: 6px 14px; font-weight: bold; color: #475569; transition: var(--transition-spring); }
+        .page-btn:hover:not(.disabled) { background: #f1f5f9; cursor: pointer; transform: translateY(-1px); }
+        .page-btn.active { background: var(--tkp-blue); color: white; border-color: var(--tkp-blue); box-shadow: 0 4px 10px rgba(0, 71, 157, 0.2); }
+        .page-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .heat-bar-bg { background: #f1f5f9; border-radius: 10px; overflow: hidden; height: 16px; flex-grow: 1; margin: 0 20px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
+        .heat-bar-fill { background: linear-gradient(90deg, #fca5a5, #ef4444); height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.1, 0.8, 0.2, 1); }
+
+        /* 📱 跨端標準化觸控目標 (Apple HIG & WCAG: >= 44px) 與壓感互動機制 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        button, .btn, .page-btn, .btn-header, .form-control, .form-select {
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        button:active:not(:disabled),
+        .btn:active:not(:disabled),
+        .page-btn:active,
+        .kpi-card:active {
+            transform: scale(0.97) !important;
+        }
+
+        /* 📱 iPad 平板專屬響應式優化 */
+        @media (max-width: 991.98px) {
+            .admin-card { padding: 1.4rem; border-radius: 20px; }
+            .kpi-card { padding: 1.1rem; border-radius: 18px; }
+            .kpi-val { font-size: 1.6rem; }
+            .table-responsive { max-height: 55vh; }
+        }
+
+        footer { text-align: center; padding: 2rem 0; font-size: 0.82em; color: #64748b; font-weight: 600; }
+    </style>
+    
+    <script>
+        // 🔒 統一的全平台相容解密算法
+        const SessionStorageUtil = {
+            _mem: {},
+            setItem: function(key, value) { 
+                try {
+                    const jsonStr = JSON.stringify(value);
+                    const encoded = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                        return String.fromCharCode(parseInt(p1, 16));
+                    }));
+                    if (window.sessionStorage) sessionStorage.setItem(key, encoded);
+                    this._mem[key] = value;
+                } catch(e) { this._mem[key] = value; }
+            },
+            getItem: function(key) { 
+                try {
+                    let raw = null;
+                    if (window.sessionStorage) raw = sessionStorage.getItem(key);
+                    if (!raw) return this._mem[key] || null;
+                    try {
+                        const decoded = decodeURIComponent(atob(raw).split("").map(function(c) {
+                            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+                        }).join(""));
+                        return JSON.parse(decoded);
+                    } catch(decodeErr) {
+                        return JSON.parse(raw);
+                    }
+                } catch(e) { return this._mem[key] || null; }
+            },
+            clear: function() {
+                try { if (window.sessionStorage) sessionStorage.clear(); } catch(e) {}
+                this._mem = {};
+            }
+        };
+
+        const SecureCache = {
+            set: function(key, value) {
+                const wrapper = { value: value, timestamp: Date.now() };
+                SessionStorageUtil.setItem(key, wrapper);
+            },
+            get: function(key, ttlMs) {
+                const wrapper = SessionStorageUtil.getItem(key);
+                if (!wrapper) return null;
+                if (wrapper && wrapper.timestamp && (Date.now() - wrapper.timestamp < ttlMs)) return wrapper.value;
+                return null;
+            }
+        };
+
+        const currentUser = SessionStorageUtil.getItem('user');
+        if (!currentUser || (currentUser.permission !== '教師' && currentUser.permission !== '管理員')) {
+            window.location.replace('index.html');
+        }
+    </script>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar glass-nav sticky-top">
+        <div class="container-fluid px-4 py-2">
+            <a class="navbar-brand fw-900 d-flex align-items-center" href="index.html" style="text-decoration: none;">
+                <img src="img/tkp-logo.png" alt="Logo" class="me-2" style="height: 38px;" onerror="this.src='https://www.tkp.edu.hk/images/logo.png'">
+                <span style="color: var(--tkp-blue); font-weight: 900; font-size: 1.35rem;">聖公會蔡功譜中學</span>
+                <span class="text-muted ms-2 border-start ps-2" style="font-weight: 700; font-size: 1.25rem; border-color: var(--border-light) !important;">數據戰情室</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <div class="user-pill shadow-sm">
+                    <i class="fas fa-user-circle text-primary me-2 fs-5"></i>
+                    <div class="text-start lh-sm" style="font-size: 0.85rem;">
+                        <strong class="text-dark" id="username">載入中...</strong>
+                        <span class="text-muted ms-2 ps-2 border-start small fw-bold" id="userrole">教師</span>
+                    </div>
+                </div>
+                <a href="index.html" class="btn-header"><i class="fas fa-arrow-left me-2"></i>返回大廳</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5 flex-grow-1">
+        <ul class="nav nav-pills sub-nav mb-4 bg-white p-2 rounded-4 border shadow-sm" id="adminModuleNav">
+            <li class="nav-item">
+                <a class="nav-link active" href="admin.html"><i class="fas fa-chart-line me-2"></i>數據戰情室 (Dashboard)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="student.html"><i class="fas fa-users-cog me-2"></i>學生帳戶與權限中心</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="question.html"><i class="fas fa-book-open me-2"></i>課程教材與題庫 Studio</a>
+            </li>
+        </ul>
+
+        <div class="hero-banner d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 shadow-lg">
+            <div style="z-index: 1;">
+                <h1 class="fw-900 fs-2 mb-2 d-flex align-items-center gap-2">
+                    <span>打字數據戰情決策中心</span>
+                    <span class="inline-svg-icon text-warning">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </span>
+                </h1>
+                <p class="mb-0 opacity-85 fw-bold">即時洞察全校學員打字進度、精確導出 Grading 成績表、分析常錯漢字盲區。</p>
+                <small class="text-white-50 fw-bold" id="adminSyncStatus">數據已啟用智慧快取防護</small>
+            </div>
+            <div class="mt-3 mt-md-0 d-flex gap-2 flex-wrap" style="z-index: 1;">
+                <button id="forceSyncAdminBtn" class="btn btn-light rounded-pill px-3 py-2 fw-bold text-primary shadow-sm" onclick="forceSyncAllAdminData()"><i class="fas fa-sync-alt me-1"></i>強制同步雲端</button>
+                <button class="btn btn-outline-light rounded-pill px-3 py-2 fw-bold text-white shadow-sm" style="border: 2px solid rgba(255,255,255,0.7);" onclick="openSystemSettingsModal()"><i class="fas fa-sliders-h me-1"></i>全校自定義設定</button>
+                <button class="btn btn-warning rounded-pill px-3 py-2 fw-bold text-dark shadow-sm" onclick="promptResetSemesterGrades()"><i class="fas fa-redo-alt me-1"></i>新學期成績重置</button>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="kpi-card" onclick="triggerKPISearch('all')">
+                    <div><div class="text-muted small fw-bold">已註冊學員總數</div><div class="kpi-val" id="kpi-users">0</div></div>
+                    <div class="kpi-icon"><i class="fas fa-user-graduate"></i></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kpi-card" onclick="triggerKPISearch('today')">
+                    <div><div class="text-muted small fw-bold">今日完成練習人次</div><div class="kpi-val text-success" id="kpi-today-records">0</div></div>
+                    <div class="kpi-icon text-success"><i class="fas fa-calendar-check"></i></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kpi-card" onclick="triggerKPISearch('all-words')">
+                    <div><div class="text-muted small fw-bold">歷史累計正確字數</div><div class="kpi-val text-primary" id="kpi-total-words">0</div></div>
+                    <div class="kpi-icon text-primary"><i class="fas fa-pencil-alt"></i></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kpi-card">
+                    <div><div class="text-muted small fw-bold">全校平均打字正確率</div><div class="kpi-val text-warning" id="kpi-avg-accuracy">0%</div></div>
+                    <div class="kpi-icon text-warning"><i class="fas fa-regular fa-compass"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-xl-7">
+                <div class="admin-card h-100 mb-0">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                        <h4 class="fw-900 mb-0 text-dark"><i class="fas fa-history text-primary me-2"></i>學生成績實時牆</h4>
+                        <div class="d-flex flex-wrap gap-2">
+                            <input type="text" id="gradeSearch" class="form-control form-control-sm rounded-pill px-3" style="width: 140px;" placeholder="搜尋學生/教材" onkeyup="filterGrades()">
+                            <select id="gradeClassFilter" class="form-select form-select-sm rounded-pill px-3" style="width: 100px;" onchange="filterGrades()">
+                                <option value="">所有班級</option>
+                                <option value="1A">1A</option><option value="1B">1B</option><option value="1C">1C</option><option value="1D">1D</option>
+                                <option value="2A">2A</option><option value="2B">2B</option><option value="2C">2C</option><option value="2D">2D</option>
+                                <option value="3A">3A</option><option value="3B">3B</option><option value="3C">3C</option><option value="3D">3D</option>
+                                <option value="4A">4A</option><option value="4B">4B</option><option value="5A">5A</option><option value="6A">6A</option>
+                            </select>
+                            <select id="gradeTypeFilter" class="form-select form-select-sm rounded-pill px-3" style="width: 105px;" onchange="filterGrades()">
+                                <option value="">所有分類</option>
+                                <option value="練習">練習</option>
+                                <option value="考試">考試</option>
+                                <option value="計時">計時</option>
+                                <option value="小測">小測</option>
+                            </select>
+                            <select id="gradeModeFilter" class="form-select form-select-sm rounded-pill px-3" style="width: 110px;" onchange="filterGrades()">
+                                <option value="">所有模式</option>
+                                <option value="速成模式">速成模式</option>
+                                <option value="拼音模式">拼音模式</option>
+                                <option value="一般打字">一般打字</option>
+                            </select>
+                            <select id="gradeExerciseFilter" class="form-select form-select-sm rounded-pill px-3" style="width: 140px;" onchange="filterGrades()">
+                                <option value="">所有教材題目</option>
+                            </select>
+                            <button class="btn btn-outline-success rounded-pill btn-sm fw-bold px-3" onclick="exportGradesToCSV()"><i class="fas fa-file-excel me-1"></i>匯出報表</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover border-top align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>提交時間</th>
+                                    <th>班別座號</th>
+                                    <th>中文姓名</th>
+                                    <th>打字教材與模式</th>
+                                    <th>完成度</th>
+                                    <th>正確字</th>
+                                    <th>準確率</th>
+                                    <th>WPM</th>
+                                    <th>耗時</th>
+                                    <th class="text-center" width="70">管理</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gradesTableBody">
+                                <tr><td colspan="10" class="text-center py-5"><div class="spinner-border text-primary spinner-border-sm me-2"></div>正在加載大數據成績...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container" id="gradesPagination"></div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-5">
+                <div class="admin-card h-100 mb-0">
+                    <h4 class="fw-900 text-dark mb-2"><i class="fas fa-chart-bar text-danger me-2"></i>全校常錯漢字盲區排行 (Top 20)</h4>
+                    <p class="text-muted small fw-bold mb-4">分析全校學員打字時最常出錯的中文字。建議教師針對排行榜前列漢字進行速成/倉頡拆碼重點加強。</p>
+                    <div id="heatmapContainer" style="max-height: 60vh; overflow-y: auto; padding-right: 8px;">
+                        <div class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>正在統計全校盲區地圖中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚠️ 新學期全校/指定條件成績重置 Modal -->
+    <div class="modal fade" id="resetGradesModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 28px;">
+                <div class="modal-header bg-warning text-dark border-0 py-3 px-4" style="border-radius: 28px 28px 0 0;">
+                    <h5 class="modal-title fw-900 mb-0"><i class="fas fa-redo-alt me-2"></i>新學期成績重置與清空</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-dark fw-bold mb-2">說明：本功能專供開學季或新學年交接使用，會將學生的打字進度與風雲榜累計字數歸零，但會<strong>完整保留學員帳號名冊與教材題庫</strong>。</p>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">請選擇欲重置的成績範圍</label>
+                        <select id="resetGradeScopeSelect" class="form-select form-select-sm" onchange="onResetScopeChange(this.value)">
+                            <option value="ALL">全校所有班級成績徹底歸零 (新學期全體重開)</option>
+                            <option value="CLASS">指定單一班級成績重置</option>
+                            <option value="EXERCISE">指定單一教材成績重置</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 d-none" id="resetClassSelectGroup">
+                        <label class="form-label text-muted small fw-bold">選擇欲重置的班級</label>
+                        <select id="resetSpecificClassSelect" class="form-select form-select-sm">
+                            <option value="1A">1A</option><option value="1B">1B</option><option value="1C">1C</option><option value="1D">1D</option>
+                            <option value="2A">2A</option><option value="2B">2B</option><option value="2C">2C</option><option value="2D">2D</option>
+                            <option value="3A">3A</option><option value="3B">3B</option><option value="3C">3C</option><option value="3D">3D</option>
+                            <option value="4A">4A</option><option value="4B">4B</option><option value="5A">5A</option><option value="6A">6A</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 d-none" id="resetExerciseSelectGroup">
+                        <label class="form-label text-muted small fw-bold">選擇欲重置的教材題目</label>
+                        <select id="resetSpecificExSelect" class="form-select form-select-sm"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">安全防呆確認：請在下方輸入 <span class="text-danger fw-bold">確認重置成績</span></label>
+                        <input type="text" id="resetGradesConfirmInput" class="form-control form-control-sm text-center fw-bold" placeholder="請輸入：確認重置成績" onkeyup="checkResetGradesConfirmMatch()">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 bg-light" style="border-radius: 0 0 28px 28px;">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-warning rounded-pill px-4 fw-bold text-dark shadow" id="confirmResetGradesBtn" onclick="executeResetGrades()" disabled><i class="fas fa-redo-alt me-1"></i>執行成績重置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚙️ 全校系統與公告自定義設定 Modal -->
+    <div class="modal fade" id="systemSettingsModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 28px;">
+                <div class="modal-header bg-light border-0 py-3 px-4">
+                    <h5 class="modal-title fw-900 text-primary mb-0"><i class="fas fa-sliders-h me-2"></i>全校系統參數與公告廣播自定義</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="max-height: 80vh; overflow-y: auto;">
+                    <form id="systemSettingsForm">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold"><i class="fas fa-school text-primary me-1"></i>學校全稱</label>
+                            <input type="text" id="setting-school-name" class="form-control form-control-sm fw-bold" value="聖公會蔡功譜中學">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold"><i class="fas fa-bullhorn text-warning me-1"></i>全校大廳置頂廣播公告</label>
+                            <textarea id="setting-announcement" class="form-control font-monospace" rows="3" style="border-radius: 14px;" placeholder="輸入將顯示於學生任務大廳頂部的公告訊息..."></textarea>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold"><i class="fas fa-stopwatch text-info me-1"></i>計時挑戰預設秒數</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" id="setting-default-timed" class="form-control" value="60" min="30" max="600">
+                                    <span class="input-group-text bg-light text-muted fw-bold">秒</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold"><i class="fas fa-calendar-alt text-success me-1"></i>學年起始月份 (香港標準)</label>
+                                <select id="setting-start-month" class="form-select form-select-sm">
+                                    <option value="9">9 月 (標準秋季新學年)</option>
+                                    <option value="8">8 月</option>
+                                    <option value="1">1 月 (曆年制)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3 p-3 bg-light rounded-4 border">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="setting-allow-retry" checked style="transform: scale(1.15);">
+                                <label class="form-check-label fw-bold ms-2" for="setting-allow-retry">允許學生對已完成的題目重複自主練習 (不重複膨脹字數，僅採納差額增量)</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="setting-strict-exam" checked style="transform: scale(1.15);">
+                                <label class="form-check-label fw-bold ms-2" for="setting-strict-exam">「考試」模式強制啟用切換視窗防作弊監測並記錄切屏次數</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0 p-4 bg-light" style="border-radius: 0 0 28px 28px;">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-5 fw-bold shadow" id="saveSystemSettingsBtn" onclick="saveSystemSettings()"><i class="fas fa-save me-1"></i>儲存全校配置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-4" style="z-index: 1060;">
+        <div id="sysToast" class="toast align-items-center text-white border-0 shadow-lg" style="border-radius: 12px; background: rgba(0,0,0,0.85);" role="alert">
+            <div class="d-flex p-2 justify-content-center"><div class="toast-body fw-bold fs-6" id="sysToastBody"></div></div>
+        </div>
+    </div>
+
+    <footer>
+        Copyright © 2026 S.K.H. Tsoi Kung Po Secondary School. All rights reserved.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = "https://tkp-typing-api.tvbar.workers.dev/";
+        const CACHE_TTL_ADMIN_GRADES = 5 * 60 * 1000;   
+        const CACHE_TTL_ADMIN_USERS = 10 * 60 * 1000;
+
+        let allGrades = [], filteredGrades = [];
+        let allUsersCount = 0;
+        let gradePage = 1;
+        const pageSize = 50; 
+
+        function showToast(msg) {
+            const toastEl = document.getElementById('sysToast'); 
+            document.getElementById('sysToastBody').innerHTML = msg;
+            new bootstrap.Toast(toastEl, { delay: 2500 }).show();
+        }
+
+        async function callAPI(action, payload = {}) { 
+            return await fetch(API_URL, { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json", "Authorization": currentUser ? currentUser.email : "" }, 
+                body: JSON.stringify({ action, payload }) 
+            }).then(r => r.json()); 
+        }
+
+        async function forceSyncAllAdminData() {
+            const btn = document.getElementById('forceSyncAdminBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>正在向雲端同步...`;
+            try {
+                await loadLiveGrades(true);
+                showToast("<i class='fas fa-sync text-success me-1'></i> 學校大廳與後台數據已完美對齊雲端");
+                throttleAdminSyncButton();
+            } catch(e) {
+                showToast("同步出錯，請確認網路！");
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-sync-alt me-2"></i>手動強制同步雲端`;
+            }
+        }
+
+        function throttleAdminSyncButton() {
+            const btn = document.getElementById('forceSyncAdminBtn');
+            let cooldown = 15; btn.disabled = true;
+            const timer = setInterval(() => {
+                cooldown--;
+                btn.innerHTML = `<i class="fas fa-hourglass-half me-2"></i>冷卻中 (${cooldown}s)`;
+                if (cooldown <= 0) { clearInterval(timer); btn.disabled = false; btn.innerHTML = `<i class="fas fa-sync-alt me-2"></i>手動強制同步雲端`; }
+            }, 1000);
+        }
+
+        function formatSeconds(sec) {
+            const s = parseInt(sec, 10) || 0;
+            if (s < 60) return `${s}秒`;
+            const m = Math.floor(s / 60);
+            const rem = s % 60;
+            return `${m}分${rem}秒`;
+        }
+
+        function populateExerciseFilter() {
+            const exSelect = document.getElementById('gradeExerciseFilter');
+            if (!exSelect) return;
+            const currentVal = exSelect.value;
+            const titlesMap = new Map();
+            allGrades.forEach(g => {
+                if (g.id && g.title) {
+                    titlesMap.set(String(g.id), g.title);
+                }
+            });
+            let html = '<option value="">所有教材題目</option>';
+            titlesMap.forEach((title, id) => {
+                html += `<option value="${id}" ${currentVal === id ? 'selected' : ''}>#${id} ${title}</option>`;
+            });
+            exSelect.innerHTML = html;
+        }
+
+        async function loadLiveGrades(force = false) {
+            let cachedGrades = SecureCache.get('admin_grades', CACHE_TTL_ADMIN_GRADES);
+            let cachedUserCount = SecureCache.get('admin_users_count', CACHE_TTL_ADMIN_USERS);
+
+            if (!force && cachedGrades && cachedUserCount) {
+                allGrades = cachedGrades;
+                allUsersCount = cachedUserCount;
+                populateExerciseFilter();
+                filterGrades();
+                calculateKPIs();
+                renderHeatmap();
+                updateSyncLabel(false);
+                return;
+            }
+
+            try {
+                const [res, uRes] = await Promise.all([
+                    callAPI('getAdminGrades'),
+                    callAPI('getAdminUsers').catch(() => ({ status: true, data: [] }))
+                ]);
+
+                if (res.status) {
+                    allGrades = res.data;
+                    SecureCache.set('admin_grades', res.data);
+                }
+                if (uRes.status && uRes.data) {
+                    allUsersCount = uRes.data.length;
+                    SecureCache.set('admin_users_count', uRes.data.length);
+                }
+
+                populateExerciseFilter();
+                filterGrades();
+                calculateKPIs();
+                renderHeatmap();
+                updateSyncLabel(true);
+            } catch(e) { showToast("伺服器連線超時！"); }
+        }
+
+        function updateSyncLabel(isNetwork) {
+            const label = document.getElementById('adminSyncStatus');
+            label.textContent = isNetwork ? `剛剛自雲端同步完成` : `快取讀取中：手動強制同步可更新`;
+        }
+
+        function calculateKPIs() {
+            document.getElementById('kpi-users').textContent = allUsersCount || "0";
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayRecords = allGrades.filter(r => r.time && r.time.startsWith(todayStr));
+            document.getElementById('kpi-today-records').textContent = todayRecords.length;
+            
+            let totalWords = 0; let sumAcc = 0;
+            allGrades.forEach(r => { totalWords += r.correct_count; sumAcc += parseFloat(r.accuracy) || 0; });
+            document.getElementById('kpi-total-words').textContent = totalWords.toLocaleString();
+            
+            const avgAcc = allGrades.length > 0 ? (sumAcc / allGrades.length).toFixed(1) : 0;
+            document.getElementById('kpi-avg-accuracy').textContent = avgAcc + "%";
+        }
+
+        function filterGrades() {
+            const searchKeyword = document.getElementById('gradeSearch').value.toLowerCase().trim();
+            const classFilter = document.getElementById('gradeClassFilter').value;
+            const typeFilter = document.getElementById('gradeTypeFilter').value;
+            const modeFilter = document.getElementById('gradeModeFilter').value;
+            const exFilter = document.getElementById('gradeExerciseFilter').value;
+
+            filteredGrades = allGrades.filter(r => {
+                const matchSearch = searchKeyword === "" ? true : (
+                    r.name.toLowerCase().includes(searchKeyword) ||
+                    r.email.toLowerCase().includes(searchKeyword) ||
+                    (r.title && r.title.toLowerCase().includes(searchKeyword))
+                );
+                const matchClass = classFilter === "" ? true : r.class === classFilter;
+                const matchType = typeFilter === "" ? true : (r.type === typeFilter);
+                const matchMode = modeFilter === "" ? true : (r.mode === modeFilter);
+                const matchEx = exFilter === "" ? true : String(r.id) === String(exFilter);
+                return matchSearch && matchClass && matchType && matchMode && matchEx;
+            });
+
+            gradePage = 1;
+            renderGradesTable();
+        }
+
+        function renderGradesTable() {
+            const tbody = document.getElementById('gradesTableBody');
+            if (filteredGrades.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-muted">無符合條件之打字成績</td></tr>`;
+                document.getElementById('gradesPagination').innerHTML = ''; return;
+            }
+
+            const paginated = filteredGrades.slice((gradePage - 1) * pageSize, gradePage * pageSize);
+            tbody.innerHTML = paginated.map(r => {
+                const stdType = r.type || "練習";
+                const stdMode = r.mode || "一般打字";
+
+                let badgeTypeClass = "bg-success-subtle text-success border border-success-subtle";
+                if (stdType === "考試") badgeTypeClass = "bg-danger text-white";
+                else if (stdType === "計時") badgeTypeClass = "bg-warning text-dark";
+                else if (stdType === "小測") badgeTypeClass = "bg-info text-white";
+
+                let badgeModeClass = "bg-secondary-subtle text-secondary border";
+                if (stdMode === "速成模式") badgeModeClass = "bg-primary-subtle text-primary border border-primary-subtle";
+                else if (stdMode === "拼音模式") badgeModeClass = "bg-success-subtle text-success border border-success-subtle";
+
+                let cheatBadgeHtml = "";
+                if (r.typos && r.typos.includes('_cheat_switch_tabs')) {
+                    try {
+                        const tObj = JSON.parse(r.typos);
+                        if (tObj._cheat_switch_tabs) {
+                            cheatBadgeHtml = `<span class="badge bg-danger ms-1" title="偵測到切換分頁作弊 ${tObj._cheat_switch_tabs} 次"><i class="fas fa-exclamation-triangle"></i> 切屏${tObj._cheat_switch_tabs}次</span>`;
+                        }
+                    } catch(e) {}
+                }
+
+                return `
+                <tr>
+                    <td><small class="text-muted">${new Date(r.time).toLocaleString('zh-HK')}</small></td>
+                    <td><span class="badge bg-primary">${r.class}</span> <span class="badge bg-secondary">${r.cnum}號</span></td>
+                    <td><strong>${r.name}</strong> ${cheatBadgeHtml}</td>
+                    <td>
+                        <span class="d-inline-block text-truncate fw-bold text-dark" style="max-width: 140px;" title="${r.title}">${r.title}</span>
+                        <div class="mt-1 d-flex gap-1 flex-wrap">
+                            <span class="badge ${badgeTypeClass}" style="font-size: 0.68rem;">${stdType}</span>
+                            <span class="badge ${badgeModeClass}" style="font-size: 0.68rem;">${stdMode}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="progress" style="height: 10px; width: 80px;">
+                            <div class="progress-bar ${r.progress >= 100 ? 'bg-success' : 'bg-warning'}" style="width: ${r.progress}%"></div>
+                        </div>
+                        <small class="text-muted fw-bold">${r.progress}%</small>
+                    </td>
+                    <td class="text-success fw-bold">${r.correct_count}</td>
+                    <td><span class="badge bg-info">${r.accuracy}%</span></td>
+                    <td class="text-info fw-900">${r.wpm || 0}</td>
+                    <td><small class="text-secondary fw-bold">${formatSeconds(r.spent_seconds)}</small></td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-danger py-0 px-2 rounded-pill" onclick="deleteGradeInline('${r.email}', '${r.id}')" title="刪除此紀錄"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+            `}).join("");
+
+            renderPagination('gradesPagination', filteredGrades.length, gradePage, p => { gradePage = p; renderGradesTable(); });
+        }
+
+        async function deleteGradeInline(email, id) {
+            if (confirm(`【成績刪除確認】\n確定要刪除學員 ${email} 在教材 #${id} 的作答紀錄嗎？\n該筆成績將被永久清除，且該生累計字數與最高 WPM 將會被自動扣除！`)) {
+                try {
+                    const res = await callAPI('deleteRecord', { email, id });
+                    if (res.status) {
+                        showToast("<i class='fas fa-trash-alt text-success me-1'></i> 成績紀錄已安全清除！");
+                        allGrades = allGrades.filter(r => !(r.email === email && String(r.id) === String(id)));
+                        SecureCache.set('admin_grades', allGrades);
+                        populateExerciseFilter();
+                        filterGrades();
+                        calculateKPIs();
+                    } else {
+                        showToast("刪除失敗: " + (res.error || "未知原因"));
+                    }
+                } catch(e) {
+                    showToast("伺服器連線超時！");
+                }
+            }
+        }
+
+        function exportGradesToCSV() {
+            if (filteredGrades.length === 0) return showToast("無數據可供導出！");
+            
+            const escapeCSV = (val) => {
+                if (val === null || val === undefined) return '';
+                let str = String(val).trim();
+                
+                if (str.startsWith('=') || str.startsWith('+') || str.startsWith('-') || str.startsWith('@')) {
+                    str = "'" + str; 
+                }
+                
+                if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+                    return `"${str.replace(/"/g, '""')}"`;
+                }
+                return str;
+            };
+
+            let csvContent = "\ufeff"; 
+            csvContent += "提交時間,班級,座號,中文姓名,學校電郵,打字教材,教材分類,打字模式,練習進度,正確字數,錯誤字數,準確率,打字速度(WPM),耗時(秒)\n";
+
+            filteredGrades.forEach(r => {
+                const timeStr = new Date(r.time).toLocaleString('zh-HK');
+                csvContent += [
+                    escapeCSV(timeStr),
+                    escapeCSV(r.class),
+                    escapeCSV(r.cnum),
+                    escapeCSV(r.name),
+                    escapeCSV(r.email),
+                    escapeCSV(r.title),
+                    escapeCSV(r.type || "練習"),
+                    escapeCSV(r.mode || "一般打字"),
+                    escapeCSV(`${r.progress}%`),
+                    escapeCSV(r.correct_count),
+                    escapeCSV(r.incorrect_count),
+                    escapeCSV(`${r.accuracy}%`),
+                    escapeCSV(r.wpm || 0),
+                    escapeCSV(r.spent_seconds || 0)
+                ].join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `SKH_TKP_Typing_Grades_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            showToast("<i class='fas fa-file-csv text-success me-1'></i>成績報表導出成功！");
+        }
+
+        function renderHeatmap() {
+            const container = document.getElementById('heatmapContainer');
+            const typoMap = {};
+            
+            allGrades.forEach(g => {
+                if (g.typos && g.typos !== "{}" && g.typos.includes("{")) {
+                    try {
+                        const t = JSON.parse(g.typos);
+                        for (const char in t) {
+                            if (/[\u4e00-\u9fa5]/.test(char)) {
+                                typoMap[char] = (typoMap[char] || 0) + t[char];
+                            }
+                        }
+                    } catch(e) {}
+                }
+            });
+
+            const sorted = Object.entries(typoMap).sort((a, b) => b[1] - a[1]).slice(0, 20);
+            if (sorted.length === 0) {
+                container.innerHTML = '<div class="text-center py-5 text-muted fw-bold"><i class="fas fa-ghost fa-3x mb-3 opacity-25"></i><br>尚無打字錯字統計數據</div>'; 
+                return;
+            }
+
+            const maxVal = sorted[0][1];
+            container.innerHTML = sorted.map(([char, count], i) => `
+                <div class="d-flex align-items-center mb-3">
+                    <div class="fw-900 fs-3 ${i < 3 ? 'text-danger' : 'text-primary'}" style="width: 45px; text-align: center;">${char}</div>
+                    <div class="heat-bar-bg"><div class="heat-bar-fill" style="width: ${(count/maxVal)*100}%;"></div></div>
+                    <div class="fw-bold text-muted text-end" style="width: 90px;">${count} 次</div>
+                </div>
+            `).join('');
+        }
+
+        function triggerKPISearch(type) {
+            const searchInput = document.getElementById('gradeSearch');
+            const classSelect = document.getElementById('gradeClassFilter');
+            if (type === 'today') {
+                searchInput.value = new Date().toISOString().split('T')[0]; classSelect.value = "";
+            } else { searchInput.value = ""; classSelect.value = ""; }
+            filterGrades();
+        }
+
+        function renderPagination(containerId, total, current, callback) {
+            const totalPages = Math.ceil(total / pageSize);
+            const container = document.getElementById(containerId);
+            if (totalPages <= 1) { container.innerHTML = ''; return; }
+            let html = `<button class="page-btn ${current === 1 ? 'disabled' : ''}" data-page="${current - 1}"><i class="fas fa-chevron-left"></i></button>`;
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= current - 2 && i <= current + 2)) {
+                    html += `<button class="page-btn ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
+                } else if (i === current - 3 || i === current + 3) html += `<span class="align-self-end text-muted fw-bold">...</span>`;
+            }
+            html += `<button class="page-btn ${current === totalPages ? 'disabled' : ''}" data-page="${current + 1}"><i class="fas fa-chevron-right"></i></button>`;
+            container.innerHTML = html;
+            container.querySelectorAll('.page-btn').forEach(b => {
+                b.addEventListener('click', () => { const p = parseInt(b.dataset.page); if (p >= 1 && p <= totalPages && p !== current) callback(p); });
+            });
+        }
+
+        let resetGradesModalInstance = null;
+        let systemSettingsModalInstance = null;
+
+        async function openSystemSettingsModal() {
+            try {
+                const res = await callAPI('getSettings');
+                if (res.status && res.data) {
+                    const s = res.data;
+                    document.getElementById('setting-school-name').value = s.school_name || "聖公會蔡功譜中學";
+                    document.getElementById('setting-announcement').value = s.announcement || "";
+                    document.getElementById('setting-default-timed').value = s.default_timed_seconds || 60;
+                    document.getElementById('setting-start-month').value = s.academic_start_month || 9;
+                    document.getElementById('setting-allow-retry').checked = s.allow_student_retry !== false;
+                    document.getElementById('setting-strict-exam').checked = s.exam_strict_mode === true;
+                }
+            } catch(e) {}
+            systemSettingsModalInstance.show();
+        }
+
+        async function saveSystemSettings() {
+            const btn = document.getElementById('saveSystemSettingsBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>儲存中...`;
+
+            const settings = {
+                school_name: document.getElementById('setting-school-name').value.trim(),
+                announcement: document.getElementById('setting-announcement').value.trim(),
+                default_timed_seconds: parseInt(document.getElementById('setting-default-timed').value, 10) || 60,
+                academic_start_month: parseInt(document.getElementById('setting-start-month').value, 10) || 9,
+                allow_student_retry: document.getElementById('setting-allow-retry').checked ? "1" : "0",
+                exam_strict_mode: document.getElementById('setting-strict-exam').checked ? "1" : "0"
+            };
+
+            try {
+                const res = await callAPI('saveSettings', { settings });
+                if (res.status) {
+                    showToast(`<i class='fas fa-check-circle text-success me-1'></i> ${res.message || '全校配置已成功儲存！'}`);
+                    systemSettingsModalInstance.hide();
+                    // 更新本地快取
+                    let d = SecureCache.get('dashboard_data', 24 * 60 * 60 * 1000);
+                    if (d) {
+                        d.settings = settings;
+                        SecureCache.set('dashboard_data', d);
+                    }
+                } else {
+                    showToast("儲存失敗: " + (res.error || "未知錯誤"));
+                }
+            } catch(e) {
+                showToast("連線伺服器異常！");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-save me-1"></i>儲存全校配置`;
+            }
+        }
+
+        function promptResetSemesterGrades() {
+            document.getElementById('resetGradesConfirmInput').value = "";
+            document.getElementById('confirmResetGradesBtn').disabled = true;
+            document.getElementById('resetGradeScopeSelect').value = "ALL";
+            onResetScopeChange("ALL");
+
+            // 同步題庫選單
+            const exSelect = document.getElementById('resetSpecificExSelect');
+            if (exSelect) {
+                const titlesMap = new Map();
+                allGrades.forEach(g => { if (g.id && g.title) titlesMap.set(String(g.id), g.title); });
+                let html = '';
+                titlesMap.forEach((title, id) => { html += `<option value="${id}">#${id} ${title}</option>`; });
+                exSelect.innerHTML = html || '<option value="">尚無任何教材作答紀錄</option>';
+            }
+
+            resetGradesModalInstance.show();
+        }
+
+        function onResetScopeChange(val) {
+            const classGroup = document.getElementById('resetClassSelectGroup');
+            const exGroup = document.getElementById('resetExerciseSelectGroup');
+            if (val === "CLASS") {
+                classGroup.classList.remove('d-none');
+                exGroup.classList.add('d-none');
+            } else if (val === "EXERCISE") {
+                classGroup.classList.add('d-none');
+                exGroup.classList.remove('d-none');
+            } else {
+                classGroup.classList.add('d-none');
+                exGroup.classList.add('d-none');
+            }
+        }
+
+        function checkResetGradesConfirmMatch() {
+            const val = document.getElementById('resetGradesConfirmInput').value.trim();
+            document.getElementById('confirmResetGradesBtn').disabled = (val !== "確認重置成績");
+        }
+
+        async function executeResetGrades() {
+            const scope = document.getElementById('resetGradeScopeSelect').value;
+            const btn = document.getElementById('confirmResetGradesBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>重置中...`;
+
+            let payload = {};
+            if (scope === "CLASS") {
+                payload = { class: document.getElementById('resetSpecificClassSelect').value };
+            } else if (scope === "EXERCISE") {
+                payload = { exercise_id: document.getElementById('resetSpecificExSelect').value };
+            }
+
+            try {
+                const res = await callAPI('clearAllRecords', payload);
+                if (res.status) {
+                    showToast(`<i class='fas fa-check-circle text-success me-1'></i> ${res.message || '成績已成功重置！'}`);
+                    resetGradesModalInstance.hide();
+                    loadLiveGrades(true);
+                } else {
+                    showToast("重置失敗: " + (res.error || "未知錯誤"));
+                }
+            } catch(e) {
+                showToast("連線伺服器異常！");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-redo-alt me-1"></i>執行成績重置`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('username').textContent = currentUser ? currentUser.name : "教師";
+            document.getElementById('userrole').textContent = currentUser ? currentUser.permission : "教師";
+            resetGradesModalInstance = new bootstrap.Modal(document.getElementById('resetGradesModal'));
+            systemSettingsModalInstance = new bootstrap.Modal(document.getElementById('systemSettingsModal'));
+            loadLiveGrades(false);
+        });
+    </script>
+</body>
+</html>
